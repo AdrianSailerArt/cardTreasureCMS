@@ -7,6 +7,7 @@ export const cardLanguage = pgEnum("card_language", ['en', 'de', 'fr', 'it', 'es
 export const deckBoard = pgEnum("deck_board", ['main', 'side', 'extra', 'commander', 'maybe'])
 export const gameCode = pgEnum("game_code", ['mtg', 'pokemon', 'yugioh'])
 export const importStatus = pgEnum("import_status", ['running', 'succeeded', 'failed'])
+export const ledgerKind = pgEnum("ledger_kind", ['sale', 'commission', 'purchase', 'payout', 'refund', 'adjustment'])
 export const listingStatus = pgEnum("listing_status", ['active', 'paused', 'sold_out', 'removed'])
 export const orderStatus = pgEnum("order_status", ['pending_payment', 'paid', 'cancelled'])
 export const paymentStatus = pgEnum("payment_status", ['pending', 'succeeded', 'failed', 'refunded'])
@@ -615,6 +616,35 @@ export const importRuns = pgTable("import_runs", {
 	finishedAt: timestamp("finished_at", { withTimezone: true, mode: 'string' }),
 }, (table) => [
 	index("import_runs_game_started_idx").using("btree", table.game.asc().nullsLast().op("timestamptz_ops"), table.startedAt.asc().nullsLast().op("timestamptz_ops")),
+]);
+
+export const ledgerEntries = pgTable("ledger_entries", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	kind: ledgerKind().notNull(),
+	amountCents: integer("amount_cents").notNull(),
+	orderId: uuid("order_id"),
+	shipmentId: uuid("shipment_id"),
+	note: text(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("ledger_user_created_idx").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [user.id],
+			name: "ledger_entries_user_id_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.orderId],
+			foreignColumns: [orders.id],
+			name: "ledger_entries_order_id_orders_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.shipmentId],
+			foreignColumns: [shipments.id],
+			name: "ledger_entries_shipment_id_shipments_id_fk"
+		}).onDelete("set null"),
+	check("ledger_amount_nonzero_chk", sql`amount_cents <> 0`),
 ]);
 
 export const postCardRefs = pgTable("post_card_refs", {

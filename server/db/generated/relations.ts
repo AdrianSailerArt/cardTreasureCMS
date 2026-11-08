@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, reviews, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, postCardRefs, conversationParticipants, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
+import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, reviews, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, ledgerEntries, postCardRefs, conversationParticipants, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
 
 export const shipmentsRelations = relations(shipments, ({one, many}) => ({
 	order: one(orders, {
@@ -13,6 +13,7 @@ export const shipmentsRelations = relations(shipments, ({one, many}) => ({
 	conversations: many(conversations),
 	reviews: many(reviews),
 	shipmentItems: many(shipmentItems),
+	ledgerEntries: many(ledgerEntries),
 }));
 
 export const ordersRelations = relations(orders, ({one, many}) => ({
@@ -22,6 +23,7 @@ export const ordersRelations = relations(orders, ({one, many}) => ({
 		references: [user.id]
 	}),
 	payments: many(payments),
+	ledgerEntries: many(ledgerEntries),
 }));
 
 export const sellerProfilesRelations = relations(sellerProfiles, ({one, many}) => ({
@@ -62,6 +64,7 @@ export const userRelations = relations(user, ({many}) => ({
 	}),
 	sessions: many(session),
 	wishlists: many(wishlists),
+	ledgerEntries: many(ledgerEntries),
 	conversationParticipants: many(conversationParticipants),
 	cartItems: many(cartItems),
 }));
@@ -283,6 +286,21 @@ export const wishlistItemsRelations = relations(wishlistItems, ({one}) => ({
 	product: one(products, {
 		fields: [wishlistItems.productId],
 		references: [products.id]
+	}),
+}));
+
+export const ledgerEntriesRelations = relations(ledgerEntries, ({one}) => ({
+	user: one(user, {
+		fields: [ledgerEntries.userId],
+		references: [user.id]
+	}),
+	order: one(orders, {
+		fields: [ledgerEntries.orderId],
+		references: [orders.id]
+	}),
+	shipment: one(shipments, {
+		fields: [ledgerEntries.shipmentId],
+		references: [shipments.id]
 	}),
 }));
 

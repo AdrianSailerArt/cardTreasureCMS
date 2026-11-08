@@ -169,6 +169,82 @@ const createDemoLogins = async (accounts: { id: string, first: string, last: str
   })))
 }
 
+type OrderRow = typeof schema.orders.$inferInsert & { id: string }
+type ShipmentRow = typeof schema.shipments.$inferInsert & { id: string }
+type PaymentRow = typeof schema.payments.$inferInsert
+
+/**
+ * Guthaben-Journal aus den simulierten Bestellungen, zeitlich geordnet mit laufendem Kontostand:
+ * Gutschrift (Ware + Versand) und Provision bei Abschluss, Erstattung bei Storno nach Zahlung,
+ * Bezahlung mit Guthaben, wenn genug da ist (dann Zahlart "balance"), monatliche Auszahlungen.
+ */
+const buildLedger = (orders: OrderRow[], shipments: ShipmentRow[], payments: PaymentRow[], now: Date) => {
+  const rows: (typeof schema.ledgerEntries.$inferInsert)[] = []
+  const balance = new Map<string, number>()
+  const book = (userId: string, kind: (typeof schema.ledgerKind.enumValues)[number], amountCents: number, at: Date, ref: { orderId?: string, shipmentId?: string, note?: string } = {}) => {
+    if (amountCents === 0) return
+    rows.push({ id: uuid(), userId, kind, amountCents, createdAt: at.toISOString(), ...ref })
+    balance.set(userId, (balance.get(userId) ?? 0) + amountCents)
+  }
+  const orderById = new Map(orders.map(o => [o.id, o]))
+  const paymentByOrder = new Map(payments.map(p => [p.orderId, p]))
+
+  type Event = { at: Date, run: () => void }
+  const events: Event[] = []
+  for (const o of orders) {
+    if (!o.paidAt) continue
+    events.push({
+      at: new Date(o.paidAt as string),
+      run: () => {
+        // Wer genug Guthaben hat, zahlt oft damit
+        if ((balance.get(o.buyerId) ?? 0) >= o.totalCents && rand() < 0.6) {
+          book(o.buyerId, 'purchase', -o.totalCents, new Date(o.paidAt as string), { orderId: o.id })
+          const payment = paymentByOrder.get(o.id)
+          if (payment) {
+            payment.provider = 'balance'
+            payment.providerRef = `bal_${o.id.replaceAll('-', '').slice(0, 20)}`
+          }
+        }
+      },
+    })
+  }
+  for (const s of shipments) {
+    if (s.completedAt) {
+      events.push({
+        at: new Date(s.completedAt as string),
+        run: () => {
+          const at = new Date(s.completedAt as string)
+          book(s.sellerId, 'sale', s.itemsCents + s.shippingCents, at, { orderId: s.orderId, shipmentId: s.id })
+          book(s.sellerId, 'commission', -s.commissionCents, new Date(at.getTime() + 1000), { orderId: s.orderId, shipmentId: s.id })
+        },
+      })
+    }
+    const order = orderById.get(s.orderId)
+    if (s.cancelledAt && order?.paidAt) {
+      events.push({
+        at: new Date(s.cancelledAt as string),
+        run: () => book(order.buyerId, 'refund', s.itemsCents + s.shippingCents, new Date(s.cancelledAt as string), { orderId: s.orderId, shipmentId: s.id }),
+      })
+    }
+  }
+  // Auszahlungen jeweils zum Monatsanfang (nicht im laufenden Monat, damit Demo-Konten Guthaben behalten)
+  const first = new Date(Math.min(...events.map(e => e.at.getTime())))
+  for (let m = new Date(first.getFullYear(), first.getMonth() + 1, 1); m < new Date(now.getFullYear(), now.getMonth(), 1); m = new Date(m.getFullYear(), m.getMonth() + 1, 1)) {
+    const at = new Date(m.getTime() + 9 * 3_600_000)
+    events.push({
+      at,
+      run: () => {
+        for (const [userId, cents] of balance) {
+          if (cents >= 2000 && rand() < 0.7) book(userId, 'payout', -cents, at, { note: 'Auszahlung auf DE89 •••• 3000' })
+        }
+      },
+    })
+  }
+
+  events.sort((a, b) => a.at.getTime() - b.at.getTime()).forEach(e => e.run())
+  return rows
+}
+
 const makePerson = (i: number, prefix: string) => {
   const first = pick(FIRST)
   const last = pick(LAST)
@@ -272,8 +348,8 @@ const simulate = async () => {
   const stock = new Map(listings.map(l => [l.id, l.quantity]))
   const sellerCountry = new Map(sellers.map(s => [s.id, s.country as string]))
 
-  const orderRows: (typeof schema.orders.$inferInsert)[] = []
-  const shipmentRows: (typeof schema.shipments.$inferInsert)[] = []
+  const orderRows: OrderRow[] = []
+  const shipmentRows: ShipmentRow[] = []
   const itemRows: (typeof schema.shipmentItems.$inferInsert)[] = []
   const paymentRows: (typeof schema.payments.$inferInsert)[] = []
   const reviewRows: (typeof schema.reviews.$inferInsert)[] = []
@@ -414,12 +490,16 @@ const simulate = async () => {
     })
   }
 
+  const ledgerRows = buildLedger(orderRows, shipmentRows, paymentRows, now)
+
   // Schreiben (Reihenfolge wegen Fremdschlüsseln)
   for (const part of chunk(orderRows, 500)) await db.insert(schema.orders).values(part)
   for (const part of chunk(shipmentRows, 500)) await db.insert(schema.shipments).values(part)
   for (const part of chunk(itemRows, 1000)) await db.insert(schema.shipmentItems).values(part)
   for (const part of chunk(paymentRows, 500)) await db.insert(schema.payments).values(part)
   for (const part of chunk(reviewRows, 500)) if (part.length) await db.insert(schema.reviews).values(part)
+  for (const part of chunk(ledgerRows, 1000)) if (part.length) await db.insert(schema.ledgerEntries).values(part)
+  console.log(`Buchungen im Guthaben-Journal: ${ledgerRows.length}`)
   if (conversationRows.length) {
     await db.insert(schema.conversations).values(conversationRows)
     await db.insert(schema.conversationParticipants).values(participantRows)
