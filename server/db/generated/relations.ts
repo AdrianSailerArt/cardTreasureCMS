@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, reviews, ledgerEntries, postCardRefs, conversationParticipants, userBadges, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
+import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, reviews, ledgerEntries, notifications, postCardRefs, conversationParticipants, userBadges, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
 
 export const shipmentsRelations = relations(shipments, ({one, many}) => ({
 	order: one(orders, {
@@ -58,6 +58,7 @@ export const userRelations = relations(user, ({many}) => ({
 		relationName: "reviews_subjectId_user_id"
 	}),
 	ledgerEntries: many(ledgerEntries),
+	notifications: many(notifications),
 	conversationParticipants: many(conversationParticipants),
 	userBadges: many(userBadges),
 	cartItems: many(cartItems),
@@ -302,6 +303,13 @@ export const ledgerEntriesRelations = relations(ledgerEntries, ({one}) => ({
 	shipment: one(shipments, {
 		fields: [ledgerEntries.shipmentId],
 		references: [shipments.id]
+	}),
+}));
+
+export const notificationsRelations = relations(notifications, ({one}) => ({
+	user: one(user, {
+		fields: [notifications.userId],
+		references: [user.id]
 	}),
 }));
 

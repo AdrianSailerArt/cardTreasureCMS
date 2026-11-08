@@ -223,6 +223,7 @@ export const conversations = pgTable("conversations", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	lastMessageAt: timestamp("last_message_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
+	uniqueIndex("conversations_shipment_uq").using("btree", table.shipmentId.asc().nullsLast().op("uuid_ops")).where(sql`(shipment_id IS NOT NULL)`),
 	foreignKey({
 			columns: [table.shipmentId],
 			foreignColumns: [shipments.id],
@@ -539,6 +540,7 @@ export const wishlists = pgTable("wishlists", {
 	isPublic: boolean("is_public").default(false).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
+	uniqueIndex("wishlists_user_name_uq").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.name.asc().nullsLast().op("text_ops")),
 	foreignKey({
 			columns: [table.userId],
 			foreignColumns: [user.id],
@@ -556,7 +558,12 @@ export const wishlistItems = pgTable("wishlist_items", {
 	languages: cardLanguage().array(),
 	finish: cardFinish(),
 	maxPriceCents: integer("max_price_cents"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
+	index("wishlist_items_card_idx").using("btree", table.cardId.asc().nullsLast().op("uuid_ops")),
+	uniqueIndex("wishlist_items_card_uq").using("btree", table.wishlistId.asc().nullsLast().op("uuid_ops"), table.cardId.asc().nullsLast().op("uuid_ops")).where(sql`(card_id IS NOT NULL)`),
+	index("wishlist_items_product_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
+	uniqueIndex("wishlist_items_product_uq").using("btree", table.wishlistId.asc().nullsLast().op("uuid_ops"), table.productId.asc().nullsLast().op("uuid_ops")).where(sql`(product_id IS NOT NULL)`),
 	foreignKey({
 			columns: [table.wishlistId],
 			foreignColumns: [wishlists.id],
@@ -651,6 +658,29 @@ export const ledgerEntries = pgTable("ledger_entries", {
 			name: "ledger_entries_shipment_id_shipments_id_fk"
 		}).onDelete("set null"),
 	check("ledger_amount_nonzero_chk", sql`amount_cents <> 0`),
+]);
+
+export const notifications = pgTable("notifications", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	kind: text().notNull(),
+	ref: text(),
+	payload: jsonb().default({}).notNull(),
+	emailStatus: text("email_status").default('pending').notNull(),
+	attempts: integer().default(0).notNull(),
+	lastError: text("last_error"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	sentAt: timestamp("sent_at", { withTimezone: true, mode: 'string' }),
+	readAt: timestamp("read_at", { withTimezone: true, mode: 'string' }),
+}, (table) => [
+	index("notifications_pending_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")).where(sql`(email_status = 'pending'::text)`),
+	index("notifications_user_created_idx").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	uniqueIndex("notifications_user_kind_ref_uq").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.kind.asc().nullsLast().op("text_ops"), table.ref.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [user.id],
+			name: "notifications_user_id_user_id_fk"
+		}).onDelete("cascade"),
 ]);
 
 export const postCardRefs = pgTable("post_card_refs", {
