@@ -444,6 +444,7 @@ const simulate = async () => {
         reviewRows.push({
           id: uuid(), shipmentId, direction: 'buyer_to_seller', authorId: buyer.id, subjectId: sellerId,
           ratingOverall: r, ratingDescription: Math.min(5, r + int(0, 1)), ratingPackaging: Math.min(5, r + int(0, 1)),
+          deliveredComplete: r >= 4 ? rand() < 0.99 : rand() < 0.6,
           comment: r >= 4 ? pick(['Schneller Versand, super verpackt!', 'Alles wie beschrieben, gerne wieder.', 'Top Verkäufer.', null]) : pick(['Zustand etwas schlechter als angegeben.', 'Versand hat lange gedauert.']),
           createdAt: addHours(completedAt, int(1, 48)).toISOString(),
         })

@@ -72,6 +72,12 @@
   --color-cond-played: #c0451c;
   --color-cond-poor: #b32d2d;
 
+  /* Medaillen und Verkäufer-Stufen */
+  --color-medal-bronze: #9a5b2e;
+  --color-medal-silver: #7d8791;
+  --color-medal-gold: #b08a1e;
+  --color-medal-platinum: #3f8fa6;
+
   /* Schimmer für Foil/Holo-Badges */
   --color-foil-from: color-mix(in oklab, var(--palette-gold-300) 45%, transparent);
   --color-foil-to: color-mix(in oklab, #9fd3f0 45%, transparent);
@@ -114,5 +120,10 @@
     --color-cond-light-played: #f5a35a;
     --color-cond-played: #f3825f;
     --color-cond-poor: #f07272;
+
+    --color-medal-bronze: #d39364;
+    --color-medal-silver: #c3ccd4;
+    --color-medal-gold: #e8c34f;
+    --color-medal-platinum: #7ccbe0;
   }
 }

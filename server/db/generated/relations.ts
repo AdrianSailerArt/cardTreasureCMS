@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, reviews, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, ledgerEntries, postCardRefs, conversationParticipants, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
+import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, reviews, ledgerEntries, postCardRefs, conversationParticipants, userBadges, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
 
 export const shipmentsRelations = relations(shipments, ({one, many}) => ({
 	order: one(orders, {
@@ -11,8 +11,8 @@ export const shipmentsRelations = relations(shipments, ({one, many}) => ({
 		references: [sellerProfiles.userId]
 	}),
 	conversations: many(conversations),
-	reviews: many(reviews),
 	shipmentItems: many(shipmentItems),
+	reviews: many(reviews),
 	ledgerEntries: many(ledgerEntries),
 }));
 
@@ -49,16 +49,17 @@ export const userRelations = relations(user, ({many}) => ({
 	messages: many(messages),
 	posts: many(posts),
 	sealedProducts: many(sealedProducts),
+	sessions: many(session),
+	wishlists: many(wishlists),
 	reviews_authorId: many(reviews, {
 		relationName: "reviews_authorId_user_id"
 	}),
 	reviews_subjectId: many(reviews, {
 		relationName: "reviews_subjectId_user_id"
 	}),
-	sessions: many(session),
-	wishlists: many(wishlists),
 	ledgerEntries: many(ledgerEntries),
 	conversationParticipants: many(conversationParticipants),
+	userBadges: many(userBadges),
 	cartItems: many(cartItems),
 }));
 
@@ -220,23 +221,6 @@ export const setsRelations = relations(sets, ({one, many}) => ({
 	sealedProducts: many(sealedProducts),
 }));
 
-export const reviewsRelations = relations(reviews, ({one}) => ({
-	shipment: one(shipments, {
-		fields: [reviews.shipmentId],
-		references: [shipments.id]
-	}),
-	user_authorId: one(user, {
-		fields: [reviews.authorId],
-		references: [user.id],
-		relationName: "reviews_authorId_user_id"
-	}),
-	user_subjectId: one(user, {
-		fields: [reviews.subjectId],
-		references: [user.id],
-		relationName: "reviews_subjectId_user_id"
-	}),
-}));
-
 export const sellerShippingAccountsRelations = relations(sellerShippingAccounts, ({one}) => ({
 	sellerProfile: one(sellerProfiles, {
 		fields: [sellerShippingAccounts.sellerId],
@@ -289,6 +273,23 @@ export const wishlistItemsRelations = relations(wishlistItems, ({one}) => ({
 	}),
 }));
 
+export const reviewsRelations = relations(reviews, ({one}) => ({
+	shipment: one(shipments, {
+		fields: [reviews.shipmentId],
+		references: [shipments.id]
+	}),
+	user_authorId: one(user, {
+		fields: [reviews.authorId],
+		references: [user.id],
+		relationName: "reviews_authorId_user_id"
+	}),
+	user_subjectId: one(user, {
+		fields: [reviews.subjectId],
+		references: [user.id],
+		relationName: "reviews_subjectId_user_id"
+	}),
+}));
+
 export const ledgerEntriesRelations = relations(ledgerEntries, ({one}) => ({
 	user: one(user, {
 		fields: [ledgerEntries.userId],
@@ -322,6 +323,13 @@ export const conversationParticipantsRelations = relations(conversationParticipa
 	}),
 	user: one(user, {
 		fields: [conversationParticipants.userId],
+		references: [user.id]
+	}),
+}));
+
+export const userBadgesRelations = relations(userBadges, ({one}) => ({
+	user: one(user, {
+		fields: [userBadges.userId],
 		references: [user.id]
 	}),
 }));

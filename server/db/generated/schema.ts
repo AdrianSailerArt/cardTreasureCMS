@@ -467,38 +467,6 @@ export const sealedProducts = pgTable("sealed_products", {
 		}),
 ]);
 
-export const reviews = pgTable("reviews", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	shipmentId: uuid("shipment_id").notNull(),
-	direction: reviewDirection().notNull(),
-	authorId: text("author_id").notNull(),
-	subjectId: text("subject_id").notNull(),
-	ratingOverall: smallint("rating_overall").notNull(),
-	ratingDescription: smallint("rating_description"),
-	ratingPackaging: smallint("rating_packaging"),
-	comment: text(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	uniqueIndex("reviews_shipment_direction_uq").using("btree", table.shipmentId.asc().nullsLast().op("uuid_ops"), table.direction.asc().nullsLast().op("uuid_ops")),
-	index("reviews_subject_idx").using("btree", table.subjectId.asc().nullsLast().op("text_ops")),
-	foreignKey({
-			columns: [table.shipmentId],
-			foreignColumns: [shipments.id],
-			name: "reviews_shipment_id_shipments_id_fk"
-		}),
-	foreignKey({
-			columns: [table.authorId],
-			foreignColumns: [user.id],
-			name: "reviews_author_id_user_id_fk"
-		}),
-	foreignKey({
-			columns: [table.subjectId],
-			foreignColumns: [user.id],
-			name: "reviews_subject_id_user_id_fk"
-		}),
-	check("reviews_rating_chk", sql`(rating_overall >= 1) AND (rating_overall <= 5)`),
-]);
-
 export const sellerShippingAccounts = pgTable("seller_shipping_accounts", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	sellerId: text("seller_id").notNull(),
@@ -607,6 +575,41 @@ export const wishlistItems = pgTable("wishlist_items", {
 	check("wishlist_items_target_chk", sql`(card_id IS NULL) <> (product_id IS NULL)`),
 ]);
 
+export const reviews = pgTable("reviews", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	shipmentId: uuid("shipment_id").notNull(),
+	direction: reviewDirection().notNull(),
+	authorId: text("author_id").notNull(),
+	subjectId: text("subject_id").notNull(),
+	ratingOverall: smallint("rating_overall").notNull(),
+	ratingDescription: smallint("rating_description"),
+	ratingPackaging: smallint("rating_packaging"),
+	comment: text(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	deliveredComplete: boolean("delivered_complete").default(true).notNull(),
+}, (table) => [
+	index("reviews_author_idx").using("btree", table.authorId.asc().nullsLast().op("text_ops")),
+	uniqueIndex("reviews_shipment_direction_uq").using("btree", table.shipmentId.asc().nullsLast().op("uuid_ops"), table.direction.asc().nullsLast().op("uuid_ops")),
+	index("reviews_subject_idx").using("btree", table.subjectId.asc().nullsLast().op("text_ops"), table.direction.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.shipmentId],
+			foreignColumns: [shipments.id],
+			name: "reviews_shipment_id_shipments_id_fk"
+		}),
+	foreignKey({
+			columns: [table.authorId],
+			foreignColumns: [user.id],
+			name: "reviews_author_id_user_id_fk"
+		}),
+	foreignKey({
+			columns: [table.subjectId],
+			foreignColumns: [user.id],
+			name: "reviews_subject_id_user_id_fk"
+		}),
+	check("reviews_rating_chk", sql`(rating_overall >= 1) AND (rating_overall <= 5)`),
+	check("reviews_description_chk", sql`(rating_description IS NULL) OR ((rating_description >= 1) AND (rating_description <= 5))`),
+]);
+
 export const importRuns = pgTable("import_runs", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	game: gameCode().notNull(),
@@ -685,6 +688,19 @@ export const conversationParticipants = pgTable("conversation_participants", {
 			name: "conversation_participants_user_id_user_id_fk"
 		}).onDelete("cascade"),
 	primaryKey({ columns: [table.conversationId, table.userId], name: "conversation_participants_conversation_id_user_id_pk"}),
+]);
+
+export const userBadges = pgTable("user_badges", {
+	userId: text("user_id").notNull(),
+	code: text().notNull(),
+	awardedAt: timestamp("awarded_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [user.id],
+			name: "user_badges_user_id_user_id_fk"
+		}).onDelete("cascade"),
+	primaryKey({ columns: [table.userId, table.code], name: "user_badges_user_id_code_pk"}),
 ]);
 
 export const cardTranslations = pgTable("card_translations", {
