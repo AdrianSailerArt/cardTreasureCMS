@@ -1,3 +1,4 @@
+import { hashPassword } from 'better-auth/crypto'
 import { inArray, sql } from 'drizzle-orm'
 import { client, db, schema } from './import/lib/db'
 import { chunk, parseArgs } from './import/lib/util'
@@ -138,6 +139,36 @@ const loadCandidates = async (): Promise<Candidate[]> => {
   return out
 }
 
+/*
+ * Feste Demo-Konten zum Testen. Anmeldung mit E-Mail + DEMO_PASSWORD, sobald der Passwort-Login
+ * in Shop bzw. CMS eingeschaltet ist (NUXT_DEMO_LOGIN=true). Stehen auch in den READMEs.
+ */
+export const DEMO_PASSWORD = 'demo1234'
+export const DEMO_ACCOUNTS = {
+  buyer: { id: 'demo_kaeufer', first: 'Karla', last: 'Käuferin', country: 'DE', email: 'kaeufer@demo.cardtreasure.test', username: 'karla_kaeuferin' },
+  seller: { id: 'demo_verkaeufer', first: 'Victor', last: 'Verkäufer', country: 'DE', email: 'verkaeufer@demo.cardtreasure.test', username: 'victor_verkaeufer' },
+  dealer: { id: 'demo_haendler', first: 'Hanna', last: 'Händlerin', country: 'AT', email: 'haendler@demo.cardtreasure.test', username: 'hanna_haendlerin' },
+  admin: { id: 'demo_admin', first: 'Ada', last: 'Admin', country: 'DE', email: 'admin@demo.cardtreasure.test', username: 'ada_admin' },
+} as const
+
+/** Legt Passwort-Zugänge (Better-Auth-Konto "credential") für die Demo-Konten an. */
+const createDemoLogins = async (accounts: { id: string, first: string, last: string, email: string, username: string }[]) => {
+  // Admin ist kein Käufer/Verkäufer und wird deshalb hier angelegt
+  await db.insert(schema.user).values({
+    id: DEMO_ACCOUNTS.admin.id, name: `${DEMO_ACCOUNTS.admin.first} ${DEMO_ACCOUNTS.admin.last}`,
+    email: DEMO_ACCOUNTS.admin.email, emailVerified: true, username: DEMO_ACCOUNTS.admin.username,
+    role: 'admin', isDemo: true,
+  })
+  const hash = await hashPassword(DEMO_PASSWORD)
+  await db.insert(schema.account).values(accounts.map(a => ({
+    id: crypto.randomUUID(),
+    userId: a.id,
+    accountId: a.id,
+    providerId: 'credential',
+    password: hash,
+  })))
+}
+
 const makePerson = (i: number, prefix: string) => {
   const first = pick(FIRST)
   const last = pick(LAST)
@@ -157,9 +188,12 @@ const simulate = async () => {
   if (!candidates.length) throw new Error('Keine Produkte mit Richtpreis gefunden. Zuerst `bun run import` ausführen.')
   console.log(`Produkte mit Richtpreis: ${candidates.length}`)
 
-  // Nutzer
+  // Nutzer; die ersten Plätze sind feste Demo-Konten mit Passwort (siehe DEMO_ACCOUNTS)
   const sellers = Array.from({ length: CFG.sellers }, (_, i) => ({ ...makePerson(i, 's'), commercial: rand() < 0.3 }))
   const buyers = Array.from({ length: CFG.buyers }, (_, i) => makePerson(i, 'b'))
+  sellers[0] = { ...DEMO_ACCOUNTS.seller, commercial: false }
+  sellers[1] = { ...DEMO_ACCOUNTS.dealer, commercial: true }
+  buyers[0] = DEMO_ACCOUNTS.buyer
   const people = [...sellers, ...buyers]
 
   await db.insert(schema.user).values(people.map(p => ({
@@ -172,6 +206,8 @@ const simulate = async () => {
     isDemo: true,
     createdAt: daysAgo(int(CFG.days, 400)).toISOString(),
   })))
+
+  await createDemoLogins([...Object.values(DEMO_ACCOUNTS)])
 
   const addressRows = people.map((p) => {
     const [postalCode, city] = pick(CITIES[p.country]!)
@@ -265,7 +301,8 @@ const simulate = async () => {
     // Mehr Bestellungen in jüngerer Zeit (wachsender Marktplatz)
     const age = CFG.days * (1 - Math.sqrt(rand()))
     const createdAt = daysAgo(age, now)
-    const buyer = rand() < 0.85 ? pick(buyers) : pick(sellers)
+    // Demo-Käuferin bekommt öfter Bestellungen, damit ihr Konto gefüllt ist
+    const buyer = rand() < 0.08 ? buyers[0]! : rand() < 0.85 ? pick(buyers) : pick(sellers)
     const buyerAddress = addressOf.get(buyer.id)!
     const orderId = uuid()
 

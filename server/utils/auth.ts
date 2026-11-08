@@ -21,6 +21,19 @@ const createAuth = () => {
         role: { type: 'string', input: false },
       },
     },
+    // Passwort nur für den Demo-Admin (NUXT_PUBLIC_DEMO_LOGIN=true); keine Registrierung
+    emailAndPassword: { enabled: config.public.demoLogin, disableSignUp: true },
+    // Nicht-Admins bekommen im CMS gar keine Sitzung (egal ob Magic-Link oder Passwort)
+    databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => {
+            const [user] = await useDb().select({ role: schema.user.role }).from(schema.user).where(eq(schema.user.id, session.userId))
+            return user?.role === 'admin' ? undefined : false
+          },
+        },
+      },
+    },
     plugins: [
       magicLink({
         // Im Admin-Tool kann sich niemand neu registrieren. Admins werden per `bun run make-admin` ernannt.

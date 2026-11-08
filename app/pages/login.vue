@@ -2,34 +2,58 @@
 definePageMeta({ layout: false })
 
 const route = useRoute()
+const config = useRuntimeConfig()
+const me = useMe()
+const next = computed(() => (typeof route.query.next === 'string' && route.query.next.startsWith('/') ? route.query.next : '/'))
+
+const DEMO = { email: 'admin@demo.cardtreasure.test', password: 'demo1234' }
+
 const email = ref('')
 const state = ref<'idle' | 'sending' | 'sent' | 'error'>('idle')
+const demoError = ref(false)
 
-const submit = async () => {
+const sendLink = async () => {
   state.value = 'sending'
-  const next = typeof route.query.next === 'string' ? route.query.next : '/'
-  const { error } = await authClient.signIn.magicLink({ email: email.value.trim(), callbackURL: next })
+  const { error } = await authClient.signIn.magicLink({ email: email.value.trim(), callbackURL: next.value })
   state.value = error ? 'error' : 'sent'
+}
+
+const demoLogin = async () => {
+  demoError.value = false
+  const { error } = await authClient.signIn.email(DEMO)
+  if (error) {
+    demoError.value = true
+    return
+  }
+  me.value = null
+  await navigateTo(next.value)
 }
 </script>
 
 <template>
   <div class="flex min-h-screen items-center justify-center px-4">
-    <form class="w-full max-w-sm" @submit.prevent="submit">
+    <div class="w-full max-w-sm">
       <h1 class="text-4xl">Card<span class="text-accent">Treasure</span></h1>
       <p class="mt-1 text-sm uppercase tracking-widest text-fg-subtle">Interner Bereich</p>
 
-      <template v-if="state !== 'sent'">
-        <UiField label="E-Mail" class="mt-10">
+      <form v-if="state !== 'sent'" class="mt-10" @submit.prevent="sendLink">
+        <UiField label="E-Mail">
           <UiInput v-model="email" type="email" placeholder="name@cardtreasure.eu" />
         </UiField>
         <UiButton type="submit" class="mt-4 w-full" :disabled="state === 'sending' || !email.includes('@')">Anmeldelink senden</UiButton>
         <UiNotice v-if="state === 'error'" tone="danger" class="mt-3">Das hat nicht geklappt. Nur Admins können sich anmelden.</UiNotice>
-      </template>
+      </form>
       <p v-else class="mt-10 text-sm leading-relaxed text-fg-muted">
         Falls <strong class="text-fg">{{ email }}</strong> ein Admin-Konto hat, ist ein Anmeldelink unterwegs.
         Lokal steht er in der Server-Konsole.
       </p>
-    </form>
+
+      <UiPanel v-if="config.public.demoLogin" title="Demo-Zugang" class="mt-10">
+        <p class="text-sm text-fg-muted">Admin aus der Simulation (<code>bun run simulate</code>):</p>
+        <p class="mt-2 font-mono text-xs text-fg-subtle">{{ DEMO.email }} · {{ DEMO.password }}</p>
+        <UiButton variant="ghost" class="mt-4 w-full" @click="demoLogin">Als Demo-Admin anmelden</UiButton>
+        <UiNotice v-if="demoError" tone="danger" class="mt-3">Demo-Admin nicht gefunden. Zuerst <code>bun run simulate --reset</code> ausführen.</UiNotice>
+      </UiPanel>
+    </div>
   </div>
 </template>

@@ -27,7 +27,9 @@ export default defineNuxtConfig({
     public: {
       siteUrl: 'http://localhost:3100',
       /** Öffentlicher Shop, für Links und Kartenbilder */
-      shopUrl: 'http://localhost:3001',
+      shopUrl: 'http://localhost:3000',
+      /** Demo-Admin mit Passwort zulassen (lokal/Testphase). Im Echtbetrieb aus: nur Magic-Link. */
+      demoLogin: false,
     },
   },
 })

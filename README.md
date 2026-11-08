@@ -27,14 +27,28 @@ Internes Werkzeug für das CardTreasure-Team. Nur für Admins, nicht öffentlich
 
 ## Setup
 
+Die Datenbank kommt aus dem Shop-Repo (`docker compose up -d` und `bun run db:migrate` dort, siehe dessen README).
+
 ```bash
 bun install
 cp .env.example .env          # Datenbank wie im Shop, eigenes Secret
-bun run make-admin du@firma.de "Dein Name"
+bun run import mtg --sets=fdn,blb && bun run import pokemon --sets=sv03.5 && bun run import yugioh --sets=LOB
+bun run simulate --reset      # Demo-Marktplatz und Demo-Konten
 bun run dev                   # http://localhost:3100
 ```
 
-Lokal steht der Anmeldelink in der Server-Konsole.
+### Test-Zugänge
+
+| Rolle | App | E-Mail | Passwort |
+|---|---|---|---|
+| Admin | CMS | `admin@demo.cardtreasure.test` | `demo1234` |
+| Käuferin | Shop | `kaeufer@demo.cardtreasure.test` | `demo1234` |
+| Privater Verkäufer (kauft auch) | Shop | `verkaeufer@demo.cardtreasure.test` | `demo1234` |
+| Gewerbliche Händlerin | Shop | `haendler@demo.cardtreasure.test` | `demo1234` |
+
+- Entstehen bei `bun run simulate` (Definition: `DEMO_ACCOUNTS` in [scripts/simulate.ts](scripts/simulate.ts)).
+- Passwort-Login nur für diese Konten und nur mit `NUXT_PUBLIC_DEMO_LOGIN=true`; im Echtbetrieb gibt es nur den Magic-Link.
+- Echte Admins: `bun run make-admin du@firma.de "Dein Name"`, dann Anmeldung per Magic-Link (lokal in der Server-Konsole).
 
 ## Befehle
 
