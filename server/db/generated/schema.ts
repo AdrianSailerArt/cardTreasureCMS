@@ -1,4 +1,4 @@
-import { pgTable, unique, text, boolean, timestamp, index, foreignKey, uuid, char, uniqueIndex, integer, jsonb, serial, check, date, smallint, primaryKey, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, unique, text, boolean, timestamp, index, foreignKey, uuid, integer, char, uniqueIndex, jsonb, serial, check, date, smallint, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const cardCondition = pgEnum("card_condition", ['mint', 'near_mint', 'excellent', 'good', 'light_played', 'played', 'poor'])
@@ -39,6 +39,40 @@ export const user = pgTable("user", {
 }, (table) => [
 	unique("user_email_unique").on(table.email),
 	unique("user_username_unique").on(table.username),
+]);
+
+export const shipments = pgTable("shipments", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	orderId: uuid("order_id").notNull(),
+	sellerId: text("seller_id").notNull(),
+	status: shipmentStatus().default('awaiting_payment').notNull(),
+	itemsCents: integer("items_cents").notNull(),
+	shippingCents: integer("shipping_cents").notNull(),
+	commissionCents: integer("commission_cents").notNull(),
+	carrier: shippingProvider(),
+	trackingNumber: text("tracking_number"),
+	labelPath: text("label_path"),
+	stripeTransferId: text("stripe_transfer_id"),
+	shippedAt: timestamp("shipped_at", { withTimezone: true, mode: 'string' }),
+	deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: 'string' }),
+	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
+	cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: 'string' }),
+	shippingService: text("shipping_service"),
+	shippingFormat: shippingFormat("shipping_format"),
+	packageWeightG: integer("package_weight_g"),
+}, (table) => [
+	index("shipments_order_idx").using("btree", table.orderId.asc().nullsLast().op("uuid_ops")),
+	index("shipments_seller_status_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.status.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.orderId],
+			foreignColumns: [orders.id],
+			name: "shipments_order_id_orders_id_fk"
+		}),
+	foreignKey({
+			columns: [table.sellerId],
+			foreignColumns: [sellerProfiles.userId],
+			name: "shipments_seller_id_seller_profiles_user_id_fk"
+		}),
 ]);
 
 export const verification = pgTable("verification", {
@@ -167,43 +201,6 @@ export const conversations = pgTable("conversations", {
 			columns: [table.shipmentId],
 			foreignColumns: [shipments.id],
 			name: "conversations_shipment_id_shipments_id_fk"
-		}),
-]);
-
-export const shipments = pgTable("shipments", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	orderId: uuid("order_id").notNull(),
-	sellerId: text("seller_id").notNull(),
-	status: shipmentStatus().default('awaiting_payment').notNull(),
-	shippingMethodId: uuid("shipping_method_id"),
-	itemsCents: integer("items_cents").notNull(),
-	shippingCents: integer("shipping_cents").notNull(),
-	commissionCents: integer("commission_cents").notNull(),
-	carrier: shippingProvider(),
-	trackingNumber: text("tracking_number"),
-	labelPath: text("label_path"),
-	stripeTransferId: text("stripe_transfer_id"),
-	shippedAt: timestamp("shipped_at", { withTimezone: true, mode: 'string' }),
-	deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: 'string' }),
-	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
-	cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: 'string' }),
-}, (table) => [
-	index("shipments_order_idx").using("btree", table.orderId.asc().nullsLast().op("uuid_ops")),
-	index("shipments_seller_status_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.status.asc().nullsLast().op("text_ops")),
-	foreignKey({
-			columns: [table.orderId],
-			foreignColumns: [orders.id],
-			name: "shipments_order_id_orders_id_fk"
-		}),
-	foreignKey({
-			columns: [table.sellerId],
-			foreignColumns: [sellerProfiles.userId],
-			name: "shipments_seller_id_seller_profiles_user_id_fk"
-		}),
-	foreignKey({
-			columns: [table.shippingMethodId],
-			foreignColumns: [shippingMethods.id],
-			name: "shipments_shipping_method_id_shipping_methods_id_fk"
 		}),
 ]);
 
@@ -618,29 +615,6 @@ export const importRuns = pgTable("import_runs", {
 	finishedAt: timestamp("finished_at", { withTimezone: true, mode: 'string' }),
 }, (table) => [
 	index("import_runs_game_started_idx").using("btree", table.game.asc().nullsLast().op("timestamptz_ops"), table.startedAt.asc().nullsLast().op("timestamptz_ops")),
-]);
-
-export const shippingMethods = pgTable("shipping_methods", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	sellerId: text("seller_id").notNull(),
-	provider: shippingProvider().notNull(),
-	name: text().notNull(),
-	providerProduct: text("provider_product"),
-	destinationCountries: char("destination_countries", { length: 2 }).array().notNull(),
-	priceCents: integer("price_cents").notNull(),
-	maxOrderValueCents: integer("max_order_value_cents"),
-	maxItems: integer("max_items"),
-	tracked: boolean().default(false).notNull(),
-	active: boolean().default(true).notNull(),
-	format: shippingFormat().default('standard').notNull(),
-	maxWeightG: integer("max_weight_g").default(20).notNull(),
-	maxThicknessMm: integer("max_thickness_mm").default(5).notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.sellerId],
-			foreignColumns: [sellerProfiles.userId],
-			name: "shipping_methods_seller_id_seller_profiles_user_id_fk"
-		}).onDelete("cascade"),
 ]);
 
 export const postCardRefs = pgTable("post_card_refs", {

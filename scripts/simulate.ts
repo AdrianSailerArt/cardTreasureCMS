@@ -2,7 +2,7 @@ import { hashPassword } from 'better-auth/crypto'
 import { inArray, sql } from 'drizzle-orm'
 import { client, db, schema } from './import/lib/db'
 import { chunk, parseArgs } from './import/lib/util'
-import { chooseShipping, defaultShippingOptions, estimatePackage, type PackageItem } from './lib/shipping'
+import { quoteShipping, type PackageItem } from './lib/shipping'
 
 /*
  * Simuliert einen laufenden Marktplatz mit Demo-Daten:
@@ -232,15 +232,6 @@ const simulate = async () => {
     createdAt: daysAgo(int(CFG.days, 300)).toISOString(),
   })))
 
-  // Versandarten: dieselben Vorgaben wie für neue Verkäufer im Shop (Briefformate nach Gewicht/Dicke, Einschreiben, Paket)
-  const methods = sellers.flatMap(s => defaultShippingOptions(s.country).map(m => ({
-    ...m,
-    id: uuid(),
-    sellerId: s.id,
-    provider: m.format === 'parcel' ? 'dhl' as const : 'deutsche_post' as const,
-  })))
-  await db.insert(schema.shippingMethods).values(methods)
-
   // Angebote
   type ListingRow = typeof schema.listings.$inferInsert & { id: string, quantity: number, priceCents: number }
   const listings: ListingRow[] = []
@@ -279,8 +270,7 @@ const simulate = async () => {
   const bySeller = new Map<string, ListingRow[]>()
   for (const l of listings) bySeller.set(l.sellerId, [...(bySeller.get(l.sellerId) ?? []), l])
   const stock = new Map(listings.map(l => [l.id, l.quantity]))
-  const methodsBySeller = new Map<string, typeof methods>()
-  for (const m of methods) methodsBySeller.set(m.sellerId, [...(methodsBySeller.get(m.sellerId) ?? []), m])
+  const sellerCountry = new Map(sellers.map(s => [s.id, s.country as string]))
 
   const orderRows: (typeof schema.orders.$inferInsert)[] = []
   const shipmentRows: (typeof schema.shipments.$inferInsert)[] = []
@@ -327,10 +317,9 @@ const simulate = async () => {
         })
       }
 
-      // Günstigste Versandart, die zu Gewicht, Dicke (inkl. Schutz und Puffer), Wert und Land passt
-      const sellerMethods = methodsBySeller.get(sellerId) ?? []
-      const method = chooseShipping(sellerMethods, estimatePackage(packageItems), buyerAddress.country)
-        ?? sellerMethods.find(m => m.format === 'parcel' && m.destinationCountries.includes(buyerAddress.country))!
+      // Versand automatisch aus dem Plattform-Tarif: Gewicht, Dicke (inkl. Schutz und Puffer), Wert, Herkunft, Ziel
+      const quote = quoteShipping(packageItems, sellerCountry.get(sellerId)!, buyerAddress.country)
+      if (!quote) continue
 
       // Status nach Alter der Bestellung
       const roll = rand()
@@ -351,12 +340,14 @@ const simulate = async () => {
         orderId,
         sellerId,
         status,
-        shippingMethodId: method.id,
         itemsCents: items,
-        shippingCents: method.priceCents,
+        shippingCents: quote.priceCents,
+        shippingService: quote.service,
+        shippingFormat: quote.format,
+        packageWeightG: quote.weightG,
         commissionCents: Math.round(items * 0.05),
-        carrier: method.provider,
-        trackingNumber: method.tracked && shippedAt ? `${method.provider === 'dhl' ? '00340' : 'RR'}${int(100000000, 999999999)}DE` : null,
+        carrier: quote.format === 'parcel' ? 'dhl' : 'deutsche_post',
+        trackingNumber: quote.tracked && shippedAt ? `${quote.format === 'parcel' ? '00340' : 'RR'}${int(100000000, 999999999)}DE` : null,
         stripeTransferId: completedAt ? `tr_demo_${shipmentId.slice(0, 8)}` : null,
         shippedAt: shippedAt?.toISOString(),
         deliveredAt: deliveredAt?.toISOString(),
@@ -365,7 +356,7 @@ const simulate = async () => {
       })
       orderShipments.push(shipmentId)
       orderItems += items
-      orderShipping += method.priceCents
+      orderShipping += quote.priceCents
 
       // Bewertungen für abgeschlossene Sendungen
       if (completedAt && rand() < 0.7) {

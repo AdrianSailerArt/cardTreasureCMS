@@ -129,27 +129,52 @@ export const chooseShipping = <T extends ShippingOption>(options: T[], pkg: Pack
 export const EU_SHIPPING_COUNTRIES = ['AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK'] as const
 
 /**
- * Vorbelegte Versandarten für neue Verkäufer aus Deutschland.
- * Preise sind Richtwerte (Deutsche Post / DHL, Stand 2025) und vom Verkäufer anpassbar.
+ * Plattform-Tarif: welche Versandarten es gibt und was sie kosten. Verkäufer pflegen nichts selbst,
+ * der Versand jeder Sendung wird daraus automatisch berechnet.
+ * Preise: Deutsche Post / DHL, Stand 2025 (Richtwerte, vor dem Start mit der aktuellen Preisliste abgleichen).
+ * Für Verkäufer außerhalb Deutschlands gilt vorerst derselbe Tarif als Näherung.
  */
-export const defaultShippingOptions = (homeCountry: string): Omit<ShippingOption, 'id'>[] => {
-  const home = [homeCountry.toUpperCase()]
-  const abroad = EU_SHIPPING_COUNTRIES.filter(c => c !== homeCountry.toUpperCase())
-  const letter = (format: Exclude<ShippingFormat, 'parcel'>, name: string, priceCents: number, region: string[], tracked = false, maxValue: number | null = 2500) => ({
+export const shippingTariff = (originCountry: string): ShippingOption[] => {
+  const origin = originCountry.toUpperCase()
+  const home = [origin]
+  const abroad = EU_SHIPPING_COUNTRIES.filter(c => c !== origin)
+  const option = (format: ShippingFormat, name: string, priceCents: number, region: string[], tracked = false, maxValue: number | null = 2500): ShippingOption => ({
+    id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     name, format, ...FORMAT_LIMITS[format], priceCents, tracked, maxOrderValueCents: maxValue, destinationCountries: region, active: true,
   })
   return [
-    letter('standard', 'Standardbrief', 95, home),
-    letter('compact', 'Kompaktbrief', 110, home),
-    letter('large', 'Großbrief', 180, home),
-    letter('maxi', 'Maxibrief', 290, home),
-    letter('compact', 'Kompaktbrief Einschreiben', 345, home, true, 25000),
-    letter('large', 'Großbrief Einschreiben', 415, home, true, 25000),
-    { name: 'DHL Paket', format: 'parcel', ...FORMAT_LIMITS.parcel, priceCents: 699, tracked: true, maxOrderValueCents: null, destinationCountries: home, active: true },
-    letter('standard', 'Standardbrief International', 125, abroad),
-    letter('compact', 'Kompaktbrief International', 180, abroad),
-    letter('large', 'Großbrief International', 330, abroad),
-    letter('large', 'Großbrief International Einschreiben', 680, abroad, true, 25000),
-    { name: 'DHL Paket EU', format: 'parcel', ...FORMAT_LIMITS.parcel, priceCents: 1899, tracked: true, maxOrderValueCents: null, destinationCountries: abroad, active: true },
+    option('standard', 'Standardbrief', 95, home),
+    option('compact', 'Kompaktbrief', 110, home),
+    option('large', 'Großbrief', 180, home),
+    option('maxi', 'Maxibrief', 290, home),
+    option('compact', 'Kompaktbrief Einschreiben', 345, home, true, 25000),
+    option('large', 'Großbrief Einschreiben', 415, home, true, 25000),
+    option('parcel', 'DHL Paket', 699, home, true, null),
+    option('standard', 'Standardbrief International', 125, abroad),
+    option('compact', 'Kompaktbrief International', 180, abroad),
+    option('large', 'Großbrief International', 330, abroad),
+    option('large', 'Großbrief International Einschreiben', 680, abroad, true, 25000),
+    option('parcel', 'DHL Paket EU', 1899, abroad, true, null),
   ]
+}
+
+export interface ShippingQuote {
+  service: string
+  format: ShippingFormat
+  tracked: boolean
+  priceCents: number
+  weightG: number
+  thicknessMm: number
+}
+
+/**
+ * Versand für eine Sendung automatisch berechnen: Gewicht und Dicke schätzen und die günstigste
+ * passende Versandart aus dem Tarif wählen. Null, wenn nichts passt (z.B. Ziel außerhalb der EU).
+ */
+export const quoteShipping = (items: PackageItem[], originCountry: string, destinationCountry: string): ShippingQuote | null => {
+  const pkg = estimatePackage(items)
+  const option = chooseShipping(shippingTariff(originCountry), pkg, destinationCountry)
+  return option
+    ? { service: option.name, format: option.format, tracked: option.tracked, priceCents: option.priceCents, weightG: pkg.weightG, thicknessMm: pkg.thicknessMm }
+    : null
 }

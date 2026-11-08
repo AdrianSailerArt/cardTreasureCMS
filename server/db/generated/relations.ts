@@ -1,5 +1,42 @@
 import { relations } from "drizzle-orm/relations";
-import { user, account, addresses, games, cards, sellerProfiles, listings, products, shipments, conversations, orders, shippingMethods, decks, printings, sealedProducts, messages, payments, posts, sets, reviews, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, postCardRefs, conversationParticipants, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
+import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, reviews, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, postCardRefs, conversationParticipants, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
+
+export const shipmentsRelations = relations(shipments, ({one, many}) => ({
+	order: one(orders, {
+		fields: [shipments.orderId],
+		references: [orders.id]
+	}),
+	sellerProfile: one(sellerProfiles, {
+		fields: [shipments.sellerId],
+		references: [sellerProfiles.userId]
+	}),
+	conversations: many(conversations),
+	reviews: many(reviews),
+	shipmentItems: many(shipmentItems),
+}));
+
+export const ordersRelations = relations(orders, ({one, many}) => ({
+	shipments: many(shipments),
+	user: one(user, {
+		fields: [orders.buyerId],
+		references: [user.id]
+	}),
+	payments: many(payments),
+}));
+
+export const sellerProfilesRelations = relations(sellerProfiles, ({one, many}) => ({
+	shipments: many(shipments),
+	listings: many(listings),
+	user: one(user, {
+		fields: [sellerProfiles.userId],
+		references: [user.id]
+	}),
+	address: one(addresses, {
+		fields: [sellerProfiles.shipFromAddressId],
+		references: [addresses.id]
+	}),
+	sellerShippingAccounts: many(sellerShippingAccounts),
+}));
 
 export const accountRelations = relations(account, ({one}) => ({
 	user: one(user, {
@@ -71,21 +108,6 @@ export const listingsRelations = relations(listings, ({one, many}) => ({
 	cartItems: many(cartItems),
 }));
 
-export const sellerProfilesRelations = relations(sellerProfiles, ({one, many}) => ({
-	listings: many(listings),
-	shipments: many(shipments),
-	user: one(user, {
-		fields: [sellerProfiles.userId],
-		references: [user.id]
-	}),
-	address: one(addresses, {
-		fields: [sellerProfiles.shipFromAddressId],
-		references: [addresses.id]
-	}),
-	sellerShippingAccounts: many(sellerShippingAccounts),
-	shippingMethods: many(shippingMethods),
-}));
-
 export const productsRelations = relations(products, ({one, many}) => ({
 	listings: many(listings),
 	game: one(games, {
@@ -113,41 +135,6 @@ export const conversationsRelations = relations(conversations, ({one, many}) => 
 	}),
 	messages: many(messages),
 	conversationParticipants: many(conversationParticipants),
-}));
-
-export const shipmentsRelations = relations(shipments, ({one, many}) => ({
-	conversations: many(conversations),
-	order: one(orders, {
-		fields: [shipments.orderId],
-		references: [orders.id]
-	}),
-	sellerProfile: one(sellerProfiles, {
-		fields: [shipments.sellerId],
-		references: [sellerProfiles.userId]
-	}),
-	shippingMethod: one(shippingMethods, {
-		fields: [shipments.shippingMethodId],
-		references: [shippingMethods.id]
-	}),
-	reviews: many(reviews),
-	shipmentItems: many(shipmentItems),
-}));
-
-export const ordersRelations = relations(orders, ({one, many}) => ({
-	shipments: many(shipments),
-	user: one(user, {
-		fields: [orders.buyerId],
-		references: [user.id]
-	}),
-	payments: many(payments),
-}));
-
-export const shippingMethodsRelations = relations(shippingMethods, ({one, many}) => ({
-	shipments: many(shipments),
-	sellerProfile: one(sellerProfiles, {
-		fields: [shippingMethods.sellerId],
-		references: [sellerProfiles.userId]
-	}),
 }));
 
 export const decksRelations = relations(decks, ({one, many}) => ({
