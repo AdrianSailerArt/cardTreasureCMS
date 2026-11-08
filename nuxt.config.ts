@@ -5,10 +5,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  css: ['~/assets/css/main.css'],
+  css: ['flag-icons/css/flag-icons.min.css', '~/assets/css/main.css'],
 
   vite: {
     plugins: [tailwindcss()],
+    // Flaggen nicht ins CSS einbetten, sonst landen alle ~540 SVGs in jeder Seite
+    build: { assetsInlineLimit: (file: string) => (file.includes('flag-icons') ? false : undefined) },
   },
 
   app: {

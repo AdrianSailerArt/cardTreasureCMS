@@ -66,7 +66,7 @@ interface TcgCard {
   pricing?: { cardmarket?: CmPricing | null }
 }
 
-function finishesOf(v: TcgCard['variants']): CardFinish[] {
+const finishesOf = (v: TcgCard['variants']): CardFinish[] => {
   const out: CardFinish[] = []
   if (v?.normal) out.push('normal')
   if (v?.holo) out.push('holo')
@@ -74,7 +74,7 @@ function finishesOf(v: TcgCard['variants']): CardFinish[] {
   return out.length ? out : ['normal']
 }
 
-function pricesOf(cm: CmPricing | null | undefined, finishes: CardFinish[]): NormPrice[] {
+const pricesOf = (cm: CmPricing | null | undefined, finishes: CardFinish[]): NormPrice[] => {
   if (!cm) return []
   return finishes.map((finish) => {
     const holo = finish !== 'normal'
@@ -89,7 +89,7 @@ function pricesOf(cm: CmPricing | null | undefined, finishes: CardFinish[]): Nor
   })
 }
 
-function normalize(c: TcgCard, setId: string, deName: string | undefined) {
+const normalize = (c: TcgCard, setId: string, deName: string | undefined) => {
   const finishes = finishesOf(c.variants)
   const languages: CardLanguage[] = deName ? ['en', 'de'] : ['en']
 
@@ -141,7 +141,7 @@ function normalize(c: TcgCard, setId: string, deName: string | undefined) {
   return { card, printing }
 }
 
-export async function importPokemon(args: CliArgs) {
+export const importPokemon = async (args: CliArgs) => {
   const gameId = await ensureGame('pokemon', 'Pokémon')
 
   let setList = (await fetchJson<BriefSet[]>(`${API}/en/sets`))!

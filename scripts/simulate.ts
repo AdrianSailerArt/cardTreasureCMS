@@ -28,7 +28,7 @@ const CFG = {
 
 // ---------- Zufall (reproduzierbar über --seed) ----------
 let state = CFG.seed >>> 0
-function rand() {
+const rand = () => {
   state = (state + 0x6D2B79F5) >>> 0
   let t = state
   t = Math.imul(t ^ (t >>> 15), t | 1)
@@ -37,7 +37,7 @@ function rand() {
 }
 const int = (min: number, max: number) => min + Math.floor(rand() * (max - min + 1))
 const pick = <T>(list: readonly T[]): T => list[Math.floor(rand() * list.length)]!
-function weighted<T>(entries: readonly (readonly [T, number])[]): T {
+const weighted = <T>(entries: readonly (readonly [T, number])[]): T => {
   const total = entries.reduce((s, [, w]) => s + w, 0)
   let r = rand() * total
   for (const [v, w] of entries) if ((r -= w) <= 0) return v
@@ -75,7 +75,7 @@ const CONDITIONS: readonly (readonly [Condition, number, number])[] = [
 ]
 
 // ---------- Löschen ----------
-async function clearDemo() {
+const clearDemo = async () => {
   const demoUsers = db.select({ id: schema.user.id }).from(schema.user).where(sql`${schema.user.isDemo}`)
   const demoOrders = db.select({ id: schema.orders.id }).from(schema.orders).where(inArray(schema.orders.buyerId, demoUsers))
   const demoShipments = db.select({ id: schema.shipments.id }).from(schema.shipments).where(inArray(schema.shipments.orderId, demoOrders))
@@ -107,7 +107,7 @@ interface Candidate {
   refFinish: Finish
 }
 
-async function loadCandidates(): Promise<Candidate[]> {
+const loadCandidates = async (): Promise<Candidate[]> => {
   const perGame = Math.ceil(CFG.products / 3)
   // 60 % aus Sets der letzten zwei Jahre (gefragte Ware), 40 % aus dem gesamten Katalog
   const query = (game: string, recent: boolean, limit: number) => sql`
@@ -138,7 +138,7 @@ async function loadCandidates(): Promise<Candidate[]> {
   return out
 }
 
-function makePerson(i: number, prefix: string) {
+const makePerson = (i: number, prefix: string) => {
   const first = pick(FIRST)
   const last = pick(LAST)
   const country = weighted(COUNTRY_WEIGHTS)
@@ -151,7 +151,7 @@ function makePerson(i: number, prefix: string) {
   }
 }
 
-async function simulate() {
+const simulate = async () => {
   const now = new Date()
   const candidates = await loadCandidates()
   if (!candidates.length) throw new Error('Keine Produkte mit Richtpreis gefunden. Zuerst `bun run import` ausführen.')
@@ -425,7 +425,7 @@ async function simulate() {
 }
 
 /** Täglicher Preisverlauf aus den simulierten Verkäufen, Trend = gleitender 7-Tage-Durchschnitt. */
-async function rebuildPriceHistory() {
+const rebuildPriceHistory = async () => {
   await db.delete(schema.priceHistory)
   await db.execute(sql`
     insert into price_history (product_id, finish, day, low_cents, avg_sold_cents, sold_count, listing_count, trend_cents)

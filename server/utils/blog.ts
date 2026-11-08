@@ -9,13 +9,13 @@ export const CARD_REF = /:card\{ref="(mtg|pokemon|yugioh)\/([a-z0-9-]+)"\}/g
 
 export interface CardRefInfo { game: string, slug: string, id: string, name: string, nameDe: string | null, printingId: string | null }
 
-export function extractRefs(markdown: string): { game: string, slug: string }[] {
+export const extractRefs = (markdown: string): { game: string, slug: string }[] => {
   const seen = new Map<string, { game: string, slug: string }>()
   for (const m of markdown.matchAll(CARD_REF)) seen.set(`${m[1]}/${m[2]}`, { game: m[1]!, slug: m[2]! })
   return [...seen.values()]
 }
 
-export async function resolveRefs(refs: { game: string, slug: string }[]): Promise<Map<string, CardRefInfo>> {
+export const resolveRefs = async (refs: { game: string, slug: string }[]): Promise<Map<string, CardRefInfo>> => {
   if (!refs.length) return new Map()
   const list = await rows<CardRefInfo>(sql`
     select g.code as game, c.slug, c.id, c.name, de.name as "nameDe",
@@ -31,7 +31,7 @@ export async function resolveRefs(refs: { game: string, slug: string }[]): Promi
 const escape = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 
 /** Markdown → HTML für die Vorschau im Admin-Tool; Kartenverweise werden zu Links in den Shop. */
-export async function renderPreview(markdown: string, locale: 'de' | 'en'): Promise<{ html: string, missing: string[] }> {
+export const renderPreview = async (markdown: string, locale: 'de' | 'en'): Promise<{ html: string, missing: string[] }> => {
   const refs = await resolveRefs(extractRefs(markdown))
   const shop = useRuntimeConfig().public.shopUrl
   const missing: string[] = []

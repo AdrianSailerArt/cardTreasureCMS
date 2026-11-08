@@ -41,17 +41,17 @@ interface YgoCard {
 }
 
 /** LOB-EN001 → LOB-001 · SDK-E001 → SDK-001 · YGLD-ENA01 → YGLD-A01 */
-export function normalizeSetCode(code: string): string {
+export const normalizeSetCode = (code: string): string => {
   const m = code.match(/^([A-Z0-9]+)-([A-Z]{0,2})([A-Z]?\d+[A-Z]?)$/i)
   return m ? `${m[1]}-${m[3]}`.toUpperCase() : code.toUpperCase()
 }
 
-function rarityKey(r: { set_rarity: string, set_rarity_code?: string }): string {
+const rarityKey = (r: { set_rarity: string, set_rarity_code?: string }): string => {
   const code = r.set_rarity_code?.replace(/[()]/g, '').trim()
   return code || slugify(r.set_rarity).toUpperCase()
 }
 
-function normalize(c: YgoCard, de: YgoCard | undefined, wantedCodes?: Set<string>) {
+const normalize = (c: YgoCard, de: YgoCard | undefined, wantedCodes?: Set<string>) => {
   const passcode = String(c.id)
   const languages: CardLanguage[] = de ? ['en', 'de'] : ['en']
 
@@ -103,7 +103,7 @@ function normalize(c: YgoCard, de: YgoCard | undefined, wantedCodes?: Set<string
   return { card, printings }
 }
 
-export async function importYugioh(args: CliArgs) {
+export const importYugioh = async (args: CliArgs) => {
   const gameId = await ensureGame('yugioh', 'Yu-Gi-Oh!')
   const wantedCodes = args.sets ? new Set(args.sets.map(s => s.toUpperCase())) : undefined
 

@@ -1,6 +1,6 @@
 const USER_AGENT = 'CardTreasureImporter/0.1 (+https://github.com/AdrianSailerArt/cardTreasure)'
 
-export function slugify(input: string): string {
+export const slugify = (input: string): string => {
   return input
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '')
@@ -10,7 +10,7 @@ export function slugify(input: string): string {
     .slice(0, 80) || 'x'
 }
 
-export function chunk<T>(items: T[], size: number): T[][] {
+export const chunk = <T>(items: T[], size: number): T[][] => {
   const out: T[][] = []
   for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size))
   return out
@@ -22,7 +22,7 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
  * GET mit User-Agent und Wiederholung bei 429/5xx. Gibt bei 404 `null` zurück.
  * Bei 429 gilt die Wartezeit aus `Retry-After`, sonst exponentiell 2 s, 4 s, 8 s … (max. 60 s).
  */
-export async function fetchJson<T>(url: string, attempts = 7): Promise<T | null> {
+export const fetchJson = async <T>(url: string, attempts = 7): Promise<T | null> => {
   for (let i = 1; ; i++) {
     const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' } })
     if (res.ok) return await res.json() as T
@@ -64,7 +64,7 @@ export async function* fetchJsonLines<T>(url: string): AsyncGenerator<T> {
 }
 
 /** Führt `fn` für alle Einträge mit begrenzter Parallelität aus. */
-export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
+export const mapLimit = async <T, R>(items: T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> => {
   const results = new Array<R>(items.length)
   let next = 0
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
@@ -77,7 +77,7 @@ export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, i:
 }
 
 /** Euro/Dollar als Zahl oder String → ganze Cent. */
-export function toCents(value: unknown): number | null {
+export const toCents = (value: unknown): number | null => {
   if (value === null || value === undefined || value === '') return null
   const n = typeof value === 'number' ? value : Number.parseFloat(String(value))
   return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : null
@@ -90,7 +90,7 @@ export interface CliArgs {
 }
 
 /** Einfache Argumente: --limit=500 --sets=lea,mh3 --bulk=default_cards */
-export function parseArgs(argv = process.argv.slice(2)): CliArgs {
+export const parseArgs = (argv = process.argv.slice(2)): CliArgs => {
   const args: CliArgs = {}
   for (const a of argv) {
     const [k, v] = a.replace(/^--/, '').split('=')
@@ -102,6 +102,6 @@ export function parseArgs(argv = process.argv.slice(2)): CliArgs {
   return args
 }
 
-export function log(game: string, msg: string) {
+export const log = (game: string, msg: string) => {
   console.log(`[${new Date().toISOString().slice(11, 19)}] [${game}] ${msg}`)
 }

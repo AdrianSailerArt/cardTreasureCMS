@@ -65,7 +65,7 @@ export interface NormPrinting {
   mergeOnly?: boolean
 }
 
-export async function ensureGame(code: GameCode, name: string): Promise<number> {
+export const ensureGame = async (code: GameCode, name: string): Promise<number> => {
   const [row] = await db.insert(games).values({ code, name })
     .onConflictDoUpdate({ target: games.code, set: { name } })
     .returning({ id: games.id })
@@ -73,7 +73,7 @@ export async function ensureGame(code: GameCode, name: string): Promise<number> 
 }
 
 /** Legt Sets an oder aktualisiert sie. Gibt externalId → interne ID zurück. */
-export async function upsertSets(gameId: number, list: NormSet[]): Promise<Map<string, string>> {
+export const upsertSets = async (gameId: number, list: NormSet[]): Promise<Map<string, string>> => {
   const map = new Map<string, string>()
   for (const part of chunk(list, 500)) {
     const rows = await db.insert(sets).values(part.map(s => ({
@@ -118,7 +118,7 @@ export async function upsertSets(gameId: number, list: NormSet[]): Promise<Map<s
   return map
 }
 
-export async function loadSetMap(gameId: number): Promise<Map<string, string>> {
+export const loadSetMap = async (gameId: number): Promise<Map<string, string>> => {
   const rows = await db.select({ id: sets.id, externalId: sets.externalId }).from(sets).where(eq(sets.gameId, gameId))
   return new Map(rows.map(r => [r.externalId, r.id]))
 }
@@ -129,13 +129,13 @@ const union = (col: string) =>
 export interface BatchResult { cards: number, printings: number, skipped: number }
 
 /** Schreibt einen Stapel Karten und Drucke inklusive Produkten und Referenzpreisen. */
-export async function upsertBatch(
+export const upsertBatch = async (
   game: GameCode,
   gameId: number,
   setMap: Map<string, string>,
   cardList: NormCard[],
   printingList: NormPrinting[],
-): Promise<BatchResult> {
+): Promise<BatchResult> => {
   // 1. Karten (innerhalb des Stapels zusammenführen, sonst meldet Postgres doppelte Konflikte)
   const cardMap = new Map<string, NormCard>()
   for (const c of cardList) {
@@ -298,7 +298,7 @@ export async function upsertBatch(
 }
 
 /** Zählt den aktuellen Stand eines Spiels in der Datenbank. */
-export async function countGame(gameId: number) {
+export const countGame = async (gameId: number) => {
   const [row] = await db.select({
     sets: sql<number>`(select count(*)::int from ${sets} where ${sets.gameId} = ${gameId})`,
     cards: sql<number>`(select count(*)::int from ${cards} where ${cards.gameId} = ${gameId})`,

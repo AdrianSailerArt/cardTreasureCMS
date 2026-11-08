@@ -72,14 +72,14 @@ const LANGS: Record<string, CardLanguage> = {
 }
 const FINISHES: Record<string, CardFinish> = { nonfoil: 'normal', foil: 'foil', etched: 'etched' }
 
-function faceJoin(c: ScryCard, key: keyof ScryFace, sep: string): string | null {
+const faceJoin = (c: ScryCard, key: keyof ScryFace, sep: string): string | null => {
   const own = c[key]
   if (typeof own === 'string' && own) return own
   const parts = (c.card_faces ?? []).map(f => f[key]).filter((v): v is string => typeof v === 'string' && !!v)
   return parts.length ? parts.join(sep) : null
 }
 
-function normalize(c: ScryCard): { card: NormCard, printing: NormPrinting } | null {
+const normalize = (c: ScryCard): { card: NormCard, printing: NormPrinting } | null => {
   const language = LANGS[c.lang]
   if (!language || c.digital || !c.games?.includes('paper')) return null
 
@@ -165,7 +165,7 @@ async function* cardsFromBulk(type: string): AsyncGenerator<ScryCard> {
   yield* fetchJsonLines<ScryCard>(bulk.jsonl_download_uri)
 }
 
-export async function importMtg(args: CliArgs) {
+export const importMtg = async (args: CliArgs) => {
   const gameId = await ensureGame('mtg', 'Magic: The Gathering')
 
   const setRes = await fetchJson<{ data: ScrySet[] }>(`${API}/sets`)

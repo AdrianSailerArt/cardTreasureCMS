@@ -78,8 +78,9 @@ export default defineEventHandler(async (event) => {
       left join printings pt on pt.id = pr.printing_id left join cards c on c.id = pt.card_id
       group by pr.id, g.code, c.slug order by gmv desc limit 8
     `),
-    rows<{ number: string, buyer: string, createdAt: string, total: number, status: string, shipments: string[] }>(sql`
-      select o.number, u.name as buyer, o.created_at as "createdAt", o.total_cents as total, o.status::text as status,
+    rows<{ number: string, buyer: string, buyerCountry: string | null, createdAt: string, total: number, status: string, shipments: string[] }>(sql`
+      select o.number, u.name as buyer, o.shipping_address->>'country' as "buyerCountry",
+             o.created_at as "createdAt", o.total_cents as total, o.status::text as status,
              array(select s.status::text from shipments s where s.order_id = o.id) as shipments
       from orders o join "user" u on u.id = o.buyer_id
       order by o.created_at desc limit 12

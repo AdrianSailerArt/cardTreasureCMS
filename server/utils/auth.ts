@@ -5,9 +5,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { magicLink } from 'better-auth/plugins'
 import { schema } from './db'
 
-let instance: ReturnType<typeof createAuth> | undefined
-
-function createAuth() {
+const createAuth = () => {
   const config = useRuntimeConfig()
   return betterAuth({
     baseURL: config.public.siteUrl,
@@ -38,7 +36,9 @@ function createAuth() {
   })
 }
 
-export function useAuth() {
+let instance: ReturnType<typeof createAuth> | undefined
+
+export const useAuth = () => {
   instance ??= createAuth()
   return instance
 }
@@ -46,7 +46,7 @@ export function useAuth() {
 export interface AdminUser { id: string, name: string, email: string }
 
 /** Liefert den angemeldeten Admin oder wirft 401/403. Für alle internen API-Routen. */
-export async function requireAdmin(event: H3Event): Promise<AdminUser> {
+export const requireAdmin = async (event: H3Event): Promise<AdminUser> => {
   const session = await useAuth().api.getSession({ headers: event.headers })
   if (!session) throw createError({ statusCode: 401, statusMessage: 'Nicht angemeldet' })
   const user = session.user as typeof session.user & { role?: string }

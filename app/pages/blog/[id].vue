@@ -1,8 +1,9 @@
 <script setup lang="ts">
 type Locale = 'de' | 'en'
+type Status = 'draft' | 'published' | 'archived'
 interface Translation { title: string, excerpt: string | null, bodyMd: string }
 interface PostDetail {
-  id: string, slug: string, status: 'draft' | 'published' | 'archived', game: string | null, tags: string[]
+  id: string, slug: string, status: Status, game: string | null, tags: string[]
   translations: Partial<Record<Locale, Translation>>
 }
 
@@ -12,7 +13,7 @@ const isNew = computed(() => route.params.id === 'neu')
 const form = reactive({
   id: undefined as string | undefined,
   slug: '',
-  status: 'draft' as PostDetail['status'],
+  status: 'draft' as Status,
   game: null as string | null,
   tags: '',
   translations: {
@@ -32,56 +33,42 @@ if (!isNew.value) {
   }
 }
 
+const statusOptions: { value: Status, label: string }[] = [
+  { value: 'draft', label: 'Entwurf' },
+  { value: 'published', label: 'Veröffentlicht' },
+  { value: 'archived', label: 'Archiviert' },
+]
+const gameOptions = [{ value: null, label: 'Alle / keins' }, ...Object.entries(GAME_LABEL).map(([value, label]) => ({ value, label }))]
+const localeOptions: { value: Locale, label: string }[] = [{ value: 'de', label: 'Deutsch' }, { value: 'en', label: 'English' }]
+
 const locale = ref<Locale>('de')
 const current = computed(() => form.translations[locale.value])
 
-// Slug aus dem deutschen Titel vorschlagen, solange er nicht selbst gesetzt wurde
+// Slug aus dem Titel vorschlagen, solange er nicht von Hand geändert wurde
 const slugTouched = ref(!isNew.value)
+const slugify = (title: string) => title.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80)
 watch(() => form.translations.de.title || form.translations.en.title, (title) => {
-  if (slugTouched.value) return
-  form.slug = title.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80)
+  if (!slugTouched.value) form.slug = slugify(title)
 })
 
-// Vorschau (verzögert, damit nicht bei jedem Tastendruck gerendert wird)
-const preview = ref<{ html: string, missing: string[] }>({ html: '', missing: [] })
-let timer: ReturnType<typeof setTimeout> | undefined
-watch(() => [current.value.bodyMd, locale.value], () => {
-  clearTimeout(timer)
-  timer = setTimeout(async () => {
-    preview.value = await $fetch<{ html: string, missing: string[] }>('/api/posts/preview', { method: 'POST', body: { markdown: current.value.bodyMd, locale: locale.value } })
-  }, 300)
-}, { immediate: true })
-
-// Kartenverweis einfügen
-const editor = ref<HTMLTextAreaElement>()
-const cardQuery = ref('')
-const cardResults = ref<{ ref: string, name: string, nameDe: string | null, game: string, setName: string | null }[]>([])
-let searchTimer: ReturnType<typeof setTimeout> | undefined
-watch(cardQuery, (q) => {
-  clearTimeout(searchTimer)
-  if (q.trim().length < 2) { cardResults.value = []; return }
-  searchTimer = setTimeout(async () => {
-    cardResults.value = await $fetch<typeof cardResults.value>('/api/cards/search', { query: { q } })
-  }, 250)
-})
-function insertCard(ref: string) {
+// Kartenverweis an der Cursorposition einfügen
+const editor = ref<{ $el: HTMLTextAreaElement }>()
+const insertCard = (ref: string) => {
   const snippet = `:card{ref="${ref}"}`
-  const el = editor.value
+  const el = editor.value?.$el
   const body = current.value.bodyMd
-  const pos = el ? el.selectionStart : body.length
+  const pos = el?.selectionStart ?? body.length
   current.value.bodyMd = body.slice(0, pos) + snippet + body.slice(pos)
-  cardQuery.value = ''
   nextTick(() => {
     el?.focus()
     el?.setSelectionRange(pos + snippet.length, pos + snippet.length)
   })
 }
 
-// Speichern
 const saving = ref(false)
 const message = ref<{ ok: boolean, text: string } | null>(null)
-async function save() {
+const save = async () => {
   saving.value = true
   message.value = null
   const translations = Object.fromEntries((['de', 'en'] as const)
@@ -117,102 +104,52 @@ async function save() {
 
 <template>
   <div>
-    <NuxtLink to="/blog" class="text-sm text-ink-400 hover:text-gold-600">← Alle Beiträge</NuxtLink>
-    <div class="mt-2 flex flex-wrap items-end justify-between gap-4">
-      <h1 class="text-4xl">{{ isNew ? 'Neuer Beitrag' : (form.translations.de.title || form.translations.en.title || 'Beitrag') }}</h1>
-      <div class="flex items-center gap-3">
-        <select v-model="form.status" class="field w-auto">
-          <option value="draft">Entwurf</option>
-          <option value="published">Veröffentlicht</option>
-          <option value="archived">Archiviert</option>
-        </select>
-        <button class="btn" :disabled="saving" @click="save">Speichern</button>
-      </div>
-    </div>
-    <p v-if="message" class="mt-3 text-sm" :class="message.ok ? 'text-emerald-600' : 'text-red-600'">{{ message.text }}</p>
+    <UiPageHeader :title="isNew ? 'Neuer Beitrag' : (form.translations.de.title || form.translations.en.title || 'Beitrag')">
+      <template #above>
+        <NuxtLink to="/blog" class="text-sm text-fg-subtle hover:text-accent">← Alle Beiträge</NuxtLink>
+      </template>
+      <UiSelect v-model="form.status" :options="statusOptions" class="w-auto" />
+      <UiButton :disabled="saving" @click="save">Speichern</UiButton>
+    </UiPageHeader>
+    <UiNotice v-if="message" :tone="message.ok ? 'success' : 'danger'" class="mt-3">{{ message.text }}</UiNotice>
 
     <div class="mt-6 grid gap-4 md:grid-cols-3">
-      <div>
-        <label class="label" for="slug">Slug (URL)</label>
-        <input id="slug" v-model="form.slug" class="field font-mono" @input="slugTouched = true">
-      </div>
-      <div>
-        <label class="label" for="game">Spiel</label>
-        <select id="game" v-model="form.game" class="field">
-          <option :value="null">Alle / keins</option>
-          <option v-for="(label, code) in GAME_LABEL" :key="code" :value="code">{{ label }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="label" for="tags">Tags (mit Komma getrennt)</label>
-        <input id="tags" v-model="form.tags" class="field" placeholder="Turnier, Preisanalyse">
-      </div>
+      <UiField label="Slug (URL)">
+        <UiInput v-model="form.slug" mono @input="slugTouched = true" />
+      </UiField>
+      <UiField label="Spiel">
+        <UiSelect v-model="form.game" :options="gameOptions" />
+      </UiField>
+      <UiField label="Tags (mit Komma getrennt)">
+        <UiInput v-model="form.tags" placeholder="Turnier, Preisanalyse" />
+      </UiField>
     </div>
 
-    <div class="mt-8 flex gap-1 border-b border-ink-200 dark:border-ink-800">
-      <button
-        v-for="l in (['de', 'en'] as const)"
-        :key="l"
-        class="-mb-px border-b-2 px-4 py-2 text-sm"
-        :class="locale === l ? 'border-gold-500 text-gold-600' : 'border-transparent text-ink-500'"
-        @click="locale = l"
-      >
-        {{ l === 'de' ? 'Deutsch' : 'English' }}
-        <span v-if="form.translations[l].title" class="ml-1 text-emerald-600">●</span>
-      </button>
+    <div class="mt-8 flex items-center justify-between gap-4 border-b border-line pb-3">
+      <UiSegmented v-model="locale" :options="localeOptions" />
+      <span class="text-xs text-fg-subtle">
+        ausgefüllt: {{ (['de', 'en'] as const).filter(l => form.translations[l].title).join(', ') || '–' }}
+      </span>
     </div>
 
     <div class="mt-6 grid gap-6 xl:grid-cols-2">
       <div class="min-w-0 space-y-4">
+        <UiField label="Titel"><UiInput v-model="current.title" /></UiField>
+        <UiField label="Teaser"><UiInput v-model="current.excerpt" :rows="2" /></UiField>
         <div>
-          <label class="label">Titel</label>
-          <input v-model="current.title" class="field text-base">
-        </div>
-        <div>
-          <label class="label">Teaser</label>
-          <textarea v-model="current.excerpt" rows="2" class="field" />
-        </div>
-        <div>
-          <div class="flex items-end justify-between gap-2">
-            <label class="label">Text (Markdown)</label>
-            <div class="relative w-64">
-              <input v-model="cardQuery" class="field py-1 text-xs" placeholder="Karte einfügen: Name suchen …">
-              <ul v-if="cardResults.length" class="absolute right-0 z-10 mt-1 max-h-72 w-80 overflow-auto rounded-lg border border-ink-200 bg-white text-sm shadow-lg dark:border-ink-700 dark:bg-ink-900">
-                <li v-for="c in cardResults" :key="c.ref">
-                  <button class="block w-full px-3 py-2 text-left hover:bg-ink-100 dark:hover:bg-ink-800" @click="insertCard(c.ref)">
-                    {{ c.nameDe ?? c.name }}
-                    <span class="block text-xs text-ink-400">{{ GAME_LABEL[c.game] }} · {{ c.setName }}</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
+          <div class="mb-1 flex items-end justify-between gap-2">
+            <span class="text-xs uppercase tracking-wider text-fg-subtle">Text (Markdown)</span>
+            <BlogCardRefPicker @pick="insertCard" />
           </div>
-          <textarea ref="editor" v-model="current.bodyMd" rows="22" class="field font-mono text-[13px] leading-relaxed" placeholder="## Überschrift&#10;&#10;Text mit Kartenverweis :card{ref=&quot;mtg/…&quot;}" />
-          <p class="mt-1 text-xs text-ink-400">Kartenverweise: <code>:card{ref="spiel/karten-slug"}</code>, am einfachsten über die Suche oben einfügen.</p>
+          <UiInput ref="editor" v-model="current.bodyMd" :rows="22" mono placeholder="## Überschrift&#10;&#10;Text mit Kartenverweis :card{ref=&quot;mtg/…&quot;}" />
+          <p class="mt-1 text-xs text-fg-subtle">Kartenverweise: <code>:card{ref="spiel/karten-slug"}</code>, am einfachsten über die Suche oben einfügen.</p>
         </div>
       </div>
 
       <div class="min-w-0">
-        <p class="label">Vorschau</p>
-        <div class="panel min-h-[200px]">
-          <h2 v-if="current.title" class="text-3xl">{{ current.title }}</h2>
-          <p v-if="current.excerpt" class="mt-2 text-ink-500">{{ current.excerpt }}</p>
-          <!-- eslint-disable-next-line vue/no-v-html -- Vorschau des eigenen Markdowns, nur für Admins -->
-          <div class="prose-preview mt-4" v-html="preview.html" />
-          <p v-if="preview.missing.length" class="mt-4 text-sm text-red-600">Unbekannte Karten: {{ preview.missing.join(', ') }}</p>
-        </div>
+        <p class="mb-1 text-xs uppercase tracking-wider text-fg-subtle">Vorschau</p>
+        <BlogMarkdownPreview :title="current.title" :excerpt="current.excerpt" :markdown="current.bodyMd" :locale="locale" />
       </div>
     </div>
   </div>
 </template>
-
-<style>
-.card-ref {
-  color: var(--color-gold-600);
-  border-bottom: 1px dotted currentColor;
-  text-decoration: none !important;
-}
-.card-ref-missing {
-  color: rgb(220 38 38);
-}
-</style>
