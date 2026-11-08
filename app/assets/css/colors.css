@@ -61,6 +61,15 @@
   --color-info: #2b67a6;
   --color-info-soft: #e5eff9;
 
+  /* Kartenzustand als Ampel: Grün (neuwertig) → Gelb (gebraucht) → Rot (stark bespielt) */
+  --color-cond-mint: #17703f;
+  --color-cond-near-mint: #2f8f45;
+  --color-cond-excellent: #6b8a12;
+  --color-cond-good: #a57c00;
+  --color-cond-light-played: #c4620f;
+  --color-cond-played: #c0451c;
+  --color-cond-poor: #b32d2d;
+
   /* Schimmer für Foil/Holo-Badges */
   --color-foil-from: color-mix(in oklab, var(--palette-gold-300) 45%, transparent);
   --color-foil-to: color-mix(in oklab, #9fd3f0 45%, transparent);
@@ -95,5 +104,13 @@
     --color-danger-soft: #331414;
     --color-info: #7fb6ec;
     --color-info-soft: #122436;
+
+    --color-cond-mint: #4fd18a;
+    --color-cond-near-mint: #7ad67c;
+    --color-cond-excellent: #bcd95a;
+    --color-cond-good: #f2cc4b;
+    --color-cond-light-played: #f5a35a;
+    --color-cond-played: #f3825f;
+    --color-cond-poor: #f07272;
   }
 }
