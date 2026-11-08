@@ -2,6 +2,7 @@ import { hashPassword } from 'better-auth/crypto'
 import { inArray, sql } from 'drizzle-orm'
 import { client, db, schema } from './import/lib/db'
 import { chunk, parseArgs } from './import/lib/util'
+import { chooseShipping, defaultShippingOptions, estimatePackage, type PackageItem } from './lib/shipping'
 
 /*
  * Simuliert einen laufenden Marktplatz mit Demo-Daten:
@@ -63,7 +64,6 @@ const CITIES: Record<string, [string, string][]> = {
   BE: [['1000', 'Bruxelles']],
 }
 const COUNTRY_WEIGHTS = [['DE', 60], ['AT', 10], ['NL', 8], ['FR', 7], ['IT', 6], ['ES', 4], ['BE', 5]] as const
-const EU = ['DE', 'AT', 'NL', 'FR', 'IT', 'ES', 'BE', 'LU', 'PL', 'DK', 'CZ', 'PT', 'IE', 'SE', 'FI']
 
 type Condition = (typeof schema.cardCondition.enumValues)[number]
 type Language = (typeof schema.cardLanguage.enumValues)[number]
@@ -232,19 +232,13 @@ const simulate = async () => {
     createdAt: daysAgo(int(CFG.days, 300)).toISOString(),
   })))
 
-  // Versandarten: Brief, Einschreiben, Paket (Ausland etwas teurer)
-  const methods = sellers.flatMap((s) => {
-    const abroad = EU.filter(c => c !== s.country)
-    const base = [
-      { name: 'Standardbrief', provider: 'deutsche_post' as const, priceCents: 110, maxOrderValueCents: 2500, tracked: false },
-      { name: 'Einschreiben', provider: 'deutsche_post' as const, priceCents: 295, maxOrderValueCents: 25000, tracked: true },
-      { name: 'DHL Paket', provider: 'dhl' as const, priceCents: 549, maxOrderValueCents: null, tracked: true, providerProduct: 'V01PAK' },
-    ]
-    return base.flatMap(m => [
-      { ...m, id: uuid(), sellerId: s.id, destinationCountries: [s.country] },
-      { ...m, id: uuid(), sellerId: s.id, name: `${m.name} (EU)`, priceCents: Math.round(m.priceCents * 1.9), destinationCountries: abroad },
-    ])
-  })
+  // Versandarten: dieselben Vorgaben wie für neue Verkäufer im Shop (Briefformate nach Gewicht/Dicke, Einschreiben, Paket)
+  const methods = sellers.flatMap(s => defaultShippingOptions(s.country).map(m => ({
+    ...m,
+    id: uuid(),
+    sellerId: s.id,
+    provider: m.format === 'parcel' ? 'dhl' as const : 'deutsche_post' as const,
+  })))
   await db.insert(schema.shippingMethods).values(methods)
 
   // Angebote
@@ -321,22 +315,22 @@ const simulate = async () => {
 
       const shipmentId = uuid()
       let items = 0
+      const packageItems: PackageItem[] = []
       for (const l of chosen) {
         const qty = Math.min(stock.get(l.id)!, weighted([[1, 80], [2, 15], [4, 5]] as const))
         stock.set(l.id, stock.get(l.id)! - qty)
         items += qty * l.priceCents
+        packageItems.push({ kind: 'single', quantity: qty, unitPriceCents: l.priceCents })
         itemRows.push({
           id: uuid(), shipmentId, listingId: l.id, productId: l.productId, condition: l.condition, language: l.language!,
           finish: l.finish!, isFirstEdition: l.isFirstEdition ?? false, quantity: qty, unitPriceCents: l.priceCents,
         })
       }
 
-      // Günstigste passende Versandart
-      const seller = sellers.find(s => s.id === sellerId)!
-      const options = (methodsBySeller.get(sellerId) ?? [])
-        .filter(m => m.destinationCountries.includes(buyerAddress.country) && (m.maxOrderValueCents === null || items <= m.maxOrderValueCents))
-        .sort((a, b) => a.priceCents - b.priceCents)
-      const method = options[0] ?? methodsBySeller.get(sellerId)!.at(-1)!
+      // Günstigste Versandart, die zu Gewicht, Dicke (inkl. Schutz und Puffer), Wert und Land passt
+      const sellerMethods = methodsBySeller.get(sellerId) ?? []
+      const method = chooseShipping(sellerMethods, estimatePackage(packageItems), buyerAddress.country)
+        ?? sellerMethods.find(m => m.format === 'parcel' && m.destinationCountries.includes(buyerAddress.country))!
 
       // Status nach Alter der Bestellung
       const roll = rand()
@@ -402,7 +396,6 @@ const simulate = async () => {
           { id: uuid(), conversationId, senderId: sellerId, body: pick(['Klar, mache ich gerne!', 'Ist unterwegs, Nummer steht in der Bestellung.', 'Gerne, legen Sie sie einfach in den Warenkorb.']), createdAt: addHours(t0, 3).toISOString() },
         )
       }
-      void seller
     }
 
     if (!orderShipments.length) continue

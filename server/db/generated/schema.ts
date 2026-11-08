@@ -17,6 +17,7 @@ export const reviewDirection = pgEnum("review_direction", ['buyer_to_seller', 's
 export const sealedType = pgEnum("sealed_type", ['booster', 'booster_display', 'collector_booster', 'bundle', 'elite_trainer_box', 'starter_deck', 'structure_deck', 'commander_deck', 'tin', 'collection_box', 'other'])
 export const sellerType = pgEnum("seller_type", ['private', 'commercial'])
 export const shipmentStatus = pgEnum("shipment_status", ['awaiting_payment', 'paid', 'shipped', 'delivered', 'completed', 'cancelled', 'disputed'])
+export const shippingFormat = pgEnum("shipping_format", ['standard', 'compact', 'large', 'maxi', 'parcel'])
 export const shippingProvider = pgEnum("shipping_provider", ['dhl', 'deutsche_post', 'other'])
 export const siteLocale = pgEnum("site_locale", ['de', 'en'])
 export const userRole = pgEnum("user_role", ['user', 'admin'])
@@ -562,26 +563,6 @@ export const shipmentItems = pgTable("shipment_items", {
 		}),
 ]);
 
-export const shippingMethods = pgTable("shipping_methods", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	sellerId: text("seller_id").notNull(),
-	provider: shippingProvider().notNull(),
-	name: text().notNull(),
-	providerProduct: text("provider_product"),
-	destinationCountries: char("destination_countries", { length: 2 }).array().notNull(),
-	priceCents: integer("price_cents").notNull(),
-	maxOrderValueCents: integer("max_order_value_cents"),
-	maxItems: integer("max_items"),
-	tracked: boolean().default(false).notNull(),
-	active: boolean().default(true).notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.sellerId],
-			foreignColumns: [sellerProfiles.userId],
-			name: "shipping_methods_seller_id_seller_profiles_user_id_fk"
-		}).onDelete("cascade"),
-]);
-
 export const wishlists = pgTable("wishlists", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	userId: text("user_id").notNull(),
@@ -637,6 +618,29 @@ export const importRuns = pgTable("import_runs", {
 	finishedAt: timestamp("finished_at", { withTimezone: true, mode: 'string' }),
 }, (table) => [
 	index("import_runs_game_started_idx").using("btree", table.game.asc().nullsLast().op("timestamptz_ops"), table.startedAt.asc().nullsLast().op("timestamptz_ops")),
+]);
+
+export const shippingMethods = pgTable("shipping_methods", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	sellerId: text("seller_id").notNull(),
+	provider: shippingProvider().notNull(),
+	name: text().notNull(),
+	providerProduct: text("provider_product"),
+	destinationCountries: char("destination_countries", { length: 2 }).array().notNull(),
+	priceCents: integer("price_cents").notNull(),
+	maxOrderValueCents: integer("max_order_value_cents"),
+	maxItems: integer("max_items"),
+	tracked: boolean().default(false).notNull(),
+	active: boolean().default(true).notNull(),
+	format: shippingFormat().default('standard').notNull(),
+	maxWeightG: integer("max_weight_g").default(20).notNull(),
+	maxThicknessMm: integer("max_thickness_mm").default(5).notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.sellerId],
+			foreignColumns: [sellerProfiles.userId],
+			name: "shipping_methods_seller_id_seller_profiles_user_id_fk"
+		}).onDelete("cascade"),
 ]);
 
 export const postCardRefs = pgTable("post_card_refs", {

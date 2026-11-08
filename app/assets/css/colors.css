@@ -37,6 +37,8 @@
   --color-bg: var(--palette-ink-50);
   --color-surface: #ffffff;
   --color-surface-muted: var(--palette-ink-100);
+  /* Abdunkelung hinter Dialogen */
+  --color-overlay: rgb(13 12 10 / 0.55);
   --color-line: var(--palette-ink-200);
   --color-line-strong: var(--palette-ink-300);
 

@@ -20,7 +20,7 @@ const body = z.object({
 /** Legt einen Beitrag an oder aktualisiert ihn, inklusive Übersetzungen und Kartenverweisen. */
 export default defineEventHandler(async (event) => {
   const admin = event.context.admin as AdminUser
-  const input = body.parse(await readBody(event))
+  const input = await readValidatedBody(event, body.parse)
   const db = useDb()
 
   const [game] = input.game ? await db.select().from(schema.games).where(eq(schema.games.code, input.game)) : []
