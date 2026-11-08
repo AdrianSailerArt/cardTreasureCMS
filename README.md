@@ -65,6 +65,13 @@ bun run dev                   # http://localhost:3100
 Simulations-Optionen: `--sellers=25 --buyers=60 --products=1500 --orders=400 --days=90 --seed=42`.
 Demo-Nutzer haben `is_demo = true` und E-Mails unter `@demo.cardtreasure.test`.
 
+## Kartenbilder ersetzen
+
+Unter **Kartenbilder** einen Druck suchen (Name de/en oder Set-Kürzel), eigenes Bild hochladen und einen Grund angeben,
+z.B. falsche Sprache oder falscher Druck. Der Shop zeigt den Ersatz sofort, in Browsern mit altem Cache spätestens nach einer Stunde.
+„Original wiederherstellen“ entfernt den Ersatz. Die Bilder liegen im Objektspeicher des Shops (SeaweedFS aus dessen
+`docker compose`, localhost:8333). `server/lib/media.ts` und `images.ts` sind Kopien aus dem Shop.
+
 ## Nächtlicher Import
 
 [.github/workflows/import.yml](.github/workflows/import.yml) startet jede Nacht um 3 Uhr (UTC) den Import.

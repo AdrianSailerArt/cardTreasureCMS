@@ -8,6 +8,7 @@ const nav = [
   { to: '/', label: 'Auswertungen' },
   { to: '/imports', label: 'Imports' },
   { to: '/blog', label: 'Blog' },
+  { to: '/kartenbilder', label: 'Kartenbilder' },
 ]
 const isActive = (to: string) => (to === '/' ? route.path === '/' : route.path.startsWith(to))
 

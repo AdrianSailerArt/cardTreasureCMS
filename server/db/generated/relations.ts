@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, reviews, ledgerEntries, notifications, postCardRefs, conversationParticipants, userBadges, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
+import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, reviews, ledgerEntries, notifications, media, printingImageOverrides, postCardRefs, conversationParticipants, userBadges, listingPhotos, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
 
 export const shipmentsRelations = relations(shipments, ({one, many}) => ({
 	order: one(orders, {
@@ -59,6 +59,8 @@ export const userRelations = relations(user, ({many}) => ({
 	}),
 	ledgerEntries: many(ledgerEntries),
 	notifications: many(notifications),
+	media: many(media),
+	printingImageOverrides: many(printingImageOverrides),
 	conversationParticipants: many(conversationParticipants),
 	userBadges: many(userBadges),
 	cartItems: many(cartItems),
@@ -110,6 +112,7 @@ export const listingsRelations = relations(listings, ({one, many}) => ({
 		references: [products.id]
 	}),
 	shipmentItems: many(shipmentItems),
+	listingPhotos: many(listingPhotos),
 	cartItems: many(cartItems),
 }));
 
@@ -164,6 +167,7 @@ export const printingsRelations = relations(printings, ({one, many}) => ({
 		fields: [printings.setId],
 		references: [sets.id]
 	}),
+	printingImageOverrides: many(printingImageOverrides),
 }));
 
 export const sealedProductsRelations = relations(sealedProducts, ({one, many}) => ({
@@ -313,6 +317,30 @@ export const notificationsRelations = relations(notifications, ({one}) => ({
 	}),
 }));
 
+export const mediaRelations = relations(media, ({one, many}) => ({
+	user: one(user, {
+		fields: [media.ownerId],
+		references: [user.id]
+	}),
+	printingImageOverrides: many(printingImageOverrides),
+	listingPhotos: many(listingPhotos),
+}));
+
+export const printingImageOverridesRelations = relations(printingImageOverrides, ({one}) => ({
+	printing: one(printings, {
+		fields: [printingImageOverrides.printingId],
+		references: [printings.id]
+	}),
+	media: one(media, {
+		fields: [printingImageOverrides.mediaId],
+		references: [media.id]
+	}),
+	user: one(user, {
+		fields: [printingImageOverrides.replacedBy],
+		references: [user.id]
+	}),
+}));
+
 export const postCardRefsRelations = relations(postCardRefs, ({one}) => ({
 	post: one(posts, {
 		fields: [postCardRefs.postId],
@@ -339,6 +367,17 @@ export const userBadgesRelations = relations(userBadges, ({one}) => ({
 	user: one(user, {
 		fields: [userBadges.userId],
 		references: [user.id]
+	}),
+}));
+
+export const listingPhotosRelations = relations(listingPhotos, ({one}) => ({
+	listing: one(listings, {
+		fields: [listingPhotos.listingId],
+		references: [listings.id]
+	}),
+	media: one(media, {
+		fields: [listingPhotos.mediaId],
+		references: [media.id]
 	}),
 }));
 

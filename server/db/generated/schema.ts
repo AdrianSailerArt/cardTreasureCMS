@@ -683,6 +683,47 @@ export const notifications = pgTable("notifications", {
 		}).onDelete("cascade"),
 ]);
 
+export const media = pgTable("media", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	ownerId: text("owner_id"),
+	purpose: text().notNull(),
+	width: integer().notNull(),
+	height: integer().notNull(),
+	bytes: integer().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("media_owner_idx").using("btree", table.ownerId.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.ownerId],
+			foreignColumns: [user.id],
+			name: "media_owner_id_user_id_fk"
+		}).onDelete("set null"),
+]);
+
+export const printingImageOverrides = pgTable("printing_image_overrides", {
+	printingId: uuid("printing_id").primaryKey().notNull(),
+	mediaId: uuid("media_id").notNull(),
+	reason: text(),
+	replacedBy: text("replaced_by"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.printingId],
+			foreignColumns: [printings.id],
+			name: "printing_image_overrides_printing_id_printings_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.mediaId],
+			foreignColumns: [media.id],
+			name: "printing_image_overrides_media_id_media_id_fk"
+		}),
+	foreignKey({
+			columns: [table.replacedBy],
+			foreignColumns: [user.id],
+			name: "printing_image_overrides_replaced_by_user_id_fk"
+		}).onDelete("set null"),
+]);
+
 export const postCardRefs = pgTable("post_card_refs", {
 	postId: uuid("post_id").notNull(),
 	cardId: uuid("card_id").notNull(),
@@ -731,6 +772,25 @@ export const userBadges = pgTable("user_badges", {
 			name: "user_badges_user_id_user_id_fk"
 		}).onDelete("cascade"),
 	primaryKey({ columns: [table.userId, table.code], name: "user_badges_user_id_code_pk"}),
+]);
+
+export const listingPhotos = pgTable("listing_photos", {
+	listingId: uuid("listing_id").notNull(),
+	mediaId: uuid("media_id").notNull(),
+	position: smallint().default(0).notNull(),
+}, (table) => [
+	index("listing_photos_listing_idx").using("btree", table.listingId.asc().nullsLast().op("int2_ops"), table.position.asc().nullsLast().op("int2_ops")),
+	foreignKey({
+			columns: [table.listingId],
+			foreignColumns: [listings.id],
+			name: "listing_photos_listing_id_listings_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.mediaId],
+			foreignColumns: [media.id],
+			name: "listing_photos_media_id_media_id_fk"
+		}).onDelete("cascade"),
+	primaryKey({ columns: [table.listingId, table.mediaId], name: "listing_photos_listing_id_media_id_pk"}),
 ]);
 
 export const cardTranslations = pgTable("card_translations", {
