@@ -1,4 +1,4 @@
-# CardTreasure Admin
+# CardTreasure CMS
 
 Internes Werkzeug für das CardTreasure-Team. Nur für Admins, nicht öffentlich.
 
@@ -11,7 +11,7 @@ Internes Werkzeug für das CardTreasure-Team. Nur für Admins, nicht öffentlich
 
 ```
                  ┌──────────────────────┐        ┌──────────────────────────┐
- Kunden  ──────► │ cardTreasure (Shop)  │        │ cardTreasure-admin       │ ◄── Team
+ Kunden  ──────► │ cardTreasure (Shop)  │        │ cardTreasureCMS          │ ◄── Team
                  │ Katalog, Käufer,     │        │ Auswertungen, Imports,   │
                  │ Verkäufer, Checkout  │        │ Blog, Simulation         │
                  └──────────┬───────────┘        └────────────┬─────────────┘

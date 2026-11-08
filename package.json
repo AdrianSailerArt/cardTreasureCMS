@@ -1,5 +1,5 @@
 {
-  "name": "cardtreasure-admin",
+  "name": "cardtreasure-cms",
   "type": "module",
   "private": true,
   "scripts": {
