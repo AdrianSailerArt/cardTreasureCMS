@@ -40,20 +40,13 @@ export const sellerProfilesRelations = relations(sellerProfiles, ({one, many}) =
 	sellerShippingAccounts: many(sellerShippingAccounts),
 }));
 
-export const accountRelations = relations(account, ({one}) => ({
-	user: one(user, {
-		fields: [account.userId],
-		references: [user.id]
-	}),
-}));
-
 export const userRelations = relations(user, ({many}) => ({
+	orders: many(orders),
 	accounts: many(account),
 	addresses: many(addresses),
 	decks: many(decks),
 	sellerProfiles: many(sellerProfiles),
 	messages: many(messages),
-	orders: many(orders),
 	posts: many(posts),
 	sealedProducts: many(sealedProducts),
 	reviews_authorId: many(reviews, {
@@ -67,6 +60,13 @@ export const userRelations = relations(user, ({many}) => ({
 	ledgerEntries: many(ledgerEntries),
 	conversationParticipants: many(conversationParticipants),
 	cartItems: many(cartItems),
+}));
+
+export const accountRelations = relations(account, ({one}) => ({
+	user: one(user, {
+		fields: [account.userId],
+		references: [user.id]
+	}),
 }));
 
 export const addressesRelations = relations(addresses, ({one, many}) => ({

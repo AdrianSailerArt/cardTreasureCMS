@@ -241,6 +241,10 @@ const buildLedger = (orders: OrderRow[], shipments: ShipmentRow[], payments: Pay
     })
   }
 
+  // Demo-Käuferin: Startguthaben zum Ausprobieren der Zahlung mit Guthaben (zuletzt gebucht, damit es erhalten bleibt)
+  const startAt = new Date(now.getTime() - 3_600_000)
+  events.push({ at: startAt, run: () => book(DEMO_ACCOUNTS.buyer.id, 'adjustment', 5000, startAt, { note: 'Startguthaben (Demo)' }) })
+
   events.sort((a, b) => a.at.getTime() - b.at.getTime()).forEach(e => e.run())
   return rows
 }

@@ -1,4 +1,4 @@
-import { pgTable, unique, text, boolean, timestamp, index, foreignKey, uuid, integer, char, uniqueIndex, jsonb, serial, check, date, smallint, primaryKey, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, unique, text, boolean, timestamp, index, foreignKey, uuid, integer, uniqueIndex, jsonb, char, serial, check, date, smallint, primaryKey, pgSequence, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const cardCondition = pgEnum("card_condition", ['mint', 'near_mint', 'excellent', 'good', 'light_played', 'played', 'poor'])
@@ -23,6 +23,7 @@ export const shippingProvider = pgEnum("shipping_provider", ['dhl', 'deutsche_po
 export const siteLocale = pgEnum("site_locale", ['de', 'en'])
 export const userRole = pgEnum("user_role", ['user', 'admin'])
 
+export const orderNumberSeq = pgSequence("order_number_seq", {  startWith: "100000", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
 
 export const user = pgTable("user", {
 	id: text().primaryKey().notNull(),
@@ -85,6 +86,30 @@ export const verification = pgTable("verification", {
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	index("verification_identifier_idx").using("btree", table.identifier.asc().nullsLast().op("text_ops")),
+]);
+
+export const orders = pgTable("orders", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	number: text().notNull(),
+	buyerId: text("buyer_id").notNull(),
+	status: orderStatus().default('pending_payment').notNull(),
+	shippingAddress: jsonb("shipping_address").notNull(),
+	itemsCents: integer("items_cents").notNull(),
+	shippingCents: integer("shipping_cents").notNull(),
+	totalCents: integer("total_cents").notNull(),
+	currency: char({ length: 3 }).default('EUR').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	paidAt: timestamp("paid_at", { withTimezone: true, mode: 'string' }),
+	idempotencyKey: text("idempotency_key"),
+}, (table) => [
+	uniqueIndex("orders_buyer_idempotency_uq").using("btree", table.buyerId.asc().nullsLast().op("text_ops"), table.idempotencyKey.asc().nullsLast().op("text_ops")),
+	index("orders_buyer_idx").using("btree", table.buyerId.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.buyerId],
+			foreignColumns: [user.id],
+			name: "orders_buyer_id_user_id_fk"
+		}),
+	unique("orders_number_unique").on(table.number),
 ]);
 
 export const account = pgTable("account", {
@@ -307,28 +332,6 @@ export const messages = pgTable("messages", {
 			foreignColumns: [user.id],
 			name: "messages_sender_id_user_id_fk"
 		}),
-]);
-
-export const orders = pgTable("orders", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	number: text().notNull(),
-	buyerId: text("buyer_id").notNull(),
-	status: orderStatus().default('pending_payment').notNull(),
-	shippingAddress: jsonb("shipping_address").notNull(),
-	itemsCents: integer("items_cents").notNull(),
-	shippingCents: integer("shipping_cents").notNull(),
-	totalCents: integer("total_cents").notNull(),
-	currency: char({ length: 3 }).default('EUR').notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	paidAt: timestamp("paid_at", { withTimezone: true, mode: 'string' }),
-}, (table) => [
-	index("orders_buyer_idx").using("btree", table.buyerId.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("text_ops")),
-	foreignKey({
-			columns: [table.buyerId],
-			foreignColumns: [user.id],
-			name: "orders_buyer_id_user_id_fk"
-		}),
-	unique("orders_number_unique").on(table.number),
 ]);
 
 export const payments = pgTable("payments", {
