@@ -24,6 +24,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     databaseUrl: '',
     betterAuthSecret: '',
+    /** SMTP für Anmeldelinks, lokal Mailpit (smtp://localhost:1025). Leer: nur Konsole. */
+    smtpUrl: '',
+    mailFrom: 'CardTreasure CMS <cms@cardtreasure.local>',
     public: {
       siteUrl: 'http://localhost:3100',
       /** Öffentlicher Shop, für Links und Kartenbilder */

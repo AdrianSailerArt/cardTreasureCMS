@@ -38,11 +38,14 @@ const createAuth = () => {
       magicLink({
         // Im Admin-Tool kann sich niemand neu registrieren. Admins werden per `bun run make-admin` ernannt.
         disableSignUp: true,
-        async sendMagicLink({ email, url }) {
+        sendMagicLink: async ({ email, url }) => {
           // Nur an echte Admins verschicken; alle anderen bekommen dieselbe Antwort, aber keine Mail
           const [user] = await useDb().select({ role: schema.user.role }).from(schema.user).where(eq(schema.user.email, email))
           if (user?.role !== 'admin') return
-          console.info(`[auth] Admin-Magic-Link für ${email}: ${url}`)
+          if (import.meta.dev) console.info(`[auth] Admin-Magic-Link für ${email}: ${url}`)
+          await sendMail(email, 'CardTreasure CMS: Anmeldelink',
+            `Anmelden im CMS (5 Minuten gültig):\n${url}`,
+            `<p style="font-family:Helvetica,Arial,sans-serif">Anmelden im CMS (5 Minuten gültig):</p><p><a href="${url}">Jetzt anmelden</a></p>`)
         },
       }),
     ],

@@ -48,7 +48,7 @@ bun run dev                   # http://localhost:3100
 
 - Entstehen bei `bun run simulate` (Definition: `DEMO_ACCOUNTS` in [scripts/simulate.ts](scripts/simulate.ts)).
 - Passwort-Login nur für diese Konten und nur mit `NUXT_PUBLIC_DEMO_LOGIN=true`; im Echtbetrieb gibt es nur den Magic-Link.
-- Echte Admins: `bun run make-admin du@firma.de "Dein Name"`, dann Anmeldung per Magic-Link (lokal in der Server-Konsole).
+- Echte Admins: `bun run make-admin du@firma.de "Dein Name"`, dann Anmeldung per Magic-Link. Die Mail landet lokal in Mailpit (http://localhost:8025, läuft im docker compose des Shops; `NUXT_SMTP_URL=smtp://localhost:1025` in der `.env`).
 
 ## Befehle
 
