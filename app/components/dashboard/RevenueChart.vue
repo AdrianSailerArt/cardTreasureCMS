@@ -10,32 +10,16 @@ const shortDate = (iso: string) => new Date(iso).toLocaleDateString('de-DE', { d
 const option = computed<EChartsOption>(() => {
   const c = theme.value
   if (!c) return {}
-  const axisLabel = { color: c.subtle, fontSize: 11 }
+  const base = chartBase(c, v => euro(v, 0))
   return {
-    textStyle: { fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' },
-    grid: { left: 4, right: 4, top: 28, bottom: 4, containLabel: true },
-    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 10, textStyle: { color: c.muted } },
-    tooltip: {
-      trigger: 'axis',
-      backgroundColor: c.surface,
-      borderColor: c.line,
-      textStyle: { color: c.fg },
-      axisPointer: { type: 'shadow', shadowStyle: { color: c.line, opacity: 0.4 } },
-    },
-    xAxis: {
-      type: 'category',
-      data: props.daily.map(d => shortDate(d.day)),
-      axisLine: { lineStyle: { color: c.line } },
-      axisTick: { show: false },
-      axisLabel,
-    },
+    textStyle: base.textStyle,
+    grid: base.grid,
+    legend: base.legend,
+    tooltip: { ...base.tooltip, valueFormatter: undefined, axisPointer: { type: 'shadow', shadowStyle: { color: c.line, opacity: 0.4 } } },
+    xAxis: { ...base.categoryAxis, data: props.daily.map(d => shortDate(d.day)) },
     yAxis: [
-      {
-        type: 'value',
-        splitLine: { lineStyle: { color: c.line } },
-        axisLabel: { ...axisLabel, formatter: (v: number) => euro(v, 0) },
-      },
-      { type: 'value', splitLine: { show: false }, axisLabel, minInterval: 1 },
+      base.valueAxis,
+      { type: 'value', splitLine: { show: false }, axisLabel: base.axisLabel, minInterval: 1 },
     ],
     series: [
       {

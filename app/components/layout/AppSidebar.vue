@@ -6,6 +6,9 @@ const shopUrl = useRuntimeConfig().public.shopUrl
 
 const nav = [
   { to: '/', label: 'Auswertungen' },
+  { to: '/finanzen', label: 'Finanzen' },
+  { to: '/vertrauen', label: 'Vertrauen' },
+  { to: '/nutzer', label: 'Nutzer' },
   { to: '/imports', label: 'Imports' },
   { to: '/blog', label: 'Blog' },
   { to: '/sealed', label: 'Sealed' },

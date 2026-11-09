@@ -38,3 +38,27 @@ export const useChartTheme = () => {
   }
   return theme
 }
+
+/* chartBase: KOPIE aus dem Shop (cardtresure/app/composables/useChartTheme.ts) */
+/**
+ * Gemeinsame Grundeinstellungen aller Diagramme (Schrift, Raster, Legende, Tooltip, Achsen) in den Farben des Color-Sets.
+ * Diagramme ergänzen nur noch Daten und Serien.
+ */
+export const chartBase = (c: ChartTheme, formatValue: (v: number) => string) => {
+  const axisLabel = { color: c.subtle, fontSize: 11 }
+  return {
+    textStyle: { fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' },
+    grid: { left: 4, right: 4, top: 28, bottom: 4, containLabel: true },
+    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 10, textStyle: { color: c.muted } },
+    tooltip: {
+      trigger: 'axis' as const,
+      backgroundColor: c.surface,
+      borderColor: c.line,
+      textStyle: { color: c.fg },
+      valueFormatter: (v: unknown) => (v === null || v === undefined || v === '-' ? '–' : formatValue(Number(v))),
+    },
+    categoryAxis: { type: 'category' as const, axisLine: { lineStyle: { color: c.line } }, axisTick: { show: false }, axisLabel },
+    valueAxis: { type: 'value' as const, splitLine: { lineStyle: { color: c.line } }, axisLabel: { ...axisLabel, formatter: (v: number) => formatValue(v) } },
+    axisLabel,
+  }
+}

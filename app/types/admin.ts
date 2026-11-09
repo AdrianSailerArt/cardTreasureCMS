@@ -34,3 +34,21 @@ export interface PostRow {
 }
 
 export interface CardSearchHit { ref: string, name: string, nameDe: string | null, game: string, setName: string | null }
+
+/** Antwort der internen Shop-API /api/internal/risks (Vertrag, Logik im Shop: server/lib/moderation.ts). */
+export interface SellerRisk {
+  sellerId: string
+  name: string
+  country: string
+  blocked: boolean
+  level: string
+  score: number
+  ratedSales: number
+  avgOverall: number | null
+  completeRate: number | null
+  overdue: number
+  sellerCancels: number
+  badReviews30: number
+  activeListings: number
+  flags: ('warning_level' | 'overdue' | 'cancels' | 'bad_reviews')[]
+}

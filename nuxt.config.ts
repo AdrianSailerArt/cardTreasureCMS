@@ -30,6 +30,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     databaseUrl: '',
     betterAuthSecret: '',
+    /** Interne API des Shops (Moderation, Risiko); Adresse vom CMS-Server aus, Geheimnis wie im Shop */
+    internalSecret: '',
+    shopInternalUrl: 'http://localhost:3000',
     /** SMTP für Anmeldelinks, lokal Mailpit (smtp://localhost:1025). Leer: nur Konsole. */
     smtpUrl: '',
     mailFrom: 'CardTreasure CMS <cms@cardtreasure.local>',

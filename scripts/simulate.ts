@@ -433,6 +433,7 @@ const simulate = async () => {
         deliveredAt: deliveredAt?.toISOString(),
         completedAt: completedAt?.toISOString(),
         cancelledAt: status === 'cancelled' ? addHours(createdAt, int(24, 120)).toISOString() : null,
+        cancelledBy: status === 'cancelled' ? (rand() < 0.5 ? 'seller' : 'buyer') : null,
       })
       orderShipments.push(shipmentId)
       orderItems += items

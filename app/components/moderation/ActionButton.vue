@@ -1,0 +1,59 @@
+<script setup lang="ts">
+/**
+ * Moderations-Knopf mit Bestätigung: Klick öffnet ein Feld für den Grund (Pflicht oder optional), erst „Bestätigen“ führt aus.
+ * Ruft /api/moderation/<action> mit `payload` + reason auf; der Shop protokolliert und benachrichtigt.
+ */
+const props = withDefaults(defineProps<{
+  label: string
+  action: 'block' | 'unblock' | 'remove-listing' | 'hide-review' | 'show-review'
+  payload: Record<string, string>
+  requireReason?: boolean
+  tone?: 'danger' | 'neutral'
+  placeholder?: string
+}>(), { requireReason: true, tone: 'danger', placeholder: 'Grund (geht per Mail an die Person)' })
+const emit = defineEmits<{ done: [] }>()
+
+const open = ref(false)
+const reason = ref('')
+const busy = ref(false)
+const error = ref<string | null>(null)
+
+const run = async () => {
+  busy.value = true
+  error.value = null
+  try {
+    await $fetch(`/api/moderation/${props.action}`, { method: 'POST', body: { ...props.payload, reason: reason.value.trim() || null } })
+    open.value = false
+    reason.value = ''
+    emit('done')
+  }
+  catch (e) {
+    error.value = (e as { data?: { statusMessage?: string } }).data?.statusMessage ?? 'Fehlgeschlagen'
+  }
+  finally {
+    busy.value = false
+  }
+}
+</script>
+
+<template>
+  <span class="inline-flex flex-col gap-2">
+    <button
+      v-if="!open"
+      type="button"
+      class="whitespace-nowrap rounded-full border px-3 py-1 text-xs transition"
+      :class="tone === 'danger' ? 'border-danger/40 text-danger hover:bg-danger-soft' : 'border-line-strong text-fg-muted hover:border-accent hover:text-accent'"
+      @click="open = true"
+    >
+      {{ label }}
+    </button>
+    <span v-else class="flex min-w-64 flex-col gap-2 rounded-lg border border-line bg-surface-muted p-2">
+      <UiInput v-model="reason" :placeholder="requireReason ? placeholder : `${placeholder} (optional)`" />
+      <span class="flex gap-2">
+        <UiButton :disabled="busy || (requireReason && reason.trim().length < 3)" @click="run">{{ label }} bestätigen</UiButton>
+        <UiButton variant="ghost" @click="open = false">Abbrechen</UiButton>
+      </span>
+      <UiNotice v-if="error" tone="danger">{{ error }}</UiNotice>
+    </span>
+  </span>
+</template>

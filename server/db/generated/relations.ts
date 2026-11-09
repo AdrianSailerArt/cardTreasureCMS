@@ -1,43 +1,14 @@
 import { relations } from "drizzle-orm/relations";
-import { orders, shipments, sellerProfiles, user, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, reviews, ledgerEntries, notifications, media, printingImageOverrides, postCardRefs, conversationParticipants, userBadges, listingPhotos, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
-
-export const shipmentsRelations = relations(shipments, ({one, many}) => ({
-	order: one(orders, {
-		fields: [shipments.orderId],
-		references: [orders.id]
-	}),
-	sellerProfile: one(sellerProfiles, {
-		fields: [shipments.sellerId],
-		references: [sellerProfiles.userId]
-	}),
-	conversations: many(conversations),
-	shipmentItems: many(shipmentItems),
-	reviews: many(reviews),
-	ledgerEntries: many(ledgerEntries),
-}));
+import { user, orders, shipments, sellerProfiles, account, addresses, games, cards, listings, products, conversations, decks, printings, sealedProducts, messages, payments, posts, sets, sellerShippingAccounts, session, shipmentItems, wishlists, wishlistItems, reviews, ledgerEntries, notifications, media, printingImageOverrides, moderationLog, postCardRefs, conversationParticipants, userBadges, listingPhotos, cardTranslations, cartItems, deckCards, postTranslations, priceHistory, referencePrices } from "./schema";
 
 export const ordersRelations = relations(orders, ({one, many}) => ({
-	shipments: many(shipments),
 	user: one(user, {
 		fields: [orders.buyerId],
 		references: [user.id]
 	}),
+	shipments: many(shipments),
 	payments: many(payments),
 	ledgerEntries: many(ledgerEntries),
-}));
-
-export const sellerProfilesRelations = relations(sellerProfiles, ({one, many}) => ({
-	shipments: many(shipments),
-	listings: many(listings),
-	user: one(user, {
-		fields: [sellerProfiles.userId],
-		references: [user.id]
-	}),
-	address: one(addresses, {
-		fields: [sellerProfiles.shipFromAddressId],
-		references: [addresses.id]
-	}),
-	sellerShippingAccounts: many(sellerShippingAccounts),
 }));
 
 export const userRelations = relations(user, ({many}) => ({
@@ -61,9 +32,39 @@ export const userRelations = relations(user, ({many}) => ({
 	notifications: many(notifications),
 	media: many(media),
 	printingImageOverrides: many(printingImageOverrides),
+	moderationLogs: many(moderationLog),
 	conversationParticipants: many(conversationParticipants),
 	userBadges: many(userBadges),
 	cartItems: many(cartItems),
+}));
+
+export const shipmentsRelations = relations(shipments, ({one, many}) => ({
+	order: one(orders, {
+		fields: [shipments.orderId],
+		references: [orders.id]
+	}),
+	sellerProfile: one(sellerProfiles, {
+		fields: [shipments.sellerId],
+		references: [sellerProfiles.userId]
+	}),
+	conversations: many(conversations),
+	shipmentItems: many(shipmentItems),
+	reviews: many(reviews),
+	ledgerEntries: many(ledgerEntries),
+}));
+
+export const sellerProfilesRelations = relations(sellerProfiles, ({one, many}) => ({
+	shipments: many(shipments),
+	listings: many(listings),
+	user: one(user, {
+		fields: [sellerProfiles.userId],
+		references: [user.id]
+	}),
+	address: one(addresses, {
+		fields: [sellerProfiles.shipFromAddressId],
+		references: [addresses.id]
+	}),
+	sellerShippingAccounts: many(sellerShippingAccounts),
 }));
 
 export const accountRelations = relations(account, ({one}) => ({
@@ -337,6 +338,13 @@ export const printingImageOverridesRelations = relations(printingImageOverrides,
 	}),
 	user: one(user, {
 		fields: [printingImageOverrides.replacedBy],
+		references: [user.id]
+	}),
+}));
+
+export const moderationLogRelations = relations(moderationLog, ({one}) => ({
+	user: one(user, {
+		fields: [moderationLog.adminId],
 		references: [user.id]
 	}),
 }));

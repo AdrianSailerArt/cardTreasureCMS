@@ -76,6 +76,14 @@ Wie im Shop: `components/atoms/` (Präfix `Ui`: Button, Input, Select, Field, Ta
 Simulations-Optionen: `--sellers=25 --buyers=60 --products=1500 --orders=400 --days=90 --seed=42`.
 Demo-Nutzer haben `is_demo = true` und E-Mails unter `@demo.cardtreasure.test`.
 
+## Finanzen, Vertrauen, Nutzer
+
+- **Finanzen:** Guthaben der Nutzer, Treuhand (bezahlte, offene Sendungen), Provision, Auszahlungen, Erstattungen, Monatsverlauf, höchste Guthaben.
+- **Vertrauen:** auffällige Verkäufer (Regeln und Berechnung aus dem Shop über die interne API) und schlechte Bewertungen mit „Text ausblenden“.
+- **Nutzer:** Suche, Detail mit Angeboten (entfernen), Bewertungen, Moderations-Protokoll, Sperren/Entsperren mit Grund.
+- Moderation läuft über die interne Shop-API (`server/utils/shop.ts`, `NUXT_INTERNAL_SECRET` und `NUXT_SHOP_INTERNAL_URL` in der `.env`).
+  Der Shop prüft, protokolliert und benachrichtigt; das CMS zeigt nur an und reicht weiter.
+
 ## Kartenbilder ersetzen
 
 Unter **Kartenbilder** einen Druck suchen (Name de/en oder Set-Kürzel), eigenes Bild hochladen und einen Grund angeben,

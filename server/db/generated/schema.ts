@@ -1,4 +1,4 @@
-import { pgTable, unique, text, boolean, timestamp, index, foreignKey, uuid, integer, uniqueIndex, jsonb, char, serial, check, date, smallint, primaryKey, pgSequence, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, index, text, timestamp, uniqueIndex, foreignKey, unique, uuid, jsonb, integer, char, boolean, serial, check, date, smallint, primaryKey, pgSequence, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const cardCondition = pgEnum("card_condition", ['mint', 'near_mint', 'excellent', 'good', 'light_played', 'played', 'poor'])
@@ -24,58 +24,6 @@ export const siteLocale = pgEnum("site_locale", ['de', 'en'])
 export const userRole = pgEnum("user_role", ['user', 'admin'])
 
 export const orderNumberSeq = pgSequence("order_number_seq", {  startWith: "100000", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
-
-export const user = pgTable("user", {
-	id: text().primaryKey().notNull(),
-	name: text().notNull(),
-	email: text().notNull(),
-	emailVerified: boolean("email_verified").default(false).notNull(),
-	image: text(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	username: text(),
-	role: userRole().default('user').notNull(),
-	locale: siteLocale().default('de').notNull(),
-	bannedAt: timestamp("banned_at", { withTimezone: true, mode: 'string' }),
-	isDemo: boolean("is_demo").default(false).notNull(),
-}, (table) => [
-	unique("user_email_unique").on(table.email),
-	unique("user_username_unique").on(table.username),
-]);
-
-export const shipments = pgTable("shipments", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	orderId: uuid("order_id").notNull(),
-	sellerId: text("seller_id").notNull(),
-	status: shipmentStatus().default('awaiting_payment').notNull(),
-	itemsCents: integer("items_cents").notNull(),
-	shippingCents: integer("shipping_cents").notNull(),
-	commissionCents: integer("commission_cents").notNull(),
-	carrier: shippingProvider(),
-	trackingNumber: text("tracking_number"),
-	labelPath: text("label_path"),
-	stripeTransferId: text("stripe_transfer_id"),
-	shippedAt: timestamp("shipped_at", { withTimezone: true, mode: 'string' }),
-	deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: 'string' }),
-	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
-	cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: 'string' }),
-	shippingService: text("shipping_service"),
-	shippingFormat: shippingFormat("shipping_format"),
-	packageWeightG: integer("package_weight_g"),
-}, (table) => [
-	index("shipments_order_idx").using("btree", table.orderId.asc().nullsLast().op("uuid_ops")),
-	index("shipments_seller_status_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.status.asc().nullsLast().op("text_ops")),
-	foreignKey({
-			columns: [table.orderId],
-			foreignColumns: [orders.id],
-			name: "shipments_order_id_orders_id_fk"
-		}),
-	foreignKey({
-			columns: [table.sellerId],
-			foreignColumns: [sellerProfiles.userId],
-			name: "shipments_seller_id_seller_profiles_user_id_fk"
-		}),
-]);
 
 export const verification = pgTable("verification", {
 	id: text().primaryKey().notNull(),
@@ -111,6 +59,61 @@ export const orders = pgTable("orders", {
 			name: "orders_buyer_id_user_id_fk"
 		}),
 	unique("orders_number_unique").on(table.number),
+]);
+
+export const shipments = pgTable("shipments", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	orderId: uuid("order_id").notNull(),
+	sellerId: text("seller_id").notNull(),
+	status: shipmentStatus().default('awaiting_payment').notNull(),
+	itemsCents: integer("items_cents").notNull(),
+	shippingCents: integer("shipping_cents").notNull(),
+	commissionCents: integer("commission_cents").notNull(),
+	carrier: shippingProvider(),
+	trackingNumber: text("tracking_number"),
+	labelPath: text("label_path"),
+	stripeTransferId: text("stripe_transfer_id"),
+	shippedAt: timestamp("shipped_at", { withTimezone: true, mode: 'string' }),
+	deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: 'string' }),
+	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
+	cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: 'string' }),
+	shippingService: text("shipping_service"),
+	shippingFormat: shippingFormat("shipping_format"),
+	packageWeightG: integer("package_weight_g"),
+	cancelledBy: text("cancelled_by"),
+}, (table) => [
+	index("shipments_order_idx").using("btree", table.orderId.asc().nullsLast().op("uuid_ops")),
+	index("shipments_seller_status_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.status.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.orderId],
+			foreignColumns: [orders.id],
+			name: "shipments_order_id_orders_id_fk"
+		}),
+	foreignKey({
+			columns: [table.sellerId],
+			foreignColumns: [sellerProfiles.userId],
+			name: "shipments_seller_id_seller_profiles_user_id_fk"
+		}),
+]);
+
+export const user = pgTable("user", {
+	id: text().primaryKey().notNull(),
+	name: text().notNull(),
+	email: text().notNull(),
+	emailVerified: boolean("email_verified").default(false).notNull(),
+	image: text(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	username: text(),
+	role: userRole().default('user').notNull(),
+	locale: siteLocale().default('de').notNull(),
+	bannedAt: timestamp("banned_at", { withTimezone: true, mode: 'string' }),
+	isDemo: boolean("is_demo").default(false).notNull(),
+	blockedAt: timestamp("blocked_at", { withTimezone: true, mode: 'string' }),
+	blockedReason: text("blocked_reason"),
+}, (table) => [
+	unique("user_email_unique").on(table.email),
+	unique("user_username_unique").on(table.username),
 ]);
 
 export const account = pgTable("account", {
@@ -597,6 +600,7 @@ export const reviews = pgTable("reviews", {
 	comment: text(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	deliveredComplete: boolean("delivered_complete").default(true).notNull(),
+	commentHiddenAt: timestamp("comment_hidden_at", { withTimezone: true, mode: 'string' }),
 }, (table) => [
 	index("reviews_author_idx").using("btree", table.authorId.asc().nullsLast().op("text_ops")),
 	uniqueIndex("reviews_shipment_direction_uq").using("btree", table.shipmentId.asc().nullsLast().op("uuid_ops"), table.direction.asc().nullsLast().op("uuid_ops")),
@@ -724,6 +728,25 @@ export const printingImageOverrides = pgTable("printing_image_overrides", {
 			columns: [table.replacedBy],
 			foreignColumns: [user.id],
 			name: "printing_image_overrides_replaced_by_user_id_fk"
+		}).onDelete("set null"),
+]);
+
+export const moderationLog = pgTable("moderation_log", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	adminId: text("admin_id"),
+	action: text().notNull(),
+	targetType: text("target_type").notNull(),
+	targetId: text("target_id").notNull(),
+	reason: text(),
+	details: jsonb().default({}).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("moderation_log_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("moderation_log_target_idx").using("btree", table.targetType.asc().nullsLast().op("text_ops"), table.targetId.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.adminId],
+			foreignColumns: [user.id],
+			name: "moderation_log_admin_id_user_id_fk"
 		}).onDelete("set null"),
 ]);
 
