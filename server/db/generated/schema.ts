@@ -103,7 +103,8 @@ export const orders = pgTable("orders", {
 	idempotencyKey: text("idempotency_key"),
 }, (table) => [
 	uniqueIndex("orders_buyer_idempotency_uq").using("btree", table.buyerId.asc().nullsLast().op("text_ops"), table.idempotencyKey.asc().nullsLast().op("text_ops")),
-	index("orders_buyer_idx").using("btree", table.buyerId.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("orders_buyer_idx").using("btree", table.buyerId.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("text_ops")),
+	index("orders_paid_idx").using("btree", table.paidAt.asc().nullsLast().op("timestamptz_ops")),
 	foreignKey({
 			columns: [table.buyerId],
 			foreignColumns: [user.id],
@@ -201,7 +202,8 @@ export const listings = pgTable("listings", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("listings_product_price_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops"), table.status.asc().nullsLast().op("enum_ops"), table.priceCents.asc().nullsLast().op("enum_ops")),
+	index("listings_active_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")).where(sql`((status = 'active'::listing_status) AND (quantity > 0))`),
+	index("listings_product_price_idx").using("btree", table.productId.asc().nullsLast().op("enum_ops"), table.status.asc().nullsLast().op("uuid_ops"), table.priceCents.asc().nullsLast().op("enum_ops")),
 	index("listings_seller_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.status.asc().nullsLast().op("enum_ops")),
 	foreignKey({
 			columns: [table.sellerId],
@@ -562,6 +564,7 @@ export const wishlistItems = pgTable("wishlist_items", {
 }, (table) => [
 	index("wishlist_items_card_idx").using("btree", table.cardId.asc().nullsLast().op("uuid_ops")),
 	uniqueIndex("wishlist_items_card_uq").using("btree", table.wishlistId.asc().nullsLast().op("uuid_ops"), table.cardId.asc().nullsLast().op("uuid_ops")).where(sql`(card_id IS NOT NULL)`),
+	index("wishlist_items_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	index("wishlist_items_product_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
 	uniqueIndex("wishlist_items_product_uq").using("btree", table.wishlistId.asc().nullsLast().op("uuid_ops"), table.productId.asc().nullsLast().op("uuid_ops")).where(sql`(product_id IS NOT NULL)`),
 	foreignKey({
@@ -814,6 +817,7 @@ export const cartItems = pgTable("cart_items", {
 	quantity: integer().notNull(),
 	addedAt: timestamp("added_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
+	index("cart_items_added_idx").using("btree", table.addedAt.asc().nullsLast().op("timestamptz_ops")),
 	foreignKey({
 			columns: [table.userId],
 			foreignColumns: [user.id],
