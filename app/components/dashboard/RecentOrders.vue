@@ -17,7 +17,7 @@ defineProps<{ orders: RecentOrder[] }>()
           </td>
           <td>
             <div class="flex flex-wrap gap-1">
-              <StatusBadge v-for="(s, i) in o.shipments" :key="i" :status="s" />
+              <StatusTag v-for="(s, i) in o.shipments" :key="i" :status="s" />
             </div>
           </td>
           <td class="text-right tabular-nums">{{ euro(o.total) }}</td>

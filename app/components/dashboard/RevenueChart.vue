@@ -47,5 +47,5 @@ const option = computed<EChartsOption>(() => {
 </script>
 
 <template>
-  <ChartsChartFrame :option="option" label="Umsatz und Bestellungen pro Tag" :height="240" />
+  <ChartFrame :option="option" label="Umsatz und Bestellungen pro Tag" :height="240" />
 </template>

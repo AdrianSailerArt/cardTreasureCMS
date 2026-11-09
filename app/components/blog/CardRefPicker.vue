@@ -10,6 +10,7 @@ useDebounced(query, 250, async (q) => {
   results.value = q.trim().length < 2 ? [] : await $fetch<CardSearchHit[]>('/api/cards/search', { query: { q } })
 })
 
+const items = computed(() => results.value.map(c => ({ value: c.ref, label: c.nameDe ?? c.name, hint: `${GAME_LABEL[c.game]} · ${c.setName}` })))
 const pick = (ref: string) => {
   emit('pick', ref)
   query.value = ''
@@ -17,15 +18,7 @@ const pick = (ref: string) => {
 </script>
 
 <template>
-  <div class="relative w-64">
-    <UiInput v-model="query" placeholder="Karte einfügen: Name suchen …" />
-    <ul v-if="results.length" class="absolute right-0 z-10 mt-1 max-h-72 w-80 overflow-auto rounded-lg border border-line bg-surface text-sm shadow-lg">
-      <li v-for="c in results" :key="c.ref">
-        <button type="button" class="block w-full px-3 py-2 text-left hover:bg-surface-muted" @click="pick(c.ref)">
-          {{ c.nameDe ?? c.name }}
-          <span class="block text-xs text-fg-subtle">{{ GAME_LABEL[c.game] }} · {{ c.setName }}</span>
-        </button>
-      </li>
-    </ul>
+  <div class="w-64">
+    <UiCombobox v-model:query="query" :items="items" label="Karte einfügen" placeholder="Karte einfügen: Name suchen …" list-class="w-80" @select="i => pick(i.value)" />
   </div>
 </template>

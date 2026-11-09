@@ -28,5 +28,5 @@ const option = computed<EChartsOption>(() => {
 </script>
 
 <template>
-  <ChartsChartFrame :option="option" label="Provision, Auszahlungen, Erstattungen und Umsatz pro Monat" :height="280" />
+  <ChartFrame :option="option" label="Provision, Auszahlungen, Erstattungen und Umsatz pro Monat" :height="280" />
 </template>

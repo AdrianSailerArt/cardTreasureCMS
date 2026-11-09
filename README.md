@@ -57,7 +57,8 @@ zeigen dann auf diese Adresse (der Shop muss ebenfalls mit `bun run dev` laufen)
 
 ## Frontend-Aufbau
 
-Wie im Shop: Atoms (Präfix `Ui`: Button, Input, Select, Field, Segmented, Notice, Table) sowie `Tag`, `Panel` und `ui.css`
+Wie im Shop: Atoms (Präfix `Ui`: Button, Input, Select, Field, Segmented, Notice, Table, Combobox), Components (`Tag`, `Panel`,
+`PageHeader`, `Stat`, `StatusTag`, `EmptyState`, `CountryFlag`, `ChartFrame`, `KeyValueList`), Status- und Formatierungsregeln sowie `ui.css`
 (Color-Set, Schrift Geist lokal, Formen, Fokus) kommen aus dem gemeinsamen Paket, oben allgemeine Components
 (`PageHeader`, `KpiCard` …), Bereichsordner für Scope-Komponenten (`blog/`, `dashboard/`, `images/`, `layout/` …).
 `useDebounced`, `useChartTheme`/`chartBase`, Versand, `slugify` und LAN-Erkennung kommen aus dem gemeinsamen Paket

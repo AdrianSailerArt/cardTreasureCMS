@@ -6,7 +6,7 @@ defineProps<{ items: { status: string, count: number }[] }>()
 <template>
   <ul class="space-y-2 text-sm">
     <li v-for="s in items" :key="s.status" class="flex items-center justify-between">
-      <StatusBadge :status="s.status" />
+      <StatusTag :status="s.status" />
       <span class="tabular-nums">{{ num(s.count) }}</span>
     </li>
   </ul>

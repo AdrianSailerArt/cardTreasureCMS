@@ -42,7 +42,7 @@ const inventory = computed(() => {
     </PageHeader>
 
     <div class="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-      <KpiCard v-for="k in kpis" :key="k.label" :label="k.label" :value="k.value" :change="k.change" />
+      <Stat framed size="lg" v-for="k in kpis" :key="k.label" :label="k.label" :value="k.value" :change="k.change" />
     </div>
 
     <div class="mt-6 grid gap-6 xl:grid-cols-[2fr_1fr]">

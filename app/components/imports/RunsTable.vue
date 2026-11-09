@@ -26,8 +26,8 @@ const duration = (r: ImportRun) => {
             <td class="tabular-nums">{{ dateTime(r.startedAt) }}</td>
             <td>{{ GAME_LABEL[r.game] }}</td>
             <td>
-              <button v-if="r.error" class="underline decoration-dotted" @click="toggle(r.id)"><StatusBadge :status="r.status" /></button>
-              <StatusBadge v-else :status="r.status" />
+              <button v-if="r.error" class="underline decoration-dotted" @click="toggle(r.id)"><StatusTag :status="r.status" /></button>
+              <StatusTag v-else :status="r.status" />
             </td>
             <td class="font-mono text-xs text-fg-muted">{{ r.args ?? 'voll' }}</td>
             <td class="text-fg-muted">{{ r.trigger === 'schedule' ? 'nachts' : 'manuell' }}</td>

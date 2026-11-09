@@ -13,11 +13,11 @@ useSeoMeta({ title: 'Finanzen – CardTreasure CMS' })
   <div v-if="data">
     <PageHeader title="Finanzen" description="Aus dem Buchungsjournal. Guthaben und Treuhand sind Geld, das Kunden gehört; Provision ist der Ertrag der Plattform." />
     <div class="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5">
-      <KpiCard label="Guthaben der Kunden" :value="euro(data.totals.balancesCents, 0)" />
-      <KpiCard label="In Treuhand" :value="euro(data.totals.escrowCents, 0)" />
-      <KpiCard label="Provision gesamt" :value="euro(data.totals.commissionCents, 0)" />
-      <KpiCard label="Ausgezahlt" :value="euro(data.totals.payoutsCents, 0)" />
-      <KpiCard label="Erstattet" :value="euro(data.totals.refundsCents, 0)" />
+      <Stat framed size="lg" label="Guthaben der Kunden" :value="euro(data.totals.balancesCents, 0)" />
+      <Stat framed size="lg" label="In Treuhand" :value="euro(data.totals.escrowCents, 0)" />
+      <Stat framed size="lg" label="Provision gesamt" :value="euro(data.totals.commissionCents, 0)" />
+      <Stat framed size="lg" label="Ausgezahlt" :value="euro(data.totals.payoutsCents, 0)" />
+      <Stat framed size="lg" label="Erstattet" :value="euro(data.totals.refundsCents, 0)" />
     </div>
     <p class="mt-2 text-xs text-fg-subtle">{{ num(data.totals.accounts) }} Konten mit Guthaben · {{ num(data.totals.escrowShipments) }} offene Sendungen in Treuhand</p>
 
