@@ -46,8 +46,6 @@ const current = computed(() => form.translations[locale.value])
 
 // Slug aus dem Titel vorschlagen, solange er nicht von Hand geändert wurde
 const slugTouched = ref(!isNew.value)
-const slugify = (title: string) => title.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss')
-  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80)
 watch(() => form.translations.de.title || form.translations.en.title, (title) => {
   if (!slugTouched.value) form.slug = slugify(title)
 })
