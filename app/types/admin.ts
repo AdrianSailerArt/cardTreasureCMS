@@ -52,3 +52,32 @@ export interface SellerRisk {
   activeListings: number
   flags: ('warning_level' | 'overdue' | 'cancels' | 'bad_reviews')[]
 }
+
+/** Provision (interne Shop-API, Logik in server/lib/commission.ts des Shops). Sätze in Basispunkten. */
+export interface CommissionTier { level: string, rateBps: number }
+export interface CommissionOverride { id: string, sellerId: string, seller: string, rateBps: number, reason: string, validFrom: string, validUntil: string | null, endedAt: string | null, grantedBy: string | null, active: boolean }
+export interface SellerCommission {
+  current: { rateBps: number, source: 'override' | 'tier', level: string, tierRateBps: number, override: { id: string, reason: string, validUntil: string | null } | null }
+  overrides: CommissionOverride[]
+}
+
+/** Meldung (interne Shop-API, Logik in server/lib/moderation.ts des Shops). */
+export interface ReportView {
+  id: string
+  targetType: 'user' | 'listing' | 'message'
+  targetId: string
+  category: 'fake' | 'fraud' | 'harassment' | 'spam' | 'wrong_item' | 'other'
+  text: string | null
+  status: 'open' | 'resolved' | 'dismissed'
+  resolution: string | null
+  createdAt: string
+  handledAt: string | null
+  handledBy: string | null
+  reporterId: string | null
+  reporter: string | null
+  subjectId: string
+  subject: string
+  subjectBlocked: boolean
+  openAgainstSubject: number
+  context: string | null
+}

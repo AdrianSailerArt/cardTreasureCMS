@@ -4,7 +4,7 @@ import type { H3Event } from 'h3'
  * Aufruf der internen Shop-API (Moderation, Risiko-Übersicht). Fachlogik liegt im Shop, das CMS prüft nur,
  * dass ein Admin angemeldet ist, und gibt dessen ID weiter. Fehler des Shops werden unverändert durchgereicht.
  */
-export const shopInternal = async <T>(event: H3Event, path: string, opts: { method?: 'GET' | 'POST', body?: Record<string, unknown>, query?: Record<string, string> } = {}): Promise<T> => {
+export const shopInternal = async <T>(event: H3Event, path: string, opts: { method?: 'GET' | 'POST' | 'PUT', body?: Record<string, unknown>, query?: Record<string, string> } = {}): Promise<T> => {
   const admin = await requireAdmin(event)
   const config = useRuntimeConfig()
   try {

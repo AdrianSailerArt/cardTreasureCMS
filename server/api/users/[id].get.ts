@@ -4,9 +4,9 @@ import { sql } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
   const id = getRouterParam(event, 'id')!
-  const [user] = await rows<{ id: string, name: string, email: string, role: string, locale: string, createdAt: string, blockedAt: string | null, blockedReason: string | null, isDemo: boolean, displayName: string | null, sellerType: string | null, country: string | null, purchases: number, sales: number, balanceCents: number }>(sql`
+  const [user] = await rows<{ id: string, name: string, email: string, role: string, locale: string, createdAt: string, blockedAt: string | null, blockedReason: string | null, blockedUntil: string | null, isDemo: boolean, displayName: string | null, sellerType: string | null, country: string | null, purchases: number, sales: number, balanceCents: number }>(sql`
     select u.id, u.name, u.email, u.role::text as role, u.locale::text as locale, u.created_at as "createdAt",
-           u.blocked_at as "blockedAt", u.blocked_reason as "blockedReason", u.is_demo as "isDemo",
+           u.blocked_at as "blockedAt", u.blocked_reason as "blockedReason", u.blocked_until as "blockedUntil", u.is_demo as "isDemo",
            sp.display_name as "displayName", sp.type::text as "sellerType", sp.country,
            (select count(*)::int from orders o where o.buyer_id = u.id) as purchases,
            (select count(*)::int from shipments s where s.seller_id = u.id and s.status <> 'cancelled') as sales,

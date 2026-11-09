@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import type { SellerCommission } from '~/types/admin'
+
 /** Nutzer-Detail: Konto, Kennzahlen, Sperre, Angebote (entfernen), Bewertungen (Text ausblenden), Protokoll. */
 interface UserDetail {
-  user: { id: string, name: string, email: string, role: string, locale: string, createdAt: string, blockedAt: string | null, blockedReason: string | null, isDemo: boolean, displayName: string | null, sellerType: string | null, country: string | null, purchases: number, sales: number, balanceCents: number }
+  user: { id: string, name: string, email: string, role: string, locale: string, createdAt: string, blockedAt: string | null, blockedReason: string | null, blockedUntil: string | null, isDemo: boolean, displayName: string | null, sellerType: string | null, country: string | null, purchases: number, sales: number, balanceCents: number }
   listings: { id: string, name: string, game: string, slug: string | null, kind: string, condition: string | null, priceCents: number, quantity: number, status: string }[]
   reviews: { id: string, direction: string, ratingOverall: number, deliveredComplete: boolean, comment: string | null, hidden: boolean, createdAt: string, otherId: string, other: string }[]
   log: { id: string, action: string, reason: string | null, createdAt: string, admin: string | null, targetType: string }[]
@@ -11,7 +13,9 @@ const shopUrl = useRuntimeConfig().public.shopUrl
 const { data, error, refresh } = await useFetch<UserDetail>(() => `/api/users/${route.params.id}`)
 if (error.value || !data.value) throw createError({ statusCode: 404, statusMessage: 'Nutzer nicht gefunden', fatal: true })
 const u = computed(() => data.value!.user)
-const ACTION_LABEL: Record<string, string> = { block_user: 'gesperrt', unblock_user: 'entsperrt', remove_listing: 'Angebot entfernt', hide_review: 'Bewertungstext ausgeblendet', show_review: 'Bewertungstext wieder gezeigt' }
+const { data: commission, refresh: refreshCommission } = await useFetch<SellerCommission>(() => `/api/commission/seller/${route.params.id}`, { immediate: true })
+const LEVEL_LABEL: Record<string, string> = { new: 'Neu', bronze: 'Bronze', silver: 'Silber', gold: 'Gold', platinum: 'Platin', warning: 'Auffällig' }
+const ACTION_LABEL: Record<string, string> = { resolve_report: 'Meldung bearbeitet', dismiss_report: 'Meldung verworfen', grant_commission: 'Provision freigegeben', end_commission: 'Provision beendet', block_user: 'gesperrt', unblock_user: 'entsperrt', remove_listing: 'Angebot entfernt', hide_review: 'Bewertungstext ausgeblendet', show_review: 'Bewertungstext wieder gezeigt' }
 const LISTING_TONE: Record<string, 'success' | 'warning' | 'neutral'> = { active: 'success', paused: 'warning', sold_out: 'neutral' }
 useSeoMeta({ title: () => `${u.value.name} – Nutzer – CardTreasure CMS` })
 </script>
@@ -38,6 +42,7 @@ useSeoMeta({ title: () => `${u.value.name} – Nutzer – CardTreasure CMS` })
       <Panel title="Status">
         <template v-if="u.blockedAt">
           <Tag tone="danger">gesperrt seit {{ dateTime(u.blockedAt) }}</Tag>
+          <Tag :tone="u.blockedUntil ? 'warning' : 'danger'" class="ml-1">{{ u.blockedUntil ? `bis ${dateTime(u.blockedUntil)}` : 'unbefristet' }}</Tag>
           <p class="mt-2 text-sm text-fg-muted">Grund: {{ u.blockedReason }}</p>
           <div class="mt-4"><ModerationActionButton label="Entsperren" action="unblock" tone="neutral" :require-reason="false" :payload="{ userId: u.id }" @done="refresh" /></div>
         </template>
@@ -48,6 +53,19 @@ useSeoMeta({ title: () => `${u.value.name} – Nutzer – CardTreasure CMS` })
         </template>
       </Panel>
     </div>
+
+    <Panel v-if="u.displayName && commission" class="mt-6" title="Provision">
+      <p class="text-sm">
+        Aktuell <strong class="tabular-nums">{{ (commission.current.rateBps / 100).toLocaleString('de-DE') }} %</strong>
+        <Tag v-if="commission.current.source === 'override'" tone="success" class="ml-2">individuell</Tag>
+        <Tag v-else class="ml-2">Stufe {{ LEVEL_LABEL[commission.current.level] }}</Tag>
+        <span class="ml-2 text-fg-muted">(Staffel: {{ (commission.current.tierRateBps / 100).toLocaleString('de-DE') }} %)</span>
+      </p>
+      <div class="mt-4 border-t border-line pt-4">
+        <CommissionGrantForm :seller-id="u.id" :seller-name="u.displayName" @done="() => { refreshCommission(); refresh() }" />
+      </div>
+      <div v-if="commission.overrides.length" class="mt-4"><CommissionOverrideList :overrides="commission.overrides" @changed="() => { refreshCommission(); refresh() }" /></div>
+    </Panel>
 
     <Panel v-if="data.listings.length" class="mt-6" :title="`Angebote (${data.listings.length})`">
       <UiTable :min-width="720">
