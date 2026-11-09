@@ -16,7 +16,7 @@ export interface SqlDb {
 const rowsOf = async <T>(db: SqlDb, query: SQL) => await db.execute(query) as unknown as T[]
 
 // Im Shop aus shared/utils/photos.ts; das CMS braucht die Werte nicht
-const MAX_LISTING_PHOTOS = 4
+const MAX_LISTING_PHOTOS = 1
 export { MAX_LISTING_PHOTOS }
 
 /** Bild verarbeiten, speichern und als Medium eintragen. Liefert die Medien-ID. */
@@ -48,7 +48,7 @@ const removeMedia = async (db: SqlDb, store: MediaStore, mediaId: string) => {
 
 // ---------------------------------------------------------------- Angebotsfotos
 
-/** Foto an ein eigenes Angebot hängen (höchstens MAX_LISTING_PHOTOS). */
+/** Foto an ein eigenes Angebot hängen (eins pro Angebot). */
 export const addListingPhoto = async (db: SqlDb, store: MediaStore, sellerId: string, listingId: string, input: Uint8Array) => {
   const [listing] = await rowsOf<{ sellerId: string, status: string, photos: number }>(db, sql`
     select seller_id as "sellerId", status::text as status,
@@ -56,14 +56,14 @@ export const addListingPhoto = async (db: SqlDb, store: MediaStore, sellerId: st
     from listings l where id = ${listingId}
   `)
   if (!listing || listing.sellerId !== sellerId || listing.status === 'removed') throw new MediaError('NOT_FOUND', 'Angebot nicht gefunden', 404)
-  if (listing.photos >= MAX_LISTING_PHOTOS) throw new MediaError('LIMIT', `Höchstens ${MAX_LISTING_PHOTOS} Fotos pro Angebot`)
+  if (listing.photos >= MAX_LISTING_PHOTOS) throw new MediaError('LIMIT', 'Pro Angebot ist ein Foto möglich. Entferne zuerst das vorhandene.')
 
   const id = await storeImage(db, store, sellerId, 'listing_photo', input, async (tx, mediaId) => {
     // Sperre auf das Angebot, damit parallele Uploads die Obergrenze nicht überschreiten.
     // Erst sperren, dann zählen: In einer einzigen Abfrage würde die Zählung den Stand vor dem Warten auf die Sperre sehen.
     await tx.execute(sql`select id from listings where id = ${listingId} for update`)
     const [locked] = await rowsOf<{ n: number }>(tx, sql`select count(*)::int as n from listing_photos where listing_id = ${listingId}`)
-    if ((locked?.n ?? 0) >= MAX_LISTING_PHOTOS) throw new MediaError('LIMIT', `Höchstens ${MAX_LISTING_PHOTOS} Fotos pro Angebot`)
+    if ((locked?.n ?? 0) >= MAX_LISTING_PHOTOS) throw new MediaError('LIMIT', 'Pro Angebot ist ein Foto möglich. Entferne zuerst das vorhandene.')
     await tx.execute(sql`insert into listing_photos (listing_id, media_id, position) values (${listingId}, ${mediaId}, ${locked!.n})`)
   })
   return { id }
