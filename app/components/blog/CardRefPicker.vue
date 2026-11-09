@@ -6,17 +6,8 @@ const emit = defineEmits<{ pick: [ref: string] }>()
 
 const query = ref('')
 const results = ref<CardSearchHit[]>([])
-let timer: ReturnType<typeof setTimeout> | undefined
-
-watch(query, (q) => {
-  clearTimeout(timer)
-  if (q.trim().length < 2) {
-    results.value = []
-    return
-  }
-  timer = setTimeout(async () => {
-    results.value = await $fetch<CardSearchHit[]>('/api/cards/search', { query: { q } })
-  }, 250)
+useDebounced(query, 250, async (q) => {
+  results.value = q.trim().length < 2 ? [] : await $fetch<CardSearchHit[]>('/api/cards/search', { query: { q } })
 })
 
 const pick = (ref: string) => {

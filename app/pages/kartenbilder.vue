@@ -3,12 +3,7 @@ import type { PrintingImageRow } from '~~/server/api/printings/index.get'
 
 /** Falsch ausgelieferte Kartenbilder aus den Katalog-APIs durch eigene ersetzen. */
 const q = ref('')
-const query = ref('')
-let timer: ReturnType<typeof setTimeout> | undefined
-watch(q, (v) => {
-  clearTimeout(timer)
-  timer = setTimeout(() => { query.value = v.trim() }, 300)
-})
+const query = useDebounced(() => q.value.trim(), 300)
 const { data: printings, refresh } = await useFetch<PrintingImageRow[]>('/api/printings', { query: { q: query }, default: () => [] })
 
 useSeoMeta({ title: 'Kartenbilder – CardTreasure CMS' })
@@ -16,7 +11,7 @@ useSeoMeta({ title: 'Kartenbilder – CardTreasure CMS' })
 
 <template>
   <div>
-    <UiPageHeader
+    <PageHeader
       title="Kartenbilder"
       description="Falsches Bild aus Scryfall, TCGdex oder YGOPRODeck? Hier ersetzen. Der Ersatz bleibt bei neuen Imports erhalten und erscheint im Shop spätestens nach einer Stunde in jedem Browser."
     />

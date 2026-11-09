@@ -6,12 +6,12 @@ const { data: posts } = await useFetch<PostRow[]>('/api/posts', { default: () =>
 
 <template>
   <div>
-    <UiPageHeader title="Blog" description="Beiträge auf Deutsch und Englisch, mit Verweisen auf Karten im Katalog.">
+    <PageHeader title="Blog" description="Beiträge auf Deutsch und Englisch, mit Verweisen auf Karten im Katalog.">
       <UiButton to="/blog/neu">Neuer Beitrag</UiButton>
-    </UiPageHeader>
+    </PageHeader>
 
-    <UiPanel class="mt-8">
+    <Panel class="mt-8">
       <BlogPostsTable :posts="posts" />
-    </UiPanel>
+    </Panel>
   </div>
 </template>

@@ -37,32 +37,32 @@ const inventory = computed(() => {
 
 <template>
   <div v-if="data">
-    <UiPageHeader title="Auswertungen" description="Bezahlte, nicht stornierte Sendungen. Vergleich mit dem Zeitraum davor.">
+    <PageHeader title="Auswertungen" description="Bezahlte, nicht stornierte Sendungen. Vergleich mit dem Zeitraum davor.">
       <UiSegmented v-model="days" :options="periods" />
-    </UiPageHeader>
+    </PageHeader>
 
     <div class="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
       <KpiCard v-for="k in kpis" :key="k.label" :label="k.label" :value="k.value" :change="k.change" />
     </div>
 
     <div class="mt-6 grid gap-6 xl:grid-cols-[2fr_1fr]">
-      <UiPanel title="Umsatz pro Tag">
+      <Panel title="Umsatz pro Tag">
         <DashboardRevenueChart :daily="data.daily" />
-      </UiPanel>
-      <UiPanel title="Nach Spiel">
+      </Panel>
+      <Panel title="Nach Spiel">
         <DashboardGameShare :games="data.byGame" />
-      </UiPanel>
+      </Panel>
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-3">
-      <UiPanel title="Bestand"><KeyValueList :items="inventory" /></UiPanel>
-      <UiPanel title="Sendungen nach Status"><DashboardStatusCounts :items="data.byStatus" /></UiPanel>
-      <UiPanel title="Top-Verkäufer"><DashboardTopSellers :sellers="data.topSellers" /></UiPanel>
+      <Panel title="Bestand"><KeyValueList :items="inventory" /></Panel>
+      <Panel title="Sendungen nach Status"><DashboardStatusCounts :items="data.byStatus" /></Panel>
+      <Panel title="Top-Verkäufer"><DashboardTopSellers :sellers="data.topSellers" /></Panel>
     </div>
 
     <div class="mt-6 grid gap-6 xl:grid-cols-2">
-      <UiPanel title="Meistverkaufte Produkte"><DashboardTopProducts :products="data.topProducts" /></UiPanel>
-      <UiPanel title="Letzte Bestellungen"><DashboardRecentOrders :orders="data.recentOrders" /></UiPanel>
+      <Panel title="Meistverkaufte Produkte"><DashboardTopProducts :products="data.topProducts" /></Panel>
+      <Panel title="Letzte Bestellungen"><DashboardRecentOrders :orders="data.recentOrders" /></Panel>
     </div>
   </div>
 </template>

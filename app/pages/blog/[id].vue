@@ -104,13 +104,13 @@ const save = async () => {
 
 <template>
   <div>
-    <UiPageHeader :title="isNew ? 'Neuer Beitrag' : (form.translations.de.title || form.translations.en.title || 'Beitrag')">
+    <PageHeader :title="isNew ? 'Neuer Beitrag' : (form.translations.de.title || form.translations.en.title || 'Beitrag')">
       <template #above>
         <NuxtLink to="/blog" class="text-sm text-fg-subtle hover:text-accent">← Alle Beiträge</NuxtLink>
       </template>
       <UiSelect v-model="form.status" :options="statusOptions" class="w-auto" />
       <UiButton :disabled="saving" @click="save">Speichern</UiButton>
-    </UiPageHeader>
+    </PageHeader>
     <UiNotice v-if="message" :tone="message.ok ? 'success' : 'danger'" class="mt-3">{{ message.text }}</UiNotice>
 
     <div class="mt-6 grid gap-4 md:grid-cols-3">

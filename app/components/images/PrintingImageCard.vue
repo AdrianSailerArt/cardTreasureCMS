@@ -57,8 +57,8 @@ const reset = async () => {
           {{ GAME_LABEL[printing.game] }} · {{ printing.setName }} ({{ printing.setCode.toUpperCase() }}) · #{{ printing.collectorNumber }}
         </p>
       </div>
-      <UiTag v-if="printing.overrideMediaId" tone="warning">ersetzt</UiTag>
-      <UiTag v-else tone="success">Original</UiTag>
+      <Tag v-if="printing.overrideMediaId" tone="warning">ersetzt</Tag>
+      <Tag v-else tone="success">Original</Tag>
     </div>
 
     <div class="mt-3 grid grid-cols-2 gap-3">

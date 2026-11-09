@@ -8,7 +8,6 @@ const props = defineProps<{
 }>()
 
 const preview = ref<{ html: string, missing: string[] }>({ html: '', missing: [] })
-let timer: ReturnType<typeof setTimeout> | undefined
 
 const render = async () => {
   preview.value = await $fetch<{ html: string, missing: string[] }>('/api/posts/preview', {
@@ -17,20 +16,18 @@ const render = async () => {
   })
 }
 
-watch(() => [props.markdown, props.locale], () => {
-  clearTimeout(timer)
-  timer = setTimeout(render, 300)
-}, { immediate: true })
+useDebounced(() => [props.markdown, props.locale], 300, render)
+onMounted(render)
 </script>
 
 <template>
-  <UiPanel class="min-h-[200px]">
+  <Panel class="min-h-[200px]">
     <h2 v-if="title" class="text-3xl">{{ title }}</h2>
     <p v-if="excerpt" class="mt-2 text-fg-muted">{{ excerpt }}</p>
     <!-- eslint-disable-next-line vue/no-v-html -- eigenes Markdown, nur für Admins -->
     <div class="prose-preview mt-4" v-html="preview.html" />
     <UiNotice v-if="preview.missing.length" tone="danger" class="mt-4">Unbekannte Karten: {{ preview.missing.join(', ') }}</UiNotice>
-  </UiPanel>
+  </Panel>
 </template>
 
 <style scoped>

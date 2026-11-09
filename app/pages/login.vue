@@ -48,12 +48,12 @@ const demoLogin = async () => {
         Lokal steht er in der Server-Konsole.
       </p>
 
-      <UiPanel v-if="config.public.demoLogin" title="Demo-Zugang" class="mt-10">
+      <Panel v-if="config.public.demoLogin" title="Demo-Zugang" class="mt-10">
         <p class="text-sm text-fg-muted">Admin aus der Simulation (<code>bun run simulate</code>):</p>
         <p class="mt-2 font-mono text-xs text-fg-subtle">{{ DEMO.email }} · {{ DEMO.password }}</p>
         <UiButton variant="ghost" class="mt-4 w-full" @click="demoLogin">Als Demo-Admin anmelden</UiButton>
         <UiNotice v-if="demoError" tone="danger" class="mt-3">Demo-Admin nicht gefunden. Zuerst <code>bun run simulate --reset</code> ausführen.</UiNotice>
-      </UiPanel>
+      </Panel>
     </div>
   </div>
 </template>

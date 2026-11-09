@@ -15,11 +15,11 @@ const items = computed(() => [
 </script>
 
 <template>
-  <UiPanel>
+  <Panel>
     <div class="mb-4 flex items-baseline justify-between gap-2">
       <h2 class="text-2xl">{{ GAME_LABEL[game.code] }}</h2>
       <span class="text-xs text-fg-subtle">{{ game.lastSuccess ? `zuletzt ${dateTime(game.lastSuccess)}` : 'noch kein Lauf protokolliert' }}</span>
     </div>
     <KeyValueList :items="items" />
-  </UiPanel>
+  </Panel>
 </template>

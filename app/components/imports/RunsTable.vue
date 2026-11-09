@@ -16,18 +16,14 @@ const duration = (r: ImportRun) => {
 </script>
 
 <template>
-  <div class="overflow-x-auto">
-    <table class="w-full min-w-[640px] text-sm">
-      <thead class="text-left text-xs uppercase tracking-wider text-fg-subtle">
-        <tr>
-          <th class="py-2 font-normal">Start</th><th class="font-normal">Spiel</th><th class="font-normal">Status</th>
-          <th class="font-normal">Argumente</th><th class="font-normal">Auslöser</th><th class="text-right font-normal">Dauer</th>
-        </tr>
-      </thead>
-      <tbody>
+  <UiTable :min-width="640">
+      <template #head>
+          <th>Start</th><th>Spiel</th><th>Status</th>
+          <th>Argumente</th><th>Auslöser</th><th class="text-right">Dauer</th>
+        </template>
         <template v-for="r in runs" :key="r.id">
-          <tr class="border-t border-line">
-            <td class="py-2 tabular-nums">{{ dateTime(r.startedAt) }}</td>
+          <tr>
+            <td class="tabular-nums">{{ dateTime(r.startedAt) }}</td>
             <td>{{ GAME_LABEL[r.game] }}</td>
             <td>
               <button v-if="r.error" class="underline decoration-dotted" @click="toggle(r.id)"><StatusBadge :status="r.status" /></button>
@@ -42,7 +38,5 @@ const duration = (r: ImportRun) => {
           </tr>
         </template>
         <tr v-if="!runs.length"><td colspan="6" class="py-4 text-fg-muted">Noch keine Läufe protokolliert.</td></tr>
-      </tbody>
-    </table>
-  </div>
+      </UiTable>
 </template>

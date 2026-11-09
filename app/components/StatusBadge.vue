@@ -4,7 +4,7 @@ defineProps<{ status: string }>()
 </script>
 
 <template>
-  <UiTag :tone="statusTone(status)" class="rounded-full px-2 font-normal">
+  <Tag :tone="statusTone(status)" class="rounded-full px-2 font-normal">
     {{ STATUS_LABEL[status] ?? status }}
-  </UiTag>
+  </Tag>
 </template>

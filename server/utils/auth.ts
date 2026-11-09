@@ -10,6 +10,8 @@ const createAuth = () => {
   return betterAuth({
     baseURL: config.public.siteUrl,
     secret: config.betterAuthSecret,
+    // Entwicklung: localhost und LAN-Adressen (Tablet/Handy im WLAN)
+    trustedOrigins: devOrigins([3100]),
     // Eigenes Cookie, damit sich Shop- und Admin-Sitzung nicht überschreiben
     advanced: { cookiePrefix: 'ct-admin' },
     database: drizzleAdapter(useDb(), {

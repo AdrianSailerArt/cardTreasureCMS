@@ -50,6 +50,17 @@ bun run dev                   # http://localhost:3100
 - Passwort-Login nur für diese Konten und nur mit `NUXT_PUBLIC_DEMO_LOGIN=true`; im Echtbetrieb gibt es nur den Magic-Link.
 - Echte Admins: `bun run make-admin du@firma.de "Dein Name"`, dann Anmeldung per Magic-Link. Die Mail landet lokal in Mailpit (http://localhost:8025, läuft im docker compose des Shops; `NUXT_SMTP_URL=smtp://localhost:1025` in der `.env`).
 
+## Im lokalen Netzwerk
+
+`bun run dev` erkennt die LAN-Adresse und gibt sie aus („CMS im Netzwerk: http://192.168.…:3100“). Anmeldelinks und Links zum Shop
+zeigen dann auf diese Adresse (der Shop muss ebenfalls mit `bun run dev` laufen). Nur lokal: `DEV_HOST=localhost bun run dev`.
+
+## Frontend-Aufbau
+
+Wie im Shop: `components/atoms/` (Präfix `Ui`: Button, Input, Select, Field, Table …), oben allgemeine Components
+(`Panel`, `Tag`, `PageHeader`, `KpiCard` …), Bereichsordner für Scope-Komponenten (`blog/`, `dashboard/`, `images/`, `layout/` …).
+`UiTable`, `useDebounced`, `scripts/lib/lan.ts` und `server/utils/dev-origins.ts` sind Kopien aus dem Shop.
+
 ## Befehle
 
 | Befehl | Zweck |

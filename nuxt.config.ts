@@ -7,6 +7,12 @@ export default defineNuxtConfig({
 
   css: ['flag-icons/css/flag-icons.min.css', '~/assets/css/main.css'],
 
+  // Drei Ebenen (Skill vue-component): atoms/ (Präfix Ui), Components oben, Scope-Komponenten in Bereichsordnern
+  components: [
+    { path: '~/components/atoms', prefix: 'Ui' },
+    '~/components',
+  ],
+
   vite: {
     plugins: [tailwindcss()],
     // Flaggen nicht ins CSS einbetten, sonst landen alle ~540 SVGs in jeder Seite
