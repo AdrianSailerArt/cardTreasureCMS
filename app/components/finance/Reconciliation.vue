@@ -56,12 +56,14 @@ const signed = (c: number) => `${c > 0 ? '+' : ''}${euro(c)}`
 
       <section>
         <p class="text-label text-fg-subtle">Ertrag der Plattform</p>
-        <p class="mt-2 text-small text-fg-muted">Provision abgeschlossener Verkäufe abzüglich der Gebühren auf Zahlungen und der Connect-Gebühren (aktive Verkäuferkonten, Auszahlungen), die Stripe monatlich abbucht.</p>
+        <p class="mt-2 text-small text-fg-muted">Provision plus an Verkäufer weitergegebene Gebühren, abzüglich der Gebühren, die Stripe uns berechnet (Zahlungen, Connect). Soll nie negativ sein.</p>
         <div class="mt-3 flex flex-wrap gap-6">
           <Stat label="Provision" :value="euro(data.platform.commissionCents)" />
+          <Stat label="Weitergegeben" :value="euro(data.platform.feesChargedCents)" />
           <Stat label="Zahlungsgebühren" :value="`−${euro(data.platform.feesCents)}`" />
           <Stat label="Connect" :value="`−${euro(data.platform.connectFeesCents)}`" />
           <Stat label="Netto" :value="euro(data.platform.netCents)" size="lg" />
+          <Tag v-if="data.platform.netCents < 0" tone="danger">Verlust</Tag>
         </div>
       </section>
 

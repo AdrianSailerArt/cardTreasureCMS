@@ -90,7 +90,7 @@ export type Reconciliation = { available: false } | {
   differenceCents: number
   match: Ampel
   owed: { balancesCents: number, escrowCents: number, payoutsInProgressCents: number, refundsPendingCents: number, totalCents: number }
-  platform: { commissionCents: number, feesCents: number, connectFeesCents: number, netCents: number }
+  platform: { commissionCents: number, feesChargedCents: number, feesCents: number, connectFeesCents: number, netCents: number }
   testCardCents: number
   coverageCents: number
   coverage: Ampel
