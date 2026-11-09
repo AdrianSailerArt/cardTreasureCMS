@@ -1,22 +1,21 @@
 <script setup lang="ts">
-import type { CommissionOverride, CommissionTier } from '~/types/admin'
+import type { CommissionOverride } from '~/types/admin'
 
-/** Provision: Staffel nach Verkäufer-Stufe und individuelle Konditionen. Änderungen gelten für neue Verkäufe. */
-const { data, refresh, error } = await useFetch<{ tiers: CommissionTier[], overrides: CommissionOverride[] }>('/api/commission')
-const LEVEL_LABEL: Record<string, string> = { new: 'Neu', bronze: 'Bronze', silver: 'Silber', gold: 'Gold', platinum: 'Platin', warning: 'Auffällig' }
+/** Provision: ein Satz für alle Kunden, Ausnahmen nur per ausdrücklicher Freigabe. Änderungen gelten für neue Verkäufe. */
+const { data, refresh, error } = await useFetch<{ rateBps: number, overrides: CommissionOverride[] }>('/api/commission')
 
-const rates = ref<Record<string, number | null>>({})
-watch(data, (d) => { rates.value = Object.fromEntries((d?.tiers ?? []).map(t => [t.level, t.rateBps])) }, { immediate: true })
-const changed = computed(() => data.value?.tiers.some(t => rates.value[t.level] !== t.rateBps) ?? false)
+const rate = ref<number | null>(null)
+watch(data, (d) => { rate.value = d?.rateBps ?? null }, { immediate: true })
+const changed = computed(() => data.value !== undefined && rate.value !== data.value?.rateBps)
 const saving = ref(false)
 const saved = ref(false)
 const saveError = ref<string | null>(null)
-const saveTiers = async () => {
+const saveRate = async () => {
   saving.value = true
   saveError.value = null
   saved.value = false
   try {
-    await $fetch('/api/commission/tiers', { method: 'PUT', body: { rates: rates.value } })
+    await $fetch('/api/commission/rate', { method: 'PUT', body: { rateBps: rate.value } })
     saved.value = true
     await refresh()
   }
@@ -34,19 +33,15 @@ useSeoMeta({ title: 'Provision – CardTreasure CMS' })
 
 <template>
   <div>
-    <PageHeader title="Provision" description="Satz auf den Warenwert. Gilt eine individuelle Freigabe, hat sie Vorrang; sonst der Satz der aktuellen Verkäufer-Stufe. Festgeschrieben wird beim Bezahlen." />
+    <PageHeader title="Provision" description="Satz auf den Warenwert, für alle Kunden gleich. Abweichungen nur, wenn wir sie einem Kunden ausdrücklich freigeben. Festgeschrieben wird beim Bezahlen." />
     <UiNotice v-if="error" tone="danger" class="mt-4">Shop nicht erreichbar: {{ error.statusMessage }}</UiNotice>
 
     <div v-if="data" class="mt-6 grid gap-6 xl:grid-cols-[360px_1fr]">
-      <Panel title="Staffel nach Stufe">
-        <div class="space-y-3">
-          <div v-for="t in data.tiers" :key="t.level" class="flex items-center justify-between gap-3">
-            <span class="text-sm">{{ LEVEL_LABEL[t.level] ?? t.level }}</span>
-            <div class="w-32"><CommissionRateInput :model-value="rates[t.level] ?? null" @update:model-value="v => rates[t.level] = v" /></div>
-          </div>
-        </div>
+      <Panel title="Allgemeiner Satz">
+        <div class="w-32"><CommissionRateInput v-model="rate" /></div>
+        <p class="mt-3 text-sm text-fg-muted">Gilt für jeden Kunden ohne eigene Freigabe, unabhängig von Bewertungen oder Umsatz.</p>
         <div class="mt-4 flex items-center gap-3">
-          <UiButton :disabled="saving || !changed" @click="saveTiers">Staffel speichern</UiButton>
+          <UiButton :disabled="saving || !changed || rate === null" @click="saveRate">Speichern</UiButton>
           <UiNotice v-if="saved" tone="success">Gespeichert, gilt für neue Verkäufe.</UiNotice>
           <UiNotice v-if="saveError" tone="danger">{{ saveError }}</UiNotice>
         </div>
@@ -54,8 +49,8 @@ useSeoMeta({ title: 'Provision – CardTreasure CMS' })
 
       <div class="space-y-6">
         <Panel title="Individuelle Konditionen freigeben"><CommissionGrantForm @done="refresh" /></Panel>
-        <Panel :title="`Laufend (${active.length})`"><CommissionOverrideList :overrides="active" show-seller @changed="refresh" /></Panel>
-        <Panel v-if="past.length" title="Abgelaufen oder beendet"><CommissionOverrideList :overrides="past" show-seller /></Panel>
+        <Panel :title="`Laufend (${active.length})`"><CommissionOverrideList :overrides="active" show-customer @changed="refresh" /></Panel>
+        <Panel v-if="past.length" title="Abgelaufen oder beendet"><CommissionOverrideList :overrides="past" show-customer /></Panel>
       </div>
     </div>
   </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ReportView } from '~/types/admin'
 
-/** Meldungen von Nutzern: prüfen, sperren, Angebot entfernen, abschließen. */
+/** Meldungen von Kunden: prüfen, sperren, Angebot entfernen, abschließen. */
 const status = ref<'open' | 'handled'>('open')
 const { data: reports, refresh, error } = await useFetch<ReportView[]>('/api/reports', { query: computed(() => ({ status: status.value })), default: () => [] })
 const tabs = [{ value: 'open' as const, label: 'Offen' }, { value: 'handled' as const, label: 'Erledigt' }]
@@ -10,7 +10,7 @@ useSeoMeta({ title: 'Meldungen – CardTreasure CMS' })
 
 <template>
   <div>
-    <PageHeader title="Meldungen" description="Von Nutzern gemeldete Profile, Angebote und Nachrichten. Die gemeldete Person erfährt nicht, wer gemeldet hat; die meldende Person bekommt nach dem Abschluss Bescheid.">
+    <PageHeader title="Meldungen" description="Von Kunden gemeldete Profile, Angebote und Nachrichten. Die gemeldete Person erfährt nicht, wer gemeldet hat; die meldende Person bekommt nach dem Abschluss Bescheid.">
       <UiSegmented v-model="status" :options="tabs" />
     </PageHeader>
     <UiNotice v-if="error" tone="danger" class="mt-4">Shop nicht erreichbar: {{ error.statusMessage }}</UiNotice>

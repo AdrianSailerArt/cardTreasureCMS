@@ -1,5 +1,5 @@
-import type { CommissionOverride, CommissionTier } from '~/types/admin'
+import type { CommissionOverride } from '~/types/admin'
 
-/** Staffel und Freigaben (Catch-all [...path] deckt den Pfad ohne Unterpfad nicht ab). */
-export default defineEventHandler(async (event): Promise<{ tiers: CommissionTier[], overrides: CommissionOverride[] }> =>
+/** Allgemeiner Satz und Freigaben (Catch-all [...path] deckt den Pfad ohne Unterpfad nicht ab). */
+export default defineEventHandler(async (event): Promise<{ rateBps: number, overrides: CommissionOverride[] }> =>
   await shopInternal(event, 'commission'))

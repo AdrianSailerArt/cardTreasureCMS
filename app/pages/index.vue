@@ -28,9 +28,9 @@ const inventory = computed(() => {
     { label: 'Aktive Angebote', value: num(i.activeListings) },
     { label: 'Verfügbare Karten', value: num(i.units) },
     { label: 'Warenwert im Angebot', value: euro(i.value, 0) },
-    { label: 'Verkäufer mit Angeboten', value: num(i.sellers) },
-    { label: 'Nutzer gesamt', value: num(i.users) },
-    { label: 'Neue Nutzer im Zeitraum', value: num(i.newUsers) },
+    { label: 'Kunden mit Angeboten', value: num(i.sellers) },
+    { label: 'Kunden gesamt', value: num(i.users) },
+    { label: 'Neue Kunden im Zeitraum', value: num(i.newUsers) },
   ]
 })
 </script>

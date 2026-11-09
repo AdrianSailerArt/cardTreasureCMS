@@ -1,12 +1,12 @@
 /**
- * Provision pflegen: an die interne Shop-API weiterreichen (dort geprüft, protokolliert, Verkäufer benachrichtigt).
- *   GET  /api/commission                       Staffel und Freigaben
- *   PUT  /api/commission/tiers                 Staffel ändern
+ * Provision pflegen: an die interne Shop-API weiterreichen (dort geprüft, protokolliert, Kunde benachrichtigt).
+ *   GET  /api/commission                       allgemeiner Satz und Freigaben
+ *   PUT  /api/commission/rate                  allgemeinen Satz ändern
  *   POST /api/commission/overrides             Freigabe erteilen
  *   POST /api/commission/overrides/<id>/end    Freigabe beenden
- *   GET  /api/commission/seller/<id>           Satz und Freigaben eines Verkäufers
+ *   GET  /api/commission/customer/<id>         Satz und Freigaben eines Kunden
  */
-const ALLOWED = [/^$/, /^tiers$/, /^overrides$/, /^overrides\/[0-9a-f-]{36}\/end$/, /^seller\/[^/]+$/]
+const ALLOWED = [/^$/, /^rate$/, /^overrides$/, /^overrides\/[0-9a-f-]{36}\/end$/, /^customer\/[^/]+$/]
 
 export default defineEventHandler(async (event): Promise<unknown> => {
   const path = getRouterParam(event, 'path') ?? ''

@@ -54,10 +54,9 @@ export interface SellerRisk {
 }
 
 /** Provision (interne Shop-API, Logik in server/lib/commission.ts des Shops). Sätze in Basispunkten. */
-export interface CommissionTier { level: string, rateBps: number }
-export interface CommissionOverride { id: string, sellerId: string, seller: string, rateBps: number, reason: string, validFrom: string, validUntil: string | null, endedAt: string | null, grantedBy: string | null, active: boolean }
-export interface SellerCommission {
-  current: { rateBps: number, source: 'override' | 'tier', level: string, tierRateBps: number, override: { id: string, reason: string, validUntil: string | null } | null }
+export interface CommissionOverride { id: string, sellerId: string, customer: string, rateBps: number, reason: string, validFrom: string, validUntil: string | null, endedAt: string | null, grantedBy: string | null, active: boolean }
+export interface CustomerCommission {
+  current: { rateBps: number, source: 'override' | 'base', baseRateBps: number, override: { id: string, reason: string, validUntil: string | null } | null }
   overrides: CommissionOverride[]
 }
 

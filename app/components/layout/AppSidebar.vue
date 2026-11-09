@@ -10,7 +10,7 @@ const nav = [
   { to: '/provision', label: 'Provision' },
   { to: '/vertrauen', label: 'Vertrauen' },
   { to: '/meldungen', label: 'Meldungen' },
-  { to: '/nutzer', label: 'Nutzer' },
+  { to: '/nutzer', label: 'Kunden' },
   { to: '/imports', label: 'Imports' },
   { to: '/blog', label: 'Blog' },
   { to: '/sealed', label: 'Sealed' },

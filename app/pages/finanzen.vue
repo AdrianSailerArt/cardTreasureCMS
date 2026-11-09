@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Plattform-Finanzen: Guthaben der Nutzer, Treuhand, Provision, Auszahlungen; Monatsverlauf; höchste Guthaben. */
+/** Plattform-Finanzen: Guthaben der Kunden, Treuhand, Provision, Auszahlungen; Monatsverlauf; höchste Guthaben. */
 interface Finance {
   totals: { balancesCents: number, accounts: number, escrowCents: number, escrowShipments: number, commissionCents: number, payoutsCents: number, refundsCents: number }
   monthly: { month: string, gmvCents: number, commissionCents: number, payoutsCents: number, refundsCents: number }[]
@@ -11,9 +11,9 @@ useSeoMeta({ title: 'Finanzen – CardTreasure CMS' })
 
 <template>
   <div v-if="data">
-    <PageHeader title="Finanzen" description="Aus dem Buchungsjournal. Guthaben und Treuhand sind Geld, das Nutzern gehört; Provision ist der Ertrag der Plattform." />
+    <PageHeader title="Finanzen" description="Aus dem Buchungsjournal. Guthaben und Treuhand sind Geld, das Kunden gehört; Provision ist der Ertrag der Plattform." />
     <div class="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5">
-      <KpiCard label="Guthaben der Nutzer" :value="euro(data.totals.balancesCents, 0)" />
+      <KpiCard label="Guthaben der Kunden" :value="euro(data.totals.balancesCents, 0)" />
       <KpiCard label="In Treuhand" :value="euro(data.totals.escrowCents, 0)" />
       <KpiCard label="Provision gesamt" :value="euro(data.totals.commissionCents, 0)" />
       <KpiCard label="Ausgezahlt" :value="euro(data.totals.payoutsCents, 0)" />
