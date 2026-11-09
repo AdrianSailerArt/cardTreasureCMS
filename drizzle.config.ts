@@ -11,6 +11,7 @@ export default defineConfig({
   casing: 'camelCase',
   introspect: { casing: 'camel' },
   dbCredentials: {
-    url: process.env.NUXT_DATABASE_URL!,
+    // Migrationen und Schema-Abgleich nicht über den Transaktions-Pooler: bei Supabase die Session-Verbindung (Port 5432)
+    url: (process.env.NUXT_DATABASE_MIGRATION_URL || process.env.NUXT_DATABASE_URL)!,
   },
 })
