@@ -307,8 +307,9 @@ const simulate = async () => {
     shipFromAddressId: addressOf.get(s.id)!.id,
     companyName: s.commercial ? `${SHOPS[i % SHOPS.length]} GmbH` : null,
     vatId: s.commercial ? `${s.country}${int(100000000, 999999999)}` : null,
-    stripeAccountId: `acct_demo_${s.id}`,
-    payoutsEnabled: true,
+    // Kein Stripe-Konto: Demo-Verkäufer richten die Auszahlung wie echte Kunden über Stripe ein (Testmodus)
+    stripeAccountId: null,
+    payoutsEnabled: false,
     createdAt: daysAgo(int(CFG.days, 300)).toISOString(),
   })))
 
