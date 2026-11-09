@@ -36,6 +36,8 @@ export default defineNuxtConfig({
     shopInternalUrl: 'http://localhost:3000',
     /** SMTP für Anmeldelinks, lokal Mailpit (smtp://localhost:1025). Leer: nur Konsole. */
     smtpUrl: '',
+    /** Brevo (EU): ist der API-Schlüssel gesetzt, geht der Versand dorthin statt per SMTP; sandbox true stellt nicht zu */
+    brevo: { apiKey: '', sandbox: false },
     mailFrom: 'CardTreasure CMS <cms@cardtreasure.local>',
     /** Gleicher Objektspeicher wie der Shop (lokal SeaweedFS aus dessen docker compose) */
     media: { endpoint: 'http://localhost:8333', bucket: 'cardtreasure-media', accessKey: 'cardtreasure', secretKey: 'cardtreasure-dev', region: 'us-east-1' },

@@ -1,17 +1,20 @@
-import nodemailer from 'nodemailer'
+import { createMailer, mailerKind, type Mailer } from '@cardtreasure/core/mailer'
 
 /*
- * Mailversand fürs CMS (nur Anmeldelinks für Admins). Lokal an Mailpit aus dem Shop-docker-compose
- * (http://localhost:8025). Ohne NUXT_SMTP_URL nur Konsole.
+ * Mailversand fürs CMS (nur Anmeldelinks für Admins), gleicher Mailer wie im Shop:
+ * Brevo (NUXT_BREVO_API_KEY, optional NUXT_BREVO_SANDBOX), sonst SMTP (NUXT_SMTP_URL, lokal Mailpit), sonst Konsole.
  */
-let transport: ReturnType<typeof nodemailer.createTransport> | undefined
+let mailer: Mailer | undefined
 
-export const sendMail = async (to: string, subject: string, text: string, html: string) => {
-  const config = useRuntimeConfig()
-  if (!config.smtpUrl) {
-    console.info(`[mail] an ${to}: ${subject}\n${text}`)
-    return
+const useMailer = () => {
+  if (!mailer) {
+    const config = useRuntimeConfig()
+    const cfg = { from: config.mailFrom, smtpUrl: config.smtpUrl || undefined, brevoApiKey: config.brevo.apiKey || undefined, brevoSandbox: String(config.brevo.sandbox) === 'true' }
+    mailer = createMailer(cfg)
+    console.info(`[mail] Versand über ${mailerKind(cfg)}`)
   }
-  transport ??= nodemailer.createTransport(config.smtpUrl)
-  await transport.sendMail({ from: config.mailFrom, to, subject, text, html })
+  return mailer
 }
+
+export const sendMail = async (to: string, subject: string, text: string, html: string, tag = 'cms_magic_link') =>
+  await useMailer().send({ to, subject, text, html, tag })
