@@ -1,4 +1,4 @@
-import { replaceCardImage } from '../../../lib/images'
+import { replaceCardImage } from '@cardtreasure/core/images'
 
 /** Kartenbild eines Drucks ersetzen (multipart: file, optional reason). Der Shop zeigt sofort den Ersatz. */
 export default defineEventHandler(async (event) => {

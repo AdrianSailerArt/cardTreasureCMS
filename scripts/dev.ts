@@ -3,7 +3,7 @@
  * damit Anmeldelinks und Links/Bilder zum Shop auch auf anderen Geräten funktionieren.
  * (Gleiches Vorgehen wie scripts/dev.ts im Shop.) Nur lokal: DEV_HOST=localhost bun run dev
  */
-import { lanAddress } from './lib/lan'
+import { lanAddress } from '@cardtreasure/core/lan'
 
 const port = Number(process.env.PORT ?? 3100)
 const ip = process.env.DEV_HOST === 'localhost' ? null : lanAddress()

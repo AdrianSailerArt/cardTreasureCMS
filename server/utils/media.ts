@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
-import { createS3Store, MAX_UPLOAD_BYTES, MediaError, type MediaStore } from '../lib/media'
-import type { SqlDb } from '../lib/images'
+import { createS3Store, MAX_UPLOAD_BYTES, MediaError, type MediaStore } from '@cardtreasure/core/media'
+import type { SqlDb } from '@cardtreasure/core/images'
 
 let store: MediaStore | undefined
 

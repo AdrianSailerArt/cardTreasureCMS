@@ -1,3 +1,4 @@
+import { devOrigins } from '@cardtreasure/core/dev-origins'
 import type { H3Event } from 'h3'
 import { eq } from 'drizzle-orm'
 import { betterAuth } from 'better-auth'
@@ -11,7 +12,7 @@ const createAuth = () => {
     baseURL: config.public.siteUrl,
     secret: config.betterAuthSecret,
     // Entwicklung: localhost und LAN-Adressen (Tablet/Handy im WLAN)
-    trustedOrigins: devOrigins([3100]),
+    trustedOrigins: devOrigins([3100], import.meta.dev),
     // Eigenes Cookie, damit sich Shop- und Admin-Sitzung nicht überschreiben
     advanced: { cookiePrefix: 'ct-admin' },
     database: drizzleAdapter(useDb(), {

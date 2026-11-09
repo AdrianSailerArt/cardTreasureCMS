@@ -2,6 +2,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  // Gemeinsamer Code mit dem Shop (UiTable, useDebounced, useChartTheme, Versand, slugify): github.com/AdrianSailerArt/cardTreasureCore
+  extends: ['@cardtreasure/core/nuxt'],
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 

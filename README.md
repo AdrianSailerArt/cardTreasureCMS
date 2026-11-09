@@ -59,7 +59,8 @@ zeigen dann auf diese Adresse (der Shop muss ebenfalls mit `bun run dev` laufen)
 
 Wie im Shop: `components/atoms/` (Präfix `Ui`: Button, Input, Select, Field, Table …), oben allgemeine Components
 (`Panel`, `Tag`, `PageHeader`, `KpiCard` …), Bereichsordner für Scope-Komponenten (`blog/`, `dashboard/`, `images/`, `layout/` …).
-`UiTable`, `useDebounced`, `scripts/lib/lan.ts` und `server/utils/dev-origins.ts` sind Kopien aus dem Shop.
+`UiTable`, `useDebounced`, `useChartTheme`/`chartBase`, Versand, `slugify` und LAN-Erkennung kommen aus dem gemeinsamen Paket
+[`@cardtreasure/core`](https://github.com/AdrianSailerArt/cardTreasureCore) (Nuxt-Layer, `extends` in `nuxt.config.ts`, feste Version in `package.json`).
 
 ## Befehle
 
@@ -89,7 +90,7 @@ Demo-Nutzer haben `is_demo = true` und E-Mails unter `@demo.cardtreasure.test`.
 Unter **Kartenbilder** einen Druck suchen (Name de/en oder Set-Kürzel), eigenes Bild hochladen und einen Grund angeben,
 z.B. falsche Sprache oder falscher Druck. Der Shop zeigt den Ersatz sofort, in Browsern mit altem Cache spätestens nach einer Stunde.
 „Original wiederherstellen“ entfernt den Ersatz. Die Bilder liegen im Objektspeicher des Shops (SeaweedFS aus dessen
-`docker compose`, localhost:8333). `server/lib/media.ts` und `images.ts` sind Kopien aus dem Shop.
+`docker compose`, localhost:8333). Bildverarbeitung und Speicher kommen aus `@cardtreasure/core`.
 
 ## Nächtlicher Import
 

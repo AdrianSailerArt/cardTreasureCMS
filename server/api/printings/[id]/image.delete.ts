@@ -1,4 +1,4 @@
-import { resetCardImage } from '../../../lib/images'
+import { resetCardImage } from '@cardtreasure/core/images'
 
 /** Ersatz entfernen: wieder das Bild aus der Quelle (Scryfall, TCGdex, YGOPRODeck). */
 export default defineEventHandler(async (event) => {

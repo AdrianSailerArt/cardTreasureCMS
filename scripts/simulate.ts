@@ -2,7 +2,7 @@ import { hashPassword } from 'better-auth/crypto'
 import { inArray, sql } from 'drizzle-orm'
 import { client, db, schema } from './import/lib/db'
 import { chunk, parseArgs } from './import/lib/util'
-import { quoteShipping, type PackageItem } from './lib/shipping'
+import { quoteShipping, type PackageItem } from '@cardtreasure/core/shipping'
 
 /*
  * Simuliert einen laufenden Marktplatz mit Demo-Daten:

@@ -3,8 +3,8 @@
  * (products, kind = sealed), damit Angebote, Warenkorb, Wunschliste und Preisverlauf sofort funktionieren.
  */
 import { sql } from 'drizzle-orm'
-import { MediaError, mediaKey, processImage, type MediaStore } from './media'
-import type { SqlDb } from './images'
+import { MediaError, mediaKey, processImage, type MediaStore } from '@cardtreasure/core/media'
+import type { SqlDb } from '@cardtreasure/core/images'
 
 const rowsOf = async <T>(db: SqlDb, query: ReturnType<typeof sql>) => await db.execute(query) as unknown as T[]
 
