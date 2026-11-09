@@ -875,6 +875,7 @@ export const priceHistory = pgTable("price_history", {
 	soldCount: integer("sold_count").default(0).notNull(),
 	listingCount: integer("listing_count").default(0).notNull(),
 }, (table) => [
+	index("price_history_day_idx").using("btree", table.day.asc().nullsLast().op("date_ops")),
 	foreignKey({
 			columns: [table.productId],
 			foreignColumns: [products.id],

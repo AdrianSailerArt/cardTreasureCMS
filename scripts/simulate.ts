@@ -530,27 +530,13 @@ const simulate = async () => {
   console.log(`Bewertungen: ${reviewRows.length}, Unterhaltungen: ${conversationRows.length}`)
 }
 
-/** Täglicher Preisverlauf aus den simulierten Verkäufen, Trend = gleitender 7-Tage-Durchschnitt. */
+/**
+ * Preisverlauf aus den simulierten Verkäufen. Die Berechnung steckt in der Datenbankfunktion refresh_price_history
+ * (Migration im Shop), damit Shop-Job und Simulation exakt gleich rechnen.
+ */
 const rebuildPriceHistory = async () => {
-  await db.delete(schema.priceHistory)
-  await db.execute(sql`
-    insert into price_history (product_id, finish, day, low_cents, avg_sold_cents, sold_count, listing_count, trend_cents)
-    with daily as (
-      select si.product_id, si.finish, (o.paid_at at time zone 'Europe/Berlin')::date as day,
-             min(si.unit_price_cents) as low_cents,
-             round(sum(si.unit_price_cents * si.quantity)::numeric / sum(si.quantity))::int as avg_sold_cents,
-             sum(si.quantity)::int as sold_count
-      from shipment_items si
-      join shipments s on s.id = si.shipment_id and s.status <> 'cancelled'
-      join orders o on o.id = s.order_id and o.paid_at is not null
-      group by 1, 2, 3
-    )
-    select d.product_id, d.finish, d.day, d.low_cents, d.avg_sold_cents, d.sold_count,
-           (select count(*)::int from listings l where l.product_id = d.product_id and l.finish = d.finish and l.status = 'active'),
-           round(avg(d.avg_sold_cents) over (partition by d.product_id, d.finish order by d.day
-                                              range between interval '6 days' preceding and current row))::int
-    from daily d
-  `)
+  await db.execute(sql`delete from price_history`)
+  await db.execute(sql`select refresh_price_history((now() at time zone 'Europe/Berlin')::date - 364, (now() at time zone 'Europe/Berlin')::date)`)
 }
 
 try {
