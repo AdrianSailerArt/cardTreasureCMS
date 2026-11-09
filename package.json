@@ -15,7 +15,7 @@
     "make-admin": "bun scripts/make-admin.ts"
   },
   "dependencies": {
-    "@cardtreasure/core": "git+ssh://git@github.com/AdrianSailerArt/cardTreasureCore.git#v0.4.1",
+    "@cardtreasure/core": "git+ssh://git@github.com/AdrianSailerArt/cardTreasureCore.git#v0.4.3",
     "@tailwindcss/vite": "^4.3.5",
     "aws4fetch": "^1.0.20",
     "better-auth": "^1.7.18",
