@@ -29,7 +29,7 @@ useSeoMeta({ title: 'Finanzen – CardTreasure CMS' })
       <UiTable :min-width="480">
         <template #head><th>Konto</th><th>E-Mail</th><th class="text-right">Guthaben</th></template>
         <tr v-for="b in data.topBalances" :key="b.userId">
-          <td><NuxtLink :to="`/nutzer/${b.userId}`" class="hover:text-accent">{{ b.name }}</NuxtLink></td>
+          <td><NuxtLink :to="`/customers/${b.userId}`" class="hover:text-accent">{{ b.name }}</NuxtLink></td>
           <td class="text-fg-muted">{{ b.email }}</td>
           <td class="text-right tabular-nums">{{ euro(b.balanceCents) }}</td>
         </tr>

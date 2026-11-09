@@ -24,7 +24,7 @@ const percent = (bps: number) => `${(bps / 100).toLocaleString('de-DE')} %`
       <th v-if="showCustomer">Kunde</th><th class="text-right">Satz</th><th>Grund</th><th>gültig</th><th>Status</th><th />
     </template>
     <tr v-for="o in overrides" :key="o.id">
-      <td v-if="showCustomer"><NuxtLink :to="`/nutzer/${o.sellerId}`" class="hover:text-accent">{{ o.customer }}</NuxtLink></td>
+      <td v-if="showCustomer"><NuxtLink :to="`/customers/${o.sellerId}`" class="hover:text-accent">{{ o.customer }}</NuxtLink></td>
       <td class="text-right tabular-nums">{{ percent(o.rateBps) }}</td>
       <td class="text-fg-muted">{{ o.reason }}<span v-if="o.grantedBy" class="block text-xs text-fg-subtle">von {{ o.grantedBy }}</span></td>
       <td class="tabular-nums text-fg-muted">{{ dateTime(o.validFrom).slice(0, 8) }} – {{ o.endedAt ? dateTime(o.endedAt).slice(0, 8) : o.validUntil ? dateTime(o.validUntil).slice(0, 8) : 'offen' }}</td>

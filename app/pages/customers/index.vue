@@ -25,7 +25,7 @@ useSeoMeta({ title: 'Kunden – CardTreasure CMS' })
           <td>
             <span class="flex items-center gap-2">
               <CountryFlag v-if="u.country" :code="u.country" />
-              <NuxtLink :to="`/nutzer/${u.id}`" class="hover:text-accent">{{ u.name }}</NuxtLink>
+              <NuxtLink :to="`/customers/${u.id}`" class="hover:text-accent">{{ u.name }}</NuxtLink>
               <span v-if="u.companyName || (u.displayName && u.displayName !== u.name)" class="text-xs text-fg-subtle">{{ u.companyName ?? u.displayName }}</span>
             </span>
           </td>

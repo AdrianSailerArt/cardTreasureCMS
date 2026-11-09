@@ -22,9 +22,9 @@ useSeoMeta({ title: () => `${u.value.name} – Kunden – CardTreasure CMS` })
 <template>
   <div v-if="data">
     <PageHeader :title="u.name" :description="u.email">
-      <template #above><NuxtLink to="/nutzer" class="text-sm text-fg-subtle hover:text-accent">← Kunden</NuxtLink></template>
+      <template #above><NuxtLink to="/customers" class="text-sm text-fg-subtle hover:text-accent">← Kunden</NuxtLink></template>
       <CustomerKindTag :role="u.role" :seller-type="u.sellerType" />
-      <a :href="`${shopUrl}/profil/${u.id}`" target="_blank" class="text-sm text-fg-subtle hover:text-accent">Öffentliches Profil ↗</a>
+      <a :href="`${shopUrl}/profile/${u.id}`" target="_blank" class="text-sm text-fg-subtle hover:text-accent">Öffentliches Profil ↗</a>
     </PageHeader>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">

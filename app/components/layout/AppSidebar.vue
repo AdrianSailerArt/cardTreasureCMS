@@ -6,15 +6,15 @@ const shopUrl = useRuntimeConfig().public.shopUrl
 
 const nav = [
   { to: '/', label: 'Auswertungen' },
-  { to: '/finanzen', label: 'Finanzen' },
-  { to: '/provision', label: 'Provision' },
-  { to: '/vertrauen', label: 'Vertrauen' },
-  { to: '/meldungen', label: 'Meldungen' },
-  { to: '/nutzer', label: 'Kunden' },
+  { to: '/finance', label: 'Finanzen' },
+  { to: '/commission', label: 'Provision' },
+  { to: '/trust', label: 'Vertrauen' },
+  { to: '/reports', label: 'Meldungen' },
+  { to: '/customers', label: 'Kunden' },
   { to: '/imports', label: 'Imports' },
   { to: '/blog', label: 'Blog' },
   { to: '/sealed', label: 'Sealed' },
-  { to: '/kartenbilder', label: 'Kartenbilder' },
+  { to: '/card-images', label: 'Kartenbilder' },
 ]
 const isActive = (to: string) => (to === '/' ? route.path === '/' : route.path.startsWith(to))
 

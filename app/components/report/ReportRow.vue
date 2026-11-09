@@ -47,12 +47,12 @@ const handle = async (status: 'resolved' | 'dismissed') => {
         </Tag>
       </p>
       <p class="mt-2">
-        gegen <NuxtLink :to="`/nutzer/${report.subjectId}`" class="font-medium hover:text-accent">{{ report.subject }}</NuxtLink>
+        gegen <NuxtLink :to="`/customers/${report.subjectId}`" class="font-medium hover:text-accent">{{ report.subject }}</NuxtLink>
         <Tag v-if="report.openAgainstSubject > 1" tone="danger" class="ml-1">{{ report.openAgainstSubject }} offene Meldungen</Tag>
         <Tag v-if="report.subjectBlocked" tone="danger" class="ml-1">gesperrt</Tag>
       </p>
       <p v-if="report.context" class="mt-1 rounded-lg bg-surface-muted px-3 py-2 text-fg-muted">
-        <a v-if="report.targetType === 'listing'" :href="`${shopUrl}/profil/${report.subjectId}`" target="_blank" class="hover:text-accent">{{ report.context }} ↗</a>
+        <a v-if="report.targetType === 'listing'" :href="`${shopUrl}/profile/${report.subjectId}`" target="_blank" class="hover:text-accent">{{ report.context }} ↗</a>
         <template v-else>„{{ report.context }}“</template>
       </p>
       <p v-if="report.text" class="mt-1">{{ report.text }}</p>

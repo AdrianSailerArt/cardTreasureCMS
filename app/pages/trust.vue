@@ -27,7 +27,7 @@ useSeoMeta({ title: 'Vertrauen – CardTreasure CMS' })
           <th>Verkäufer</th><th>Signale</th><th class="text-right">Wert</th><th class="text-right">Bewertungen</th><th class="text-right">Ø</th><th class="text-right">vollständig</th><th class="text-right">überfällig</th><th class="text-right">Stornos</th><th class="text-right">Angebote</th><th />
         </template>
         <tr v-for="r in risks" :key="r.sellerId">
-          <td><span class="flex items-center gap-2"><CountryFlag :code="r.country" /><NuxtLink :to="`/nutzer/${r.sellerId}`" class="hover:text-accent">{{ r.name }}</NuxtLink></span></td>
+          <td><span class="flex items-center gap-2"><CountryFlag :code="r.country" /><NuxtLink :to="`/customers/${r.sellerId}`" class="hover:text-accent">{{ r.name }}</NuxtLink></span></td>
           <td><ModerationRiskFlags :flags="r.flags" :blocked="r.blocked" /></td>
           <td class="text-right tabular-nums">{{ r.score }}</td>
           <td class="text-right tabular-nums">{{ r.ratedSales }}</td>
