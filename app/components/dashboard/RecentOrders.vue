@@ -9,8 +9,8 @@ defineProps<{ orders: RecentOrder[] }>()
   <UiTable :min-width="480">
         <tr v-for="o in orders" :key="o.number">
           <td>
-            <span class="font-mono text-xs">{{ o.number }}</span>
-            <span class="flex items-center gap-1.5 text-xs text-fg-subtle">
+            <span class="font-mono text-meta">{{ o.number }}</span>
+            <span class="flex items-center gap-1.5 text-meta text-fg-subtle">
               <CountryFlag v-if="o.buyerCountry" :code="o.buyerCountry" />
               {{ o.buyer }} · {{ dateTime(o.createdAt) }}
             </span>

@@ -15,7 +15,7 @@ const languages = (p: PostRow) => [p.titleDe && 'de', p.titleEn && 'en'].filter(
         <tr v-for="p in posts" :key="p.id">
           <td>
             <NuxtLink :to="`/blog/${p.id}`" class="hover:text-accent">{{ p.titleDe ?? p.titleEn }}</NuxtLink>
-            <span class="block font-mono text-xs text-fg-subtle">/{{ p.slug }} · {{ languages(p) }}</span>
+            <span class="block font-mono text-meta text-fg-subtle">/{{ p.slug }} · {{ languages(p) }}</span>
           </td>
           <td><StatusTag :status="p.status" /></td>
           <td class="text-fg-muted">{{ p.game ? GAME_LABEL[p.game] : '–' }}</td>

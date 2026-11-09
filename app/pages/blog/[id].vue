@@ -104,7 +104,7 @@ const save = async () => {
   <div>
     <PageHeader :title="isNew ? 'Neuer Beitrag' : (form.translations.de.title || form.translations.en.title || 'Beitrag')">
       <template #above>
-        <NuxtLink to="/blog" class="text-sm text-fg-subtle hover:text-accent">← Alle Beiträge</NuxtLink>
+        <NuxtLink to="/blog" class="text-small text-fg-subtle hover:text-accent">← Alle Beiträge</NuxtLink>
       </template>
       <UiSelect v-model="form.status" :options="statusOptions" class="w-auto" />
       <UiButton :disabled="saving" @click="save">Speichern</UiButton>
@@ -125,7 +125,7 @@ const save = async () => {
 
     <div class="mt-8 flex items-center justify-between gap-4 border-b border-line pb-3">
       <UiSegmented v-model="locale" :options="localeOptions" />
-      <span class="text-xs text-fg-subtle">
+      <span class="text-meta text-fg-subtle">
         ausgefüllt: {{ (['de', 'en'] as const).filter(l => form.translations[l].title).join(', ') || '–' }}
       </span>
     </div>
@@ -136,16 +136,16 @@ const save = async () => {
         <UiField label="Teaser"><UiInput v-model="current.excerpt" :rows="2" /></UiField>
         <div>
           <div class="mb-1 flex items-end justify-between gap-2">
-            <span class="text-xs uppercase tracking-wider text-fg-subtle">Text (Markdown)</span>
+            <span class="text-label text-fg-subtle">Text (Markdown)</span>
             <BlogCardRefPicker @pick="insertCard" />
           </div>
           <UiInput ref="editor" v-model="current.bodyMd" :rows="22" mono placeholder="## Überschrift&#10;&#10;Text mit Kartenverweis :card{ref=&quot;mtg/…&quot;}" />
-          <p class="mt-1 text-xs text-fg-subtle">Kartenverweise: <code>:card{ref="spiel/karten-slug"}</code>, am einfachsten über die Suche oben einfügen.</p>
+          <p class="mt-1 text-meta text-fg-subtle">Kartenverweise: <code>:card{ref="spiel/karten-slug"}</code>, am einfachsten über die Suche oben einfügen.</p>
         </div>
       </div>
 
       <div class="min-w-0">
-        <p class="mb-1 text-xs uppercase tracking-wider text-fg-subtle">Vorschau</p>
+        <p class="mb-1 text-label text-fg-subtle">Vorschau</p>
         <BlogMarkdownPreview :title="current.title" :excerpt="current.excerpt" :markdown="current.bodyMd" :locale="locale" />
       </div>
     </div>

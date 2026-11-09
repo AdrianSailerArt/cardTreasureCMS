@@ -22,9 +22,9 @@ useSeoMeta({ title: () => `${u.value.name} – Kunden – CardTreasure CMS` })
 <template>
   <div v-if="data">
     <PageHeader :title="u.name" :description="u.email">
-      <template #above><NuxtLink to="/customers" class="text-sm text-fg-subtle hover:text-accent">← Kunden</NuxtLink></template>
+      <template #above><NuxtLink to="/customers" class="text-small text-fg-subtle hover:text-accent">← Kunden</NuxtLink></template>
       <CustomerKindTag :role="u.role" :seller-type="u.sellerType" />
-      <a :href="`${shopUrl}/profile/${u.id}`" target="_blank" class="text-sm text-fg-subtle hover:text-accent">Öffentliches Profil ↗</a>
+      <a :href="`${shopUrl}/profile/${u.id}`" target="_blank" class="text-small text-fg-subtle hover:text-accent">Öffentliches Profil ↗</a>
     </PageHeader>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -44,19 +44,19 @@ useSeoMeta({ title: () => `${u.value.name} – Kunden – CardTreasure CMS` })
         <template v-if="u.blockedAt">
           <Tag tone="danger">gesperrt seit {{ dateTime(u.blockedAt) }}</Tag>
           <Tag :tone="u.blockedUntil ? 'warning' : 'danger'" class="ml-1">{{ u.blockedUntil ? `bis ${dateTime(u.blockedUntil)}` : 'unbefristet' }}</Tag>
-          <p class="mt-2 text-sm text-fg-muted">Grund: {{ u.blockedReason }}</p>
+          <p class="mt-2 text-small text-fg-muted">Grund: {{ u.blockedReason }}</p>
           <div class="mt-4"><ModerationActionButton label="Entsperren" action="unblock" tone="neutral" :require-reason="false" :payload="{ userId: u.id }" @done="refresh" /></div>
         </template>
         <template v-else>
           <Tag tone="success">aktiv</Tag>
-          <p class="mt-2 text-sm text-fg-muted">Sperren beendet alle Sitzungen und pausiert alle Angebote. Offene Sendungen laufen weiter.</p>
+          <p class="mt-2 text-small text-fg-muted">Sperren beendet alle Sitzungen und pausiert alle Angebote. Offene Sendungen laufen weiter.</p>
           <div v-if="u.role !== 'admin'" class="mt-4"><ModerationActionButton label="Sperren" action="block" :payload="{ userId: u.id }" @done="refresh" /></div>
         </template>
       </Panel>
     </div>
 
     <Panel v-if="commission" class="mt-6" title="Provision">
-      <p class="text-sm">
+      <p class="text-small">
         Aktuell <strong class="tabular-nums">{{ (commission.current.rateBps / 100).toLocaleString('de-DE') }} %</strong>
         <Tag v-if="commission.current.source === 'override'" tone="success" class="ml-2">individuell</Tag>
         <Tag v-else class="ml-2">allgemeiner Satz</Tag>
@@ -74,7 +74,7 @@ useSeoMeta({ title: () => `${u.value.name} – Kunden – CardTreasure CMS` })
         <tr v-for="l in data.listings" :key="l.id">
           <td>
             <a :href="`${shopUrl}/${l.game}/${l.kind === 'sealed' ? 'sealed' : 'cards'}/${l.slug}`" target="_blank" class="hover:text-accent">{{ l.name }}</a>
-            <span class="ml-1 text-xs text-fg-subtle">{{ GAME_LABEL[l.game] }}</span>
+            <span class="ml-1 text-meta text-fg-subtle">{{ GAME_LABEL[l.game] }}</span>
           </td>
           <td class="text-fg-muted">{{ l.condition ?? 'Sealed' }}</td>
           <td class="text-right tabular-nums">{{ l.quantity }}</td>
@@ -98,15 +98,15 @@ useSeoMeta({ title: () => `${u.value.name} – Kunden – CardTreasure CMS` })
     </Panel>
 
     <Panel class="mt-6" title="Moderations-Protokoll">
-      <ul v-if="data.log.length" class="divide-y divide-line text-sm">
+      <ul v-if="data.log.length" class="divide-y divide-line text-small">
         <li v-for="e in data.log" :key="e.id" class="flex flex-wrap gap-x-3 py-2">
           <span class="tabular-nums text-fg-subtle">{{ dateTime(e.createdAt) }}</span>
           <span>{{ ACTION_LABEL[e.action] ?? e.action }}</span>
           <span v-if="e.reason" class="text-fg-muted">„{{ e.reason }}“</span>
-          <span class="ml-auto text-xs text-fg-subtle">{{ e.admin ?? 'unbekannt' }}</span>
+          <span class="ml-auto text-meta text-fg-subtle">{{ e.admin ?? 'unbekannt' }}</span>
         </li>
       </ul>
-      <p v-else class="text-sm text-fg-muted">Noch keine Eingriffe.</p>
+      <p v-else class="text-small text-fg-muted">Noch keine Eingriffe.</p>
     </Panel>
   </div>
 </template>

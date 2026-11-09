@@ -19,7 +19,7 @@ useSeoMeta({ title: 'Finanzen – CardTreasure CMS' })
       <Stat framed size="lg" label="Ausgezahlt" :value="euro(data.totals.payoutsCents, 0)" />
       <Stat framed size="lg" label="Erstattet" :value="euro(data.totals.refundsCents, 0)" />
     </div>
-    <p class="mt-2 text-xs text-fg-subtle">{{ num(data.totals.accounts) }} Konten mit Guthaben · {{ num(data.totals.escrowShipments) }} offene Sendungen in Treuhand</p>
+    <p class="mt-2 text-meta text-fg-subtle">{{ num(data.totals.accounts) }} Konten mit Guthaben · {{ num(data.totals.escrowShipments) }} offene Sendungen in Treuhand</p>
 
     <Panel class="mt-6" title="Pro Monat (12 Monate)">
       <FinanceMonthlyChart :monthly="data.monthly" />

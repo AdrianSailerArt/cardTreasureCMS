@@ -25,8 +25,8 @@ useSeoMeta({ title: 'Sealed – CardTreasure CMS' })
           <td>
             <span class="flex items-center gap-3">
               <img v-if="s.imageId" :src="`${shopUrl}/media/${s.imageId}?size=thumb`" alt="" class="h-10 w-10 rounded object-contain">
-              <span class="grid h-10 w-10 place-items-center rounded bg-surface-muted text-[10px] text-fg-subtle" v-else>–</span>
-              <span>{{ s.nameDe ?? s.name }} <span class="block text-xs text-fg-subtle">{{ GAME_LABEL[s.game] }}</span></span>
+              <span class="grid h-10 w-10 place-items-center rounded bg-surface-muted text-micro text-fg-subtle" v-else>–</span>
+              <span>{{ s.nameDe ?? s.name }} <span class="block text-meta text-fg-subtle">{{ GAME_LABEL[s.game] }}</span></span>
             </span>
           </td>
           <td><Tag>{{ SEALED_TYPE_LABEL[s.type] ?? s.type }}</Tag></td>

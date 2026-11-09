@@ -21,7 +21,7 @@ const pick = (s: { id: string, name: string } | null) => {
 
 <template>
   <div>
-    <div v-if="model" class="flex items-center gap-2 text-sm">
+    <div v-if="model" class="flex items-center gap-2 text-small">
       <Tag tone="info">{{ label ?? 'Set gewählt' }}</Tag>
       <UiButton size="sm" variant="ghost" @click="pick(null)">entfernen</UiButton>
     </div>

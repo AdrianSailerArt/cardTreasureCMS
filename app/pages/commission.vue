@@ -39,7 +39,7 @@ useSeoMeta({ title: 'Provision – CardTreasure CMS' })
     <div v-if="data" class="mt-6 grid gap-6 xl:grid-cols-[360px_1fr]">
       <Panel title="Allgemeiner Satz">
         <div class="w-32"><CommissionRateInput v-model="rate" /></div>
-        <p class="mt-3 text-sm text-fg-muted">Gilt für jeden Kunden ohne eigene Freigabe, unabhängig von Bewertungen oder Umsatz.</p>
+        <p class="mt-3 text-small text-fg-muted">Gilt für jeden Kunden ohne eigene Freigabe, unabhängig von Bewertungen oder Umsatz.</p>
         <div class="mt-4 flex items-center gap-3">
           <UiButton :disabled="saving || !changed || rate === null" @click="saveRate">Speichern</UiButton>
           <UiNotice v-if="saved" tone="success">Gespeichert, gilt für neue Verkäufe.</UiNotice>

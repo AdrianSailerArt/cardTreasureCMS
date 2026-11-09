@@ -33,8 +33,8 @@ const demoLogin = async () => {
 <template>
   <div class="flex min-h-screen items-center justify-center px-4">
     <div class="w-full max-w-sm">
-      <h1 class="text-4xl">Card<span class="text-accent">Treasure</span></h1>
-      <p class="mt-1 text-sm uppercase tracking-widest text-fg-subtle">Interner Bereich</p>
+      <h1 class="text-headline">Card<span class="text-accent">Treasure</span></h1>
+      <p class="mt-1 text-label text-fg-subtle">Interner Bereich</p>
 
       <form v-if="state !== 'sent'" class="mt-10" @submit.prevent="sendLink">
         <UiField label="E-Mail">
@@ -43,14 +43,14 @@ const demoLogin = async () => {
         <UiButton type="submit" class="mt-4 w-full" :disabled="state === 'sending' || !email.includes('@')">Anmeldelink senden</UiButton>
         <UiNotice v-if="state === 'error'" tone="danger" class="mt-3">Das hat nicht geklappt. Nur Admins können sich anmelden.</UiNotice>
       </form>
-      <p v-else class="mt-10 text-sm leading-relaxed text-fg-muted">
+      <p v-else class="mt-10 text-small leading-relaxed text-fg-muted">
         Falls <strong class="text-fg">{{ email }}</strong> ein Admin-Konto hat, ist ein Anmeldelink unterwegs.
         Lokal steht er in der Server-Konsole.
       </p>
 
       <Panel v-if="config.public.demoLogin" title="Demo-Zugang" class="mt-10">
-        <p class="text-sm text-fg-muted">Admin aus der Simulation (<code>bun run simulate</code>):</p>
-        <p class="mt-2 font-mono text-xs text-fg-subtle">{{ DEMO.email }} · {{ DEMO.password }}</p>
+        <p class="text-small text-fg-muted">Admin aus der Simulation (<code>bun run simulate</code>):</p>
+        <p class="mt-2 font-mono text-meta text-fg-subtle">{{ DEMO.email }} · {{ DEMO.password }}</p>
         <UiButton variant="ghost" class="mt-4 w-full" @click="demoLogin">Als Demo-Admin anmelden</UiButton>
         <UiNotice v-if="demoError" tone="danger" class="mt-3">Demo-Admin nicht gefunden. Zuerst <code>bun run simulate --reset</code> ausführen.</UiNotice>
       </Panel>

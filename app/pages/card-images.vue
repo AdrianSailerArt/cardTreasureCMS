@@ -18,7 +18,7 @@ useSeoMeta({ title: 'Kartenbilder – CardTreasure CMS' })
     <div class="mt-6 max-w-md">
       <UiInput v-model="q" placeholder="Kartenname (de/en) oder Set-Kürzel …" />
     </div>
-    <p class="mt-3 text-sm text-fg-muted">
+    <p class="mt-3 text-small text-fg-muted">
       {{ q.trim().length >= 2 ? `${printings.length} Drucke` : printings.length ? 'Zuletzt ersetzte Bilder' : 'Noch keine Bilder ersetzt. Suche oben nach einer Karte.' }}
     </p>
     <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

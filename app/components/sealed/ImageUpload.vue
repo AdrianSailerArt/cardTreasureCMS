@@ -30,9 +30,9 @@ const upload = async (files: FileList | null) => {
   <div>
     <div class="grid aspect-square w-48 place-items-center overflow-hidden rounded-xl border border-line bg-surface-muted">
       <img v-if="imageId" :src="`${shopUrl}/media/${imageId}`" alt="" class="h-full w-full object-contain">
-      <span v-else class="text-xs text-fg-subtle">kein Bild</span>
+      <span v-else class="text-meta text-fg-subtle">kein Bild</span>
     </div>
-    <label class="mt-3 inline-flex min-h-10 cursor-pointer items-center rounded-md px-4 text-xs font-semibold uppercase tracking-[0.08em] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent bg-surface-muted hover:text-accent" :class="{ 'pointer-events-none opacity-50': busy }">
+    <label class="mt-3 inline-flex min-h-10 cursor-pointer items-center rounded-md px-4 text-button focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent bg-surface-muted hover:text-accent" :class="{ 'pointer-events-none opacity-50': busy }">
       {{ busy ? 'Lädt …' : imageId ? 'Bild ersetzen' : 'Bild hochladen' }}
       <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="upload(($event.target as HTMLInputElement).files)">
     </label>

@@ -29,12 +29,12 @@ const duration = (r: ImportRun) => {
               <button v-if="r.error" class="underline decoration-dotted" @click="toggle(r.id)"><StatusTag :status="r.status" /></button>
               <StatusTag v-else :status="r.status" />
             </td>
-            <td class="font-mono text-xs text-fg-muted">{{ r.args ?? 'voll' }}</td>
+            <td class="font-mono text-meta text-fg-muted">{{ r.args ?? 'voll' }}</td>
             <td class="text-fg-muted">{{ r.trigger === 'schedule' ? 'nachts' : 'manuell' }}</td>
             <td class="text-right tabular-nums">{{ duration(r) }}</td>
           </tr>
           <tr v-if="openError === r.id">
-            <td colspan="6"><pre class="mb-2 max-h-60 overflow-auto rounded-lg bg-danger-soft p-3 text-xs text-danger">{{ r.error }}</pre></td>
+            <td colspan="6"><pre class="mb-2 max-h-60 overflow-auto rounded-lg bg-danger-soft p-3 text-meta text-danger">{{ r.error }}</pre></td>
           </tr>
         </template>
         <tr v-if="!runs.length"><td colspan="6" class="py-4 text-fg-muted">Noch keine Läufe protokolliert.</td></tr>

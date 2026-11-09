@@ -22,7 +22,7 @@ onMounted(render)
 
 <template>
   <Panel class="min-h-[200px]">
-    <h2 v-if="title" class="text-3xl">{{ title }}</h2>
+    <h2 v-if="title" class="text-section">{{ title }}</h2>
     <p v-if="excerpt" class="mt-2 text-fg-muted">{{ excerpt }}</p>
     <!-- eslint-disable-next-line vue/no-v-html -- eigenes Markdown, nur für Admins -->
     <div class="prose-preview mt-4" v-html="preview.html" />

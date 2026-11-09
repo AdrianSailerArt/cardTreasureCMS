@@ -19,7 +19,7 @@ useSeoMeta({ title: 'Vertrauen – CardTreasure CMS' })
 
     <Panel v-if="tab === 'sellers'" class="mt-6">
       <template #actions>
-        <label class="flex items-center gap-2 text-sm"><input v-model="all" type="checkbox" class="accent-accent"> alle Verkäufer zeigen</label>
+        <label class="flex items-center gap-2 text-small"><input v-model="all" type="checkbox" class="accent-accent"> alle Verkäufer zeigen</label>
       </template>
       <UiNotice v-if="riskError" tone="danger">Shop nicht erreichbar: {{ riskError.statusMessage }}</UiNotice>
       <UiTable :min-width="900">
@@ -52,7 +52,7 @@ useSeoMeta({ title: 'Vertrauen – CardTreasure CMS' })
           @changed="refreshReviews"
         />
       </div>
-      <p v-if="!reviews.length" class="text-sm text-fg-muted">Keine schlechten Bewertungen.</p>
+      <p v-if="!reviews.length" class="text-small text-fg-muted">Keine schlechten Bewertungen.</p>
     </Panel>
   </div>
 </template>

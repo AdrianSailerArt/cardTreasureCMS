@@ -18,7 +18,7 @@ useSeoMeta({ title: 'Meldungen – CardTreasure CMS' })
       <div class="divide-y divide-line">
         <ReportRow v-for="r in reports" :key="r.id" :report="r" @changed="refresh" />
       </div>
-      <p v-if="!reports.length" class="text-sm text-fg-muted">{{ status === 'open' ? 'Keine offenen Meldungen.' : 'Noch nichts erledigt.' }}</p>
+      <p v-if="!reports.length" class="text-small text-fg-muted">{{ status === 'open' ? 'Keine offenen Meldungen.' : 'Noch nichts erledigt.' }}</p>
     </Panel>
   </div>
 </template>

@@ -16,7 +16,7 @@ useSeoMeta({ title: 'Kunden – CardTreasure CMS' })
     <div class="mt-6 flex flex-wrap items-center gap-3">
       <div class="w-80"><UiInput v-model="q" placeholder="Name, E-Mail oder Anzeigename …" /></div>
       <UiSegmented v-model="kind" :options="KINDS" />
-      <label class="flex items-center gap-2 text-sm"><input v-model="onlyBlocked" type="checkbox" class="accent-accent"> nur gesperrte</label>
+      <label class="flex items-center gap-2 text-small"><input v-model="onlyBlocked" type="checkbox" class="accent-accent"> nur gesperrte</label>
     </div>
     <Panel class="mt-4">
       <UiTable :min-width="860">
@@ -26,7 +26,7 @@ useSeoMeta({ title: 'Kunden – CardTreasure CMS' })
             <span class="flex items-center gap-2">
               <CountryFlag v-if="u.country" :code="u.country" />
               <NuxtLink :to="`/customers/${u.id}`" class="hover:text-accent">{{ u.name }}</NuxtLink>
-              <span v-if="u.companyName || (u.displayName && u.displayName !== u.name)" class="text-xs text-fg-subtle">{{ u.companyName ?? u.displayName }}</span>
+              <span v-if="u.companyName || (u.displayName && u.displayName !== u.name)" class="text-meta text-fg-subtle">{{ u.companyName ?? u.displayName }}</span>
             </span>
           </td>
           <td class="text-fg-muted">{{ u.email }}</td>

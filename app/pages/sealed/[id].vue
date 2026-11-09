@@ -50,7 +50,7 @@ useSeoMeta({ title: () => `${isNew.value ? 'Neues Sealed-Produkt' : form.name} ‚
 <template>
   <div>
     <PageHeader :title="isNew ? 'Neues Sealed-Produkt' : form.name">
-      <template #above><NuxtLink to="/sealed" class="text-sm text-fg-subtle hover:text-accent">‚Üê Sealed-Katalog</NuxtLink></template>
+      <template #above><NuxtLink to="/sealed" class="text-small text-fg-subtle hover:text-accent">‚Üê Sealed-Katalog</NuxtLink></template>
     </PageHeader>
     <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_260px]">
       <Panel>
@@ -73,7 +73,7 @@ useSeoMeta({ title: () => `${isNew.value ? 'Neues Sealed-Produkt' : form.name} ‚
       </Panel>
       <Panel title="Bild">
         <SealedImageUpload v-if="form.id" :sealed-id="form.id" :image-id="form.imageId" @changed="id => form.imageId = id" />
-        <p v-else class="text-sm text-fg-muted">Nach dem Anlegen kannst du ein Bild hochladen.</p>
+        <p v-else class="text-small text-fg-muted">Nach dem Anlegen kannst du ein Bild hochladen.</p>
       </Panel>
     </div>
   </div>

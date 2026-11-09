@@ -16,8 +16,8 @@ const reload = () => refresh()
     </div>
 
     <Panel title="Manuell starten" class="mt-6">
-      <p class="text-sm text-fg-muted">Imports laufen als Skript, nicht auf Vercel. Im Repo cardTreasureCMS:</p>
-      <pre class="mt-3 overflow-x-auto rounded-lg bg-surface-muted p-3 text-xs">bun run import                      # alle Spiele, voll
+      <p class="text-small text-fg-muted">Imports laufen als Skript, nicht auf Vercel. Im Repo cardTreasureCMS:</p>
+      <pre class="mt-3 overflow-x-auto rounded-lg bg-surface-muted p-3 text-meta">bun run import                      # alle Spiele, voll
 bun run import mtg --sets=fdn,blb   # nur bestimmte Sets
 bun run simulate --reset            # Demo-Marktplatz neu erzeugen</pre>
     </Panel>

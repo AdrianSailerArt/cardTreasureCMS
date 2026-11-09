@@ -45,7 +45,7 @@ const submit = async () => {
 <template>
   <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="valid && submit()">
     <UiField v-if="!sellerId" label="Kunde" class="sm:col-span-2">
-      <div v-if="picked" class="flex items-center gap-2 text-sm">
+      <div v-if="picked" class="flex items-center gap-2 text-small">
         <Tag tone="info">{{ picked.name }}</Tag>
         <UiButton size="sm" variant="ghost" @click="picked = null">ändern</UiButton>
       </div>

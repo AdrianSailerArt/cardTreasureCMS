@@ -36,12 +36,12 @@ const handle = async (status: 'resolved' | 'dismissed') => {
 </script>
 
 <template>
-  <div class="grid gap-3 py-4 text-sm lg:grid-cols-[1fr_auto]">
+  <div class="grid gap-3 py-4 text-small lg:grid-cols-[1fr_auto]">
     <div class="min-w-0">
       <p class="flex flex-wrap items-center gap-2">
         <Tag :tone="CATEGORY[report.category].tone">{{ CATEGORY[report.category].label }}</Tag>
         <Tag>{{ TARGET[report.targetType] }}</Tag>
-        <span class="text-xs text-fg-subtle">{{ dateTime(report.createdAt) }} · von {{ report.reporter ?? 'gelöschtem Konto' }}</span>
+        <span class="text-meta text-fg-subtle">{{ dateTime(report.createdAt) }} · von {{ report.reporter ?? 'gelöschtem Konto' }}</span>
         <Tag v-if="report.status !== 'open'" :tone="report.status === 'resolved' ? 'success' : 'neutral'">
           {{ report.status === 'resolved' ? 'bearbeitet' : 'kein Verstoß' }}<template v-if="report.handledBy"> · {{ report.handledBy }}</template>
         </Tag>
@@ -56,7 +56,7 @@ const handle = async (status: 'resolved' | 'dismissed') => {
         <template v-else>„{{ report.context }}“</template>
       </p>
       <p v-if="report.text" class="mt-1">{{ report.text }}</p>
-      <p v-if="report.resolution" class="mt-1 text-xs text-fg-subtle">Notiz: {{ report.resolution }}</p>
+      <p v-if="report.resolution" class="mt-1 text-meta text-fg-subtle">Notiz: {{ report.resolution }}</p>
     </div>
     <div v-if="report.status === 'open'" class="flex flex-col gap-2 lg:w-72">
       <div class="flex flex-wrap gap-2">

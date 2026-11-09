@@ -53,7 +53,7 @@ const reset = async () => {
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
         <p class="truncate font-medium">{{ printing.cardNameDe ?? printing.cardName }}</p>
-        <p class="truncate text-xs text-fg-subtle">
+        <p class="truncate text-meta text-fg-subtle">
           {{ GAME_LABEL[printing.game] }} · {{ printing.setName }} ({{ printing.setCode.toUpperCase() }}) · #{{ printing.collectorNumber }}
         </p>
       </div>
@@ -64,23 +64,23 @@ const reset = async () => {
     <div class="mt-3 grid grid-cols-2 gap-3">
       <figure>
         <img :src="shopImage" :alt="printing.cardName" loading="lazy" class="aspect-[63/88] w-full rounded-md bg-surface-muted object-cover">
-        <figcaption class="mt-1 text-center text-[11px] text-fg-subtle">im Shop</figcaption>
+        <figcaption class="mt-1 text-center text-meta text-fg-subtle">im Shop</figcaption>
       </figure>
       <figure>
         <img v-if="printing.sourceImageUrl" :src="printing.sourceImageUrl" alt="" loading="lazy" class="aspect-[63/88] w-full rounded-md bg-surface-muted object-cover opacity-80">
-        <div v-else class="grid aspect-[63/88] place-items-center rounded-md bg-surface-muted text-xs text-fg-subtle">kein Bild</div>
-        <figcaption class="mt-1 text-center text-[11px] text-fg-subtle">Quelle (API)</figcaption>
+        <div v-else class="grid aspect-[63/88] place-items-center rounded-md bg-surface-muted text-meta text-fg-subtle">kein Bild</div>
+        <figcaption class="mt-1 text-center text-meta text-fg-subtle">Quelle (API)</figcaption>
       </figure>
     </div>
 
-    <p v-if="printing.overrideMediaId && printing.overrideBy" class="mt-2 text-xs text-fg-subtle">
+    <p v-if="printing.overrideMediaId && printing.overrideBy" class="mt-2 text-meta text-fg-subtle">
       Ersetzt von {{ printing.overrideBy }}<template v-if="printing.overrideReason">: „{{ printing.overrideReason }}“</template>
     </p>
 
     <div class="mt-3 space-y-2">
       <UiInput v-model="reason" placeholder="Grund, z.B. falsche Sprache, Rückseite, falscher Druck" />
       <div class="flex flex-wrap gap-2">
-        <label class="inline-flex min-h-10 cursor-pointer items-center rounded-md px-4 text-xs font-semibold uppercase tracking-[0.08em] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent bg-primary text-on-primary" :class="{ 'pointer-events-none opacity-50': busy }">
+        <label class="inline-flex min-h-10 cursor-pointer items-center rounded-md px-4 text-button focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent bg-primary text-on-primary" :class="{ 'pointer-events-none opacity-50': busy }">
           {{ busy ? 'Lädt …' : printing.overrideMediaId ? 'Erneut ersetzen' : 'Bild ersetzen' }}
           <input ref="input" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="upload(($event.target as HTMLInputElement).files)">
         </label>
