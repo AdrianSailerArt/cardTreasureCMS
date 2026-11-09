@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
            u.blocked_at as "blockedAt", u.blocked_reason as "blockedReason", u.blocked_until as "blockedUntil", u.is_demo as "isDemo",
            sp.display_name as "displayName", coalesce(sp.type::text, 'private') as "sellerType", sp.company_name as "companyName", sp.vat_id as "vatId", sp.country,
            (select count(*)::int from orders o where o.buyer_id = u.id) as purchases,
-           (select count(*)::int from shipments s where s.seller_id = u.id and s.status <> 'cancelled') as sales,
+           (select count(*)::int from shipments s where s.seller_id = u.id and s.status not in ('cancelled', 'awaiting_payment')) as sales,
            (select coalesce(sum(amount_cents), 0)::int from ledger_entries l where l.user_id = u.id) as "balanceCents"
     from "user" u left join seller_profiles sp on sp.user_id = u.id where u.id = ${id}
   `)
