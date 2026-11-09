@@ -492,7 +492,8 @@ const simulate = async () => {
       paidAt: anyPaid ? addHours(createdAt, 1).toISOString() : null,
     })
     paymentRows.push({
-      id: uuid(), orderId, provider: 'stripe', providerRef: `pi_demo_${orderId.replaceAll('-', '').slice(0, 20)}`,
+      // Demo-Zahlungen ohne echtes Geld: wie die lokale Testkarte, damit der Kassenabgleich mit Stripe sie nicht erwartet
+      id: uuid(), orderId, provider: 'test_card', providerRef: `test_demo_${orderId.replaceAll('-', '').slice(0, 20)}`,
       amountCents: orderItems + orderShipping, status: anyPaid ? 'succeeded' : 'pending', createdAt: createdAt.toISOString(),
     })
   }

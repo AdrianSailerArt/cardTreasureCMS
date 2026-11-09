@@ -80,3 +80,19 @@ export interface ReportView {
   openAgainstSubject: number
   context: string | null
 }
+
+/** Kassenabgleich (interne Shop-API, Logik in server/lib/payments.ts des Shops). Beträge in Cent. */
+export type Ampel = 'success' | 'warning' | 'danger'
+export type Reconciliation = { available: false } | {
+  available: true
+  booked: { inCents: number, feesCents: number, feesMissing: number, connectFeesCents: number, refundsCents: number, transfersCents: number, expectedCents: number }
+  stripe: { availableCents: number, pendingCents: number, paidOutCents: number, totalCents: number }
+  differenceCents: number
+  match: Ampel
+  owed: { balancesCents: number, escrowCents: number, payoutsInProgressCents: number, refundsPendingCents: number, totalCents: number }
+  platform: { commissionCents: number, feesCents: number, connectFeesCents: number, netCents: number }
+  testCardCents: number
+  coverageCents: number
+  coverage: Ampel
+  unmatched: { id: string, type: string, amountCents: number, feeCents: number, netCents: number, createdAt: string, ref: string | null, description: string | null }[]
+}

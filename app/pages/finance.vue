@@ -21,6 +21,8 @@ useSeoMeta({ title: 'Finanzen – CardTreasure CMS' })
     </div>
     <p class="mt-2 text-meta text-fg-subtle">{{ num(data.totals.accounts) }} Konten mit Guthaben · {{ num(data.totals.escrowShipments) }} offene Sendungen in Treuhand</p>
 
+    <FinanceReconciliation class="mt-6" />
+
     <Panel class="mt-6" title="Pro Monat (12 Monate)">
       <FinanceMonthlyChart :monthly="data.monthly" />
     </Panel>
