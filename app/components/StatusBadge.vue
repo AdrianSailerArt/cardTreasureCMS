@@ -4,7 +4,7 @@ defineProps<{ status: string }>()
 </script>
 
 <template>
-  <Tag :tone="statusTone(status)" class="rounded-full px-2 font-normal">
+  <Tag :tone="statusTone(status)" class="px-2">
     {{ STATUS_LABEL[status] ?? status }}
   </Tag>
 </template>

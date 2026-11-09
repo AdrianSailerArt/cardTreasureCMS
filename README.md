@@ -57,9 +57,10 @@ zeigen dann auf diese Adresse (der Shop muss ebenfalls mit `bun run dev` laufen)
 
 ## Frontend-Aufbau
 
-Wie im Shop: `components/atoms/` (Präfix `Ui`: Button, Input, Select, Field, Table …), oben allgemeine Components
-(`Panel`, `Tag`, `PageHeader`, `KpiCard` …), Bereichsordner für Scope-Komponenten (`blog/`, `dashboard/`, `images/`, `layout/` …).
-`UiTable`, `useDebounced`, `useChartTheme`/`chartBase`, Versand, `slugify` und LAN-Erkennung kommen aus dem gemeinsamen Paket
+Wie im Shop: Atoms (Präfix `Ui`: Button, Input, Select, Field, Segmented, Notice, Table) sowie `Tag`, `Panel` und `ui.css`
+(Color-Set, Schrift Geist lokal, Formen, Fokus) kommen aus dem gemeinsamen Paket, oben allgemeine Components
+(`PageHeader`, `KpiCard` …), Bereichsordner für Scope-Komponenten (`blog/`, `dashboard/`, `images/`, `layout/` …).
+`useDebounced`, `useChartTheme`/`chartBase`, Versand, `slugify` und LAN-Erkennung kommen aus dem gemeinsamen Paket
 [`@cardtreasure/core`](https://github.com/AdrianSailerArt/cardTreasureCore) (Nuxt-Layer, `extends` in `nuxt.config.ts`, feste Version in `package.json`).
 
 ## Befehle

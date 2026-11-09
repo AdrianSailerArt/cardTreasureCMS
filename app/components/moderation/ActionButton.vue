@@ -44,15 +44,7 @@ const run = async () => {
 
 <template>
   <span class="inline-flex flex-col gap-2">
-    <button
-      v-if="!open"
-      type="button"
-      class="whitespace-nowrap rounded-full border px-3 py-1 text-xs transition"
-      :class="tone === 'danger' ? 'border-danger/40 text-danger hover:bg-danger-soft' : 'border-line-strong text-fg-muted hover:border-accent hover:text-accent'"
-      @click="open = true"
-    >
-      {{ label }}
-    </button>
+    <UiButton v-if="!open" size="sm" :variant="tone === 'danger' ? 'danger' : 'ghost'" @click="open = true">{{ label }}</UiButton>
     <span v-else class="flex min-w-64 flex-col gap-2 rounded-lg border border-line bg-surface-muted p-2">
       <UiInput v-model="reason" :placeholder="requireReason ? placeholder : `${placeholder} (optional)`" />
       <UiSelect v-if="action === 'block'" v-model="days" :options="durations" />

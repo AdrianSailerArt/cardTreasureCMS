@@ -9,9 +9,8 @@ export default defineNuxtConfig({
 
   css: ['flag-icons/css/flag-icons.min.css', '~/assets/css/main.css'],
 
-  // Drei Ebenen (Skill vue-component): atoms/ (Präfix Ui), Components oben, Scope-Komponenten in Bereichsordnern
+  // Drei Ebenen (Skill vue-component): Atoms (Präfix Ui) und Tag/Panel kommen aus @cardtreasure/core, Components oben, Scope-Komponenten in Bereichsordnern
   components: [
-    { path: '~/components/atoms', prefix: 'Ui' },
     '~/components',
   ],
 

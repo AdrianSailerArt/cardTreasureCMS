@@ -11,8 +11,8 @@ const total = computed(() => Math.max(1, props.games.reduce((s, g) => s + g.gmv,
         <span>{{ GAME_LABEL[g.game] }}</span>
         <span class="tabular-nums">{{ euro(g.gmv, 0) }}</span>
       </div>
-      <div class="mt-1 h-1.5 rounded-full bg-surface-muted">
-        <div class="h-full rounded-full bg-accent" :style="{ width: `${(g.gmv / total) * 100}%` }" />
+      <div class="mt-1 h-1.5 rounded-sm bg-surface-muted">
+        <div class="h-full rounded-sm bg-accent" :style="{ width: `${(g.gmv / total) * 100}%` }" />
       </div>
       <p class="mt-1 text-xs text-fg-subtle">{{ num(g.items) }} Karten</p>
     </li>

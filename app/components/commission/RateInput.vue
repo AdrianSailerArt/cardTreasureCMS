@@ -14,8 +14,8 @@ const invalid = computed(() => model.value !== null && (model.value < 0 || model
 </script>
 
 <template>
-  <div class="flex items-center rounded-lg border bg-bg focus-within:border-accent" :class="invalid ? 'border-danger' : 'border-line-strong'">
-    <input v-model="text" inputmode="decimal" class="w-full bg-transparent px-3 py-2 text-right text-sm tabular-nums text-fg outline-none" @input="onInput">
+  <div class="flex min-h-10 items-center rounded-md border bg-bg focus-within:border-accent focus-within:outline-2 focus-within:outline-accent" :class="invalid ? 'border-danger' : 'border-line-strong'">
+    <input v-model="text" inputmode="decimal" class="w-full bg-transparent px-3 py-2 text-right text-sm tabular-nums text-fg focus-visible:outline-none" :aria-invalid="invalid ? 'true' : undefined" @input="onInput">
     <span class="pr-3 text-sm text-fg-subtle">%</span>
   </div>
 </template>

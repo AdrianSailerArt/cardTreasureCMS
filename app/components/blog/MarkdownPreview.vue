@@ -31,7 +31,7 @@ onMounted(render)
 </template>
 
 <style scoped>
-.prose-preview :deep(h1), .prose-preview :deep(h2), .prose-preview :deep(h3) { margin: 1.5rem 0 0.5rem; font-family: var(--font-serif); }
+.prose-preview :deep(h1), .prose-preview :deep(h2), .prose-preview :deep(h3) { margin: 1.5rem 0 0.5rem; font-family: var(--font-display); }
 .prose-preview :deep(h1) { font-size: 1.875rem; }
 .prose-preview :deep(h2) { font-size: 1.5rem; }
 .prose-preview :deep(p) { margin: 0.75rem 0; line-height: 1.7; }

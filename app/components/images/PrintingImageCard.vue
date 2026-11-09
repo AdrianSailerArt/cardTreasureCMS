@@ -80,7 +80,7 @@ const reset = async () => {
     <div class="mt-3 space-y-2">
       <UiInput v-model="reason" placeholder="Grund, z.B. falsche Sprache, Rückseite, falscher Druck" />
       <div class="flex flex-wrap gap-2">
-        <label class="inline-flex cursor-pointer items-center rounded-full bg-primary px-4 py-1.5 text-sm text-on-primary" :class="{ 'pointer-events-none opacity-50': busy }">
+        <label class="inline-flex min-h-10 cursor-pointer items-center rounded-md px-4 text-xs font-semibold uppercase tracking-[0.08em] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent bg-primary text-on-primary" :class="{ 'pointer-events-none opacity-50': busy }">
           {{ busy ? 'Lädt …' : printing.overrideMediaId ? 'Erneut ersetzen' : 'Bild ersetzen' }}
           <input ref="input" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="upload(($event.target as HTMLInputElement).files)">
         </label>
