@@ -33,21 +33,22 @@ Die Datenbank kommt aus dem Shop-Repo (`docker compose up -d` und `bun run db:mi
 bun install
 cp .env.example .env          # Datenbank wie im Shop, eigenes Secret
 bun run import mtg --sets=fdn,blb && bun run import pokemon --sets=sv03.5 && bun run import yugioh --sets=LOB
-bun run simulate --reset      # Demo-Marktplatz und Demo-Konten
-bun run dev                   # http://localhost:3100
+bun run testdata --reset      # nur Katalog + feste Testkonten (oder simulate --reset für einen großen Demo-Marktplatz)
+bun run dev                   # http://localhost:3100 (gegen Staging: bun run dev:staging, braucht .env.staging)
 ```
 
 ### Test-Zugänge
 
-| Rolle | App | E-Mail | Passwort |
-|---|---|---|---|
-| Admin | CMS | `admin@demo.cardtreasure.test` | `demo1234` |
-| Käuferin | Shop | `kaeufer@demo.cardtreasure.test` | `demo1234` |
-| Privater Verkäufer (kauft auch) | Shop | `verkaeufer@demo.cardtreasure.test` | `demo1234` |
-| Gewerbliche Händlerin | Shop | `haendler@demo.cardtreasure.test` | `demo1234` |
+Feste Testkonten aus `@cardtreasure/core/test-accounts`, Passwort für alle `test1234`, Übersicht im Shop-README.
+Im CMS: `admin@test.cardtreasure.test`.
 
-- Entstehen bei `bun run simulate` (Definition: `DEMO_ACCOUNTS` in [scripts/simulate.ts](scripts/simulate.ts)).
-- Passwort-Login nur für diese Konten und nur mit `NUXT_PUBLIC_DEMO_LOGIN=true`; im Echtbetrieb gibt es nur den Magic-Link.
+```bash
+bun run testdata --reset            # lokal: Marktplatzdaten löschen (Katalog bleibt), Testkonten neu
+bun run testdata:staging --reset    # dasselbe gegen Staging (Supabase, .env.staging)
+bun run testdata add anna "Anna Test" --seller=commercial --country=FR   # weiteres Testkonto
+```
+
+- Passwort-Login nur für Konten mit Passwort und nur mit `NUXT_PUBLIC_DEMO_LOGIN=true`; im Echtbetrieb gibt es nur den Magic-Link.
 - Echte Admins: `bun run make-admin du@firma.de "Dein Name"`, dann Anmeldung per Magic-Link. Die Mail landet lokal in Mailpit (http://localhost:8025, läuft im docker compose des Shops; `NUXT_SMTP_URL=smtp://localhost:1025` in der `.env`).
 
 ## Im lokalen Netzwerk

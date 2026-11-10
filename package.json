@@ -5,6 +5,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "bun scripts/dev.ts",
+    "dev:staging": "bun --env-file=.env --env-file=.env.staging scripts/dev.ts",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -12,10 +13,12 @@
     "db:pull": "bun --bun drizzle-kit pull && rm -rf server/db/generated/meta server/db/generated/*.sql && bun scripts/fix-pulled-schema.ts",
     "import": "bun scripts/import/index.ts",
     "simulate": "bun scripts/simulate.ts",
+    "testdata": "bun scripts/testdata.ts",
+    "testdata:staging": "bun --env-file=.env --env-file=.env.staging scripts/testdata.ts --allow-remote",
     "make-admin": "bun scripts/make-admin.ts"
   },
   "dependencies": {
-    "@cardtreasure/core": "git+ssh://git@github.com/AdrianSailerArt/cardTreasureCore.git#v0.7.1",
+    "@cardtreasure/core": "git+ssh://git@github.com/AdrianSailerArt/cardTreasureCore.git#v0.8.0",
     "@tailwindcss/vite": "^4.3.5",
     "aws4fetch": "^1.0.20",
     "better-auth": "^1.7.18",

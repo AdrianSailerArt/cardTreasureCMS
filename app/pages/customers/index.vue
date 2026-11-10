@@ -31,7 +31,7 @@ useSeoMeta({ title: 'Kunden – CardTreasure CMS' })
           </td>
           <td class="text-fg-muted">{{ u.email }}</td>
           <td><CustomerKindTag :role="u.role" :seller-type="u.sellerType" /></td>
-          <td><Tag v-if="u.blocked" tone="danger">gesperrt</Tag><Tag v-else tone="success">aktiv</Tag><Tag v-if="u.isDemo" tone="info" class="ml-1">Demo</Tag></td>
+          <td><Tag v-if="u.blocked" tone="danger">gesperrt</Tag><Tag v-else tone="success">aktiv</Tag><Tag v-if="u.isDemo" tone="info" class="ml-1">Test</Tag></td>
           <td class="text-right tabular-nums">{{ u.purchases }}</td>
           <td class="text-right tabular-nums">{{ u.sales }}</td>
           <td class="text-right tabular-nums">{{ euro(u.balanceCents) }}</td>

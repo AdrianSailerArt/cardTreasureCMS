@@ -19,7 +19,8 @@ const reload = () => refresh()
       <p class="text-small text-fg-muted">Imports laufen als Skript, nicht auf Vercel. Im Repo cardTreasureCMS:</p>
       <pre class="mt-3 overflow-x-auto rounded-lg bg-surface-muted p-3 text-meta">bun run import                      # alle Spiele, voll
 bun run import mtg --sets=fdn,blb   # nur bestimmte Sets
-bun run simulate --reset            # Demo-Marktplatz neu erzeugen</pre>
+bun run testdata --reset            # nur Katalog + feste Testkonten (sauber für Stripe-Tests)
+bun run simulate --reset            # großer Demo-Marktplatz mit Verlauf</pre>
     </Panel>
 
     <Panel title="Letzte Läufe" class="mt-6">
