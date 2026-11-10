@@ -57,7 +57,7 @@ useSeoMeta({ title: () => `${u.value.name} – Kunden – CardTreasure CMS` })
 
     <Panel v-if="commission" class="mt-6" title="Provision">
       <p class="text-small">
-        Aktuell <strong class="tabular-nums">{{ (commission.current.rateBps / 100).toLocaleString('de-DE') }} %</strong>
+        Aktuell <strong class="tabular-nums">{{ percent(commission.current.rateBps) }}</strong>
         <Tag v-if="commission.current.source === 'override'" tone="success" class="ml-2">individuell</Tag>
         <Tag v-else class="ml-2">allgemeiner Satz</Tag>
         <span v-if="commission.current.source === 'override'" class="ml-2 text-fg-muted">(allgemein: {{ (commission.current.baseRateBps / 100).toLocaleString('de-DE') }} %)</span>

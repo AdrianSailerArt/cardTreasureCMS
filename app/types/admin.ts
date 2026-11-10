@@ -90,7 +90,7 @@ export type Reconciliation = { available: false } | {
   differenceCents: number
   match: Ampel
   owed: { balancesCents: number, escrowCents: number, payoutsInProgressCents: number, refundsPendingCents: number, totalCents: number }
-  platform: { commissionCents: number, feesChargedCents: number, feesCents: number, connectFeesCents: number, netCents: number }
+  platform: { commissionCents: number, advertisingCents: number, feesChargedCents: number, ownSalesCents: number, feesCents: number, connectFeesCents: number, netCents: number }
   testCardCents: number
   coverageCents: number
   coverage: Ampel
@@ -111,3 +111,13 @@ export interface PlatformSale {
   address: { name: string, street: string, houseNumber: string, extra?: string | null, postalCode: string, city: string, country: string }
   items: { name: string, quantity: number, condition: string | null, language: string, storageLocation: string | null }[]
 }
+
+/** Werbung gewerblicher Kunden (interne Shop-API, Logik in server/lib/ads.ts des Shops). */
+export interface AdSettings { enabled: boolean, minRateBps: number, maxRateBps: number, minFeeCents: number, attributionDays: number }
+export interface Promotion {
+  listingId: string, name: string, game: string, cardSlug: string | null
+  sellerId: string, seller: string, sellerCountry: string
+  rateBps: number, startedAt: string, priceCents: number, status: string
+  clicks: number, adSales: number, adRevenueCents: number
+}
+export interface AdsOverview { settings: AdSettings, promotions: Promotion[], totals: { revenueCents: number, revenue30Cents: number, sales: number } }

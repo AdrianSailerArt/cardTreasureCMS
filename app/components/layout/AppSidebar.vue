@@ -12,6 +12,7 @@ const nav = [
   { to: '/reports', label: 'Meldungen' },
   { to: '/customers', label: 'Kunden' },
   { to: '/shop', label: 'Eigener Shop' },
+  { to: '/ads', label: 'Werbung' },
   { to: '/imports', label: 'Imports' },
   { to: '/blog', label: 'Blog' },
   { to: '/sealed', label: 'Sealed' },

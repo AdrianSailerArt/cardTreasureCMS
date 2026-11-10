@@ -1,11 +1,13 @@
 <script setup lang="ts">
 /**
  * Moderations-Knopf mit Bestätigung: Klick öffnet ein Feld für den Grund (Pflicht oder optional), erst „Bestätigen“ führt aus.
- * Ruft /api/moderation/<action> mit `payload` + reason auf; der Shop protokolliert und benachrichtigt.
+ * Ruft /api/moderation/<action> (oder `url`) mit `payload` + reason auf; der Shop protokolliert und benachrichtigt.
  */
 const props = withDefaults(defineProps<{
   label: string
-  action: 'block' | 'unblock' | 'remove-listing' | 'hide-review' | 'show-review'
+  action: 'block' | 'unblock' | 'remove-listing' | 'hide-review' | 'show-review' | 'end-promotion'
+  /** Abweichender Endpunkt (z.B. /api/ads/<id>/end) */
+  url?: string
   payload: Record<string, string>
   requireReason?: boolean
   tone?: 'danger' | 'neutral'
@@ -25,7 +27,7 @@ const run = async () => {
   busy.value = true
   error.value = null
   try {
-    await $fetch(`/api/moderation/${props.action}`, {
+    await $fetch(props.url ?? `/api/moderation/${props.action}`, {
       method: 'POST',
       body: { ...props.payload, reason: reason.value.trim() || null, ...(props.action === 'block' ? { days: days.value ? Number(days.value) : null } : {}) },
     })

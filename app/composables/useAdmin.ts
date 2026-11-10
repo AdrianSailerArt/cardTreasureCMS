@@ -23,6 +23,9 @@ export const CONDITIONS = [
 /** Euro aus Cent auf Deutsch, `digits` 0 für ganze Euro in Übersichten. */
 export const euro = (cents: number | null | undefined, digits = 2) => formatPrice(cents, 'de', 'EUR', digits)
 
+/** Satz in Basispunkten als Prozent, z.B. 450 → "4,5 %". */
+export const percent = (bps: number | null | undefined) => formatRate(bps, 'de')
+
 export const num = (n: number | null | undefined) => formatNumber(n, 'de')
 
 export const dateTime = (iso: string | null | undefined) => formatDate(iso, 'de', true)

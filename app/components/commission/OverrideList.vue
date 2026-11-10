@@ -15,7 +15,6 @@ const end = async (id: string) => {
     busy.value = null
   }
 }
-const percent = (bps: number) => `${(bps / 100).toLocaleString('de-DE')} %`
 </script>
 
 <template>
