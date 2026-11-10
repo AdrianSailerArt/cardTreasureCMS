@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm'
 
+/** Ein Beitrag zum Bearbeiten: Stammdaten und Übersetzungen (de/en) als Markdown. */
 export default defineEventHandler(async (event) => {
+  await requireAdmin(event)
   const id = getRouterParam(event, 'id')!
   const db = useDb()
   const [post] = await db.select().from(schema.posts).where(eq(schema.posts.id, id))

@@ -14,7 +14,7 @@ import { fetchJson, fetchJsonLines, log, slugify, toCents, type CliArgs } from '
 const API = 'https://api.scryfall.com'
 const BATCH = 2000
 
-interface ScryFace {
+type ScryFace = {
   name: string
   oracle_id?: string
   mana_cost?: string
@@ -28,7 +28,7 @@ interface ScryFace {
   image_uris?: Record<string, string>
 }
 
-interface ScryCard extends ScryFace {
+type ScryCard = ScryFace & {
   id: string
   lang: string
   layout: string
@@ -55,7 +55,7 @@ interface ScryCard extends ScryFace {
   released_at?: string
 }
 
-interface ScrySet {
+type ScrySet = {
   code: string
   name: string
   set_type: string

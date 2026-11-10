@@ -11,7 +11,7 @@ const body = z.object({
   id: z.string().uuid().optional(),
   slug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Nur Kleinbuchstaben, Zahlen und Bindestriche'),
   status: z.enum(['draft', 'published', 'archived']),
-  game: z.enum(['mtg', 'pokemon', 'yugioh']).nullable(),
+  game: z.enum(GAMES).nullable(),
   tags: z.array(z.string().trim().min(1).max(40)).max(20),
   translations: z.object({ de: translation.optional(), en: translation.optional() })
     .refine(t => t.de || t.en, 'Mindestens eine Sprache ausfüllen'),
@@ -19,7 +19,7 @@ const body = z.object({
 
 /** Legt einen Beitrag an oder aktualisiert ihn, inklusive Übersetzungen und Kartenverweisen. */
 export default defineEventHandler(async (event) => {
-  const admin = event.context.admin as AdminUser
+  const admin = await requireAdmin(event)
   const input = await readValidatedBody(event, body.parse)
   const db = useDb()
 

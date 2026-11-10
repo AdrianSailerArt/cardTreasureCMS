@@ -1,6 +1,8 @@
 import { sql } from 'drizzle-orm'
 
-export default defineEventHandler(async () => {
+/** Alle Beiträge (auch Entwürfe), zuletzt geänderte zuerst. */
+export default defineEventHandler(async (event) => {
+  await requireAdmin(event)
   return await rows<{
     id: string, slug: string, status: string, titleDe: string | null, titleEn: string | null,
     author: string, game: string | null, publishedAt: string | null, updatedAt: string, cardRefs: number

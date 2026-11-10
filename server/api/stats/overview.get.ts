@@ -3,12 +3,12 @@ import { z } from 'zod'
 
 const query = z.object({ days: z.coerce.number().int().min(1).max(365).default(30) })
 
-/*
+/**
  * Kennzahlen des Marktplatzes für einen Zeitraum (Standard: 30 Tage) und den Vorzeitraum zum Vergleich.
  * Umsatz = Warenwert bezahlter, nicht stornierter Sendungen (ohne Versand).
  */
 export default defineEventHandler(async (event) => {
-  const { days } = query.parse(getQuery(event))
+  const { days } = await getValidatedQuery(event, query.parse)
   const since = sql`now() - make_interval(days => ${days})`
   const prevSince = sql`now() - make_interval(days => ${days * 2})`
 

@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
+import { z } from 'zod'
 
-export interface PrintingImageRow {
+export type PrintingImageRow = {
   id: string
   game: string
   cardName: string
@@ -15,12 +16,14 @@ export interface PrintingImageRow {
   overrideBy: string | null
 }
 
+const query = z.object({ q: z.string().trim().max(100).catch('') })
+
 /**
  * Drucke für den Bildaustausch: Suche nach Kartenname (de/en) oder Set-Kürzel, ohne Suche die zuletzt ersetzten.
  */
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
-  const q = String(getQuery(event).q ?? '').trim()
+  const { q } = await getValidatedQuery(event, query.parse)
   const filter = q.length >= 2
     ? sql`(c.name ilike ${`%${q}%`} or exists (select 1 from card_translations t where t.card_id = c.id and t.name ilike ${`%${q}%`}) or s.code ilike ${q})`
     : sql`o.printing_id is not null`

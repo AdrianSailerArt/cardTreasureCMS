@@ -3,7 +3,7 @@ import { magicLinkClient } from 'better-auth/client/plugins'
 
 export const authClient = createAuthClient({ plugins: [magicLinkClient()] })
 
-export interface Me { id: string, name: string, email: string }
+export type Me = { id: string, name: string, email: string }
 
 /** Angemeldeter Admin, einmal pro Seitenaufruf geladen. */
 export const useMe = () => useState<Me | null>('me', () => null)

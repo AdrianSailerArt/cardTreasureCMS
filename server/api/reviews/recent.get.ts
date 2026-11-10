@@ -1,9 +1,12 @@
 import { sql } from 'drizzle-orm'
+import { z } from 'zod'
+
+const query = z.object({ bad: flagParam })
 
 /** Neueste Bewertungen (Käufer über Verkäufer); ?bad=1 nur 1–2 Sterne oder unvollständig geliefert. */
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
-  const bad = getQuery(event).bad === '1'
+  const { bad } = await getValidatedQuery(event, query.parse)
   return await rows<{ id: string, ratingOverall: number, deliveredComplete: boolean, comment: string | null, hidden: boolean, createdAt: string, authorId: string, author: string, subjectId: string, subject: string, orderNumber: string }>(sql`
     select r.id, r.rating_overall as "ratingOverall", r.delivered_complete as "deliveredComplete", r.comment,
            (r.comment_hidden_at is not null) as hidden, r.created_at as "createdAt",

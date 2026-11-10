@@ -83,7 +83,7 @@ export const toCents = (value: unknown): number | null => {
   return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : null
 }
 
-export interface CliArgs {
+export type CliArgs = {
   limit?: number
   sets?: string[]
   [key: string]: string | number | string[] | boolean | undefined

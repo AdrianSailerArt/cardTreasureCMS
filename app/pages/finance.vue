@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** Plattform-Finanzen: Guthaben der Kunden, Treuhand, Provision, Auszahlungen; Monatsverlauf; höchste Guthaben. */
-interface Finance {
+type Finance = {
   totals: { balancesCents: number, accounts: number, escrowCents: number, escrowShipments: number, commissionCents: number, payoutsCents: number, refundsCents: number }
   monthly: { month: string, gmvCents: number, commissionCents: number, payoutsCents: number, refundsCents: number }[]
   topBalances: { userId: string, name: string, email: string, balanceCents: number }[]

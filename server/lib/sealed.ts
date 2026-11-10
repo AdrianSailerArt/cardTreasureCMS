@@ -5,10 +5,10 @@
 import { sql } from 'drizzle-orm'
 import { MediaError, mediaKey, processImage, type MediaStore } from '@cardtreasure/core/media'
 import type { SqlDb } from '@cardtreasure/core/images'
+import { rowsOf } from '@cardtreasure/core/db'
 
-const rowsOf = async <T>(db: SqlDb, query: ReturnType<typeof sql>) => await db.execute(query) as unknown as T[]
 
-export interface SealedInput {
+export type SealedInput = {
   id?: string
   game: string
   type: string
@@ -68,7 +68,7 @@ export const setSealedImage = async (db: SqlDb, store: MediaStore, adminId: stri
   return { imageId: id }
 }
 
-export interface SealedRow {
+export type SealedRow = {
   id: string
   slug: string
   game: string

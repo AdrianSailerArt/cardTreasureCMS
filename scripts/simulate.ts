@@ -97,7 +97,7 @@ const clearDemo = async () => {
 }
 
 // ---------- Simulation ----------
-interface Candidate {
+type Candidate = {
   productId: string
   game: 'mtg' | 'pokemon' | 'yugioh'
   finishes: Finish[]

@@ -9,7 +9,7 @@ const emit = defineEmits<{ done: [] }>()
 const picked = ref<{ id: string, name: string } | null>(props.sellerId ? { id: props.sellerId, name: props.sellerName ?? '' } : null)
 const q = ref('')
 const query = useDebounced(() => q.value.trim(), 250)
-interface UserHit { id: string, name: string, displayName: string | null, email: string }
+type UserHit = { id: string, name: string, displayName: string | null, email: string }
 const { data: hits } = await useFetch<UserHit[]>('/api/users', { query: computed(() => ({ q: query.value || undefined })), default: () => [], immediate: !props.sellerId, watch: [query] })
 const customers = computed(() => (query.value.length >= 2 ? hits.value.slice(0, 8) : []).map(h => ({ value: h.id, label: h.displayName ?? h.name, hint: h.email })))
 

@@ -5,7 +5,7 @@ const model = defineModel<string | null>({ required: true })
 const emit = defineEmits<{ picked: [name: string | null] }>()
 
 const query = ref('')
-interface SetHit { id: string, code: string, name: string, releaseDate: string | null }
+type SetHit = { id: string, code: string, name: string, releaseDate: string | null }
 const results = ref<SetHit[]>([])
 useDebounced(query, 250, async (q) => {
   results.value = q.trim().length < 2 ? [] : await $fetch<SetHit[]>('/api/sets/search', { query: { game: props.game, q } })

@@ -62,10 +62,14 @@ export const useAuth = () => {
   return instance
 }
 
-export interface AdminUser { id: string, name: string, email: string }
+export type AdminUser = { id: string, name: string, email: string }
 
-/** Liefert den angemeldeten Admin oder wirft 401/403. Für alle internen API-Routen. */
+/**
+ * Liefert den angemeldeten Admin oder wirft 401/403. Für alle API-Routen. Die Middleware admin-only hat die Sitzung
+ * für /api/* schon geprüft und den Admin am Request abgelegt, dann wird sie nicht noch einmal geladen.
+ */
 export const requireAdmin = async (event: H3Event): Promise<AdminUser> => {
+  if (event.context.admin) return event.context.admin as AdminUser
   const session = await useAuth().api.getSession({ headers: event.headers })
   if (!session) throw createError({ statusCode: 401, statusMessage: 'Nicht angemeldet' })
   const user = session.user as typeof session.user & { role?: string }

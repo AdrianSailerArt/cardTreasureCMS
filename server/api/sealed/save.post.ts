@@ -4,7 +4,7 @@ import { cardLanguage, sealedType } from '../../db/generated/schema'
 
 const body = z.object({
   id: z.string().uuid().optional(),
-  game: z.enum(['mtg', 'pokemon', 'yugioh']),
+  game: z.enum(GAMES),
   type: z.enum(sealedType.enumValues),
   name: z.string().trim().min(2).max(200),
   nameDe: z.string().trim().max(200).nullish().transform(v => v || null),

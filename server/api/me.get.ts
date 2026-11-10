@@ -1,1 +1,2 @@
-export default defineEventHandler(event => event.context.admin as AdminUser)
+/** Angemeldeter Admin (ID, Name, E-Mail). */
+export default defineEventHandler(async event => await requireAdmin(event))

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** Kunden suchen; nach Art (privat/gewerblich) und gesperrt filterbar. Jeder Kunde kann kaufen und verkaufen. */
-interface UserRow { id: string, name: string, email: string, role: string, displayName: string | null, sellerType: 'private' | 'commercial', companyName: string | null, country: string | null, createdAt: string, blocked: boolean, isDemo: boolean, purchases: number, sales: number, balanceCents: number }
+type UserRow = { id: string, name: string, email: string, role: string, displayName: string | null, sellerType: 'private' | 'commercial', companyName: string | null, country: string | null, createdAt: string, blocked: boolean, isDemo: boolean, purchases: number, sales: number, balanceCents: number }
 const q = ref('')
 const query = useDebounced(() => q.value.trim(), 300)
 const onlyBlocked = ref(false)

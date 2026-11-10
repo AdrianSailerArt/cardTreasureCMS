@@ -1,12 +1,12 @@
 /** Antwort-Typen der internen API, geteilt von Seiten und Komponenten. */
 
-export interface Kpi { gmv: number, commission: number, orders: number, shipments: number, buyers: number, items: number }
+export type Kpi = { gmv: number, commission: number, orders: number, shipments: number, buyers: number, items: number }
 
-export interface TopSeller { name: string, type: string, country: string, gmv: number, shipments: number, rating: number | null }
-export interface TopProduct { name: string, game: string, slug: string | null, items: number, gmv: number }
-export interface RecentOrder { number: string, buyer: string, buyerCountry: string | null, createdAt: string, total: number, status: string, shipments: string[] }
+export type TopSeller = { name: string, type: string, country: string, gmv: number, shipments: number, rating: number | null }
+export type TopProduct = { name: string, game: string, slug: string | null, items: number, gmv: number }
+export type RecentOrder = { number: string, buyer: string, buyerCountry: string | null, createdAt: string, total: number, status: string, shipments: string[] }
 
-export interface Overview {
+export type Overview = {
   days: number
   current: Kpi
   previous: Kpi
@@ -19,24 +19,24 @@ export interface Overview {
   recentOrders: RecentOrder[]
 }
 
-export interface GameCatalog {
+export type GameCatalog = {
   code: string, name: string, sets: number, setsWithCards: number, cards: number, products: number,
   withPrice: number, withGerman: number, lastSuccess: string | null
 }
-export interface ImportRun {
+export type ImportRun = {
   id: string, game: string, status: string, args: string | null, trigger: string,
   stats: Record<string, number>, error: string | null, startedAt: string, finishedAt: string | null
 }
 
-export interface PostRow {
+export type PostRow = {
   id: string, slug: string, status: string, titleDe: string | null, titleEn: string | null,
   author: string, game: string | null, publishedAt: string | null, updatedAt: string, cardRefs: number
 }
 
-export interface CardSearchHit { ref: string, name: string, nameDe: string | null, game: string, setName: string | null }
+export type CardSearchHit = { ref: string, name: string, nameDe: string | null, game: string, setName: string | null }
 
 /** Antwort der internen Shop-API /api/internal/risks (Vertrag, Logik im Shop: server/lib/moderation.ts). */
-export interface SellerRisk {
+export type SellerRisk = {
   sellerId: string
   name: string
   country: string
@@ -54,14 +54,14 @@ export interface SellerRisk {
 }
 
 /** Provision (interne Shop-API, Logik in server/lib/commission.ts des Shops). Sätze in Basispunkten. */
-export interface CommissionOverride { id: string, sellerId: string, customer: string, rateBps: number, reason: string, validFrom: string, validUntil: string | null, endedAt: string | null, grantedBy: string | null, active: boolean }
-export interface CustomerCommission {
+export type CommissionOverride = { id: string, sellerId: string, customer: string, rateBps: number, reason: string, validFrom: string, validUntil: string | null, endedAt: string | null, grantedBy: string | null, active: boolean }
+export type CustomerCommission = {
   current: { rateBps: number, source: 'override' | 'base', baseRateBps: number, override: { id: string, reason: string, validUntil: string | null } | null }
   overrides: CommissionOverride[]
 }
 
 /** Meldung (interne Shop-API, Logik in server/lib/moderation.ts des Shops). */
-export interface ReportView {
+export type ReportView = {
   id: string
   targetType: 'user' | 'listing' | 'message'
   targetId: string
@@ -98,14 +98,14 @@ export type Reconciliation = { available: false } | {
 }
 
 /** Eigener Shop von CardTreasure (interne Shop-API, Logik in server/lib/listings.ts und platform.ts des Shops). */
-export interface PlatformListing {
+export type PlatformListing = {
   id: string, name: string, game: string, kind: 'single' | 'sealed', setCode: string | null, setName: string | null, collectorNumber: string | null
   condition: string | null, language: string, finish: string, isFirstEdition: boolean
   quantity: number, priceCents: number, comment: string | null, storageLocation: string | null, status: string, createdAt: string, sold: number
 }
-export interface PlatformPrinting { id: string, setCode: string, setName: string, collectorNumber: string | null, finishes: string[], languages: string[], hasFirstEdition: boolean }
-export interface PlatformCard { id: string, name: string, nameDe: string | null, game: string, printings: PlatformPrinting[] | null }
-export interface PlatformSale {
+export type PlatformPrinting = { id: string, setCode: string, setName: string, collectorNumber: string | null, finishes: string[], languages: string[], hasFirstEdition: boolean }
+export type PlatformCard = { id: string, name: string, nameDe: string | null, game: string, printings: PlatformPrinting[] | null }
+export type PlatformSale = {
   id: string, orderNumber: string, paidAt: string | null, status: string, trackingNumber: string | null
   itemsCents: number, shippingCents: number, shippingService: string | null
   address: { name: string, street: string, houseNumber: string, extra?: string | null, postalCode: string, city: string, country: string }
@@ -113,23 +113,23 @@ export interface PlatformSale {
 }
 
 /** Werbung gewerblicher Kunden (interne Shop-API, Logik in server/lib/ads.ts des Shops). */
-export interface AdSettings { enabled: boolean, minRateBps: number, maxRateBps: number, minFeeCents: number, attributionDays: number }
-export interface Promotion {
+export type AdSettings = { enabled: boolean, minRateBps: number, maxRateBps: number, minFeeCents: number, attributionDays: number }
+export type Promotion = {
   listingId: string, name: string, game: string, cardSlug: string | null
   sellerId: string, seller: string, sellerCountry: string
   rateBps: number, startedAt: string, priceCents: number, status: string
   clicks: number, adSales: number, adRevenueCents: number
 }
-export interface AdsOverview { settings: AdSettings, promotions: Promotion[], totals: { revenueCents: number, revenue30Cents: number, sales: number } }
+export type AdsOverview = { settings: AdSettings, promotions: Promotion[], totals: { revenueCents: number, revenue30Cents: number, sales: number } }
 
 /** Abgelaufene Warenkörbe (interne Shop-API, Logik in server/lib/cart-expiry.ts des Shops). */
-export interface CartExpiryCustomer {
+export type CartExpiryCustomer = {
   userId: string, name: string, email: string, country: string | null
   expiries: number, items: number, valueCents: number, lastAt: string, expiriesTotal: number, orders: number, blocked: boolean
 }
-export interface CartExpiryReport {
+export type CartExpiryReport = {
   days: number, holdHours: number, repeatThreshold: number
   totals: { expiries: number, customers: number, items: number, valueCents: number, repeaters: number }
   customers: CartExpiryCustomer[]
 }
-export interface CustomerCartExpiries { total: number, last30: number, lastAt: string | null, repeatThreshold: number }
+export type CustomerCartExpiries = { total: number, last30: number, lastAt: string | null, repeatThreshold: number }

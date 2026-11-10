@@ -9,7 +9,7 @@ const { games, sets, cards, cardTranslations, printings, products, referencePric
  * der Rest (Upsert, Produkte, Preise) ist für alle Spiele gleich.
  */
 
-export interface NormSet {
+export type NormSet = {
   externalId: string
   code: string
   name: string
@@ -24,7 +24,7 @@ export interface NormSet {
   attributes?: Record<string, unknown>
 }
 
-export interface NormCard {
+export type NormCard = {
   externalId: string
   slug: string
   name: string
@@ -33,7 +33,7 @@ export interface NormCard {
   translations: { language: CardLanguage, name: string, text?: string | null }[]
 }
 
-export interface NormPrice {
+export type NormPrice = {
   source: 'cardmarket' | 'tcgplayer'
   finish: CardFinish
   currency: string
@@ -42,7 +42,7 @@ export interface NormPrice {
   trendCents?: number | null
 }
 
-export interface NormPrinting {
+export type NormPrinting = {
   cardExternalId: string
   setExternalId: string
   externalId: string
@@ -126,7 +126,7 @@ export const loadSetMap = async (gameId: number): Promise<Map<string, string>> =
 const union = (col: string) =>
   sql.raw(`(select coalesce(array_agg(distinct x), '{}') from unnest("printings"."${col}" || excluded."${col}") as x)`)
 
-export interface BatchResult { cards: number, printings: number, skipped: number }
+export type BatchResult = { cards: number, printings: number, skipped: number }
 
 /** Schreibt einen Stapel Karten und Drucke inklusive Produkten und Referenzpreisen. */
 export const upsertBatch = async (

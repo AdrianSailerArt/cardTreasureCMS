@@ -2,7 +2,7 @@
 import type { CustomerCartExpiries, CustomerCommission } from '~/types/admin'
 
 /** Kunden-Detail: Art (privat/gewerblich), Konto, Kennzahlen, Sperre, Angebote (entfernen), Bewertungen (Text ausblenden), Protokoll. */
-interface UserDetail {
+type UserDetail = {
   user: { id: string, name: string, email: string, role: string, locale: string, createdAt: string, blockedAt: string | null, blockedReason: string | null, blockedUntil: string | null, isDemo: boolean, displayName: string | null, sellerType: 'private' | 'commercial', companyName: string | null, vatId: string | null, country: string | null, purchases: number, sales: number, balanceCents: number }
   listings: { id: string, name: string, game: string, slug: string | null, kind: string, condition: string | null, priceCents: number, quantity: number, status: string }[]
   reviews: { id: string, direction: string, ratingOverall: number, deliveredComplete: boolean, comment: string | null, hidden: boolean, createdAt: string, otherId: string, other: string }[]

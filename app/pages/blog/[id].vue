@@ -1,8 +1,8 @@
 <script setup lang="ts">
 type Locale = 'de' | 'en'
 type Status = 'draft' | 'published' | 'archived'
-interface Translation { title: string, excerpt: string | null, bodyMd: string }
-interface PostDetail {
+type Translation = { title: string, excerpt: string | null, bodyMd: string }
+type PostDetail = {
   id: string, slug: string, status: Status, game: string | null, tags: string[]
   translations: Partial<Record<Locale, Translation>>
 }

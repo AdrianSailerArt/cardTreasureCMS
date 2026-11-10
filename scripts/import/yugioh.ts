@@ -17,9 +17,9 @@ import { chunk, fetchJson, log, slugify, toCents, type CliArgs } from './lib/uti
 const API = 'https://db.ygoprodeck.com/api/v7'
 const BATCH = 1000
 
-interface YgoSet { set_name: string, set_code: string, num_of_cards?: number, tcg_date?: string, set_image?: string }
+type YgoSet = { set_name: string, set_code: string, num_of_cards?: number, tcg_date?: string, set_image?: string }
 
-interface YgoCard {
+type YgoCard = {
   id: number
   name: string
   desc?: string

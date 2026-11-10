@@ -7,7 +7,7 @@ import { marked } from 'marked'
  */
 export const CARD_REF = /:card\{ref="(mtg|pokemon|yugioh)\/([a-z0-9-]+)"\}/g
 
-export interface CardRefInfo { game: string, slug: string, id: string, name: string, nameDe: string | null, printingId: string | null }
+export type CardRefInfo = { game: string, slug: string, id: string, name: string, nameDe: string | null, printingId: string | null }
 
 export const extractRefs = (markdown: string): { game: string, slug: string }[] => {
   const seen = new Map<string, { game: string, slug: string }>()

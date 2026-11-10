@@ -1,4 +1,4 @@
-import type { SQL } from 'drizzle-orm'
+import type { SqlDb } from '@cardtreasure/core/images'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { pgOptions } from '@cardtreasure/core/db'
@@ -20,7 +20,5 @@ export const useDb = () => {
 
 export { schema }
 
-/** Führt eine lesende SQL-Abfrage aus und gibt die Zeilen typisiert zurück. */
-export const rows = async <T>(query: SQL): Promise<T[]> => {
-  return await useDb().execute(query) as unknown as T[]
-}
+/** Datenbank für die Bild- und Sealed-Module (nur SQL, ohne Schema). */
+export const mediaDb = () => useDb() as unknown as SqlDb

@@ -21,3 +21,19 @@ export const shopInternal = async <T>(event: H3Event, path: string, opts: { meth
     throw createError({ statusCode: err.statusCode ?? 502, statusMessage: err.data?.statusMessage ?? err.data?.message ?? 'Shop nicht erreichbar' })
   }
 }
+
+type ProxyMethod = 'GET' | 'POST' | 'PUT'
+
+/**
+ * Catch-all-Route an die interne Shop-API weiterreichen: nur erlaubte Unterpfade (sonst 404) und Methoden (sonst 405),
+ * Body und Query unverändert. Eingaben prüft der Shop. `prefix` ist der Pfad unter /api/internal.
+ */
+export const proxyShopInternal = async (event: H3Event, prefix: string, allowed: RegExp[]): Promise<unknown> => {
+  const path = getRouterParam(event, 'path') ?? ''
+  if (!allowed.some(re => re.test(path))) throw createError({ statusCode: 404 })
+  const method = event.method as ProxyMethod
+  if (!['GET', 'POST', 'PUT'].includes(method)) throw createError({ statusCode: 405 })
+  const body = method === 'GET' ? undefined : await readBody<Record<string, unknown>>(event)
+  const query = method === 'GET' ? Object.fromEntries(Object.entries(getQuery(event)).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])) : undefined
+  return await shopInternal<unknown>(event, path ? `${prefix}/${path}` : prefix, { method, body, query })
+}

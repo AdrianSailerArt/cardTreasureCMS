@@ -13,10 +13,10 @@ import { fetchJson, log, mapLimit, slugify, toCents, type CliArgs } from './lib/
 const API = 'https://api.tcgdex.net/v2'
 const CONCURRENCY = 8
 
-interface BriefSet { id: string, name: string }
-interface BriefCard { id: string, localId: string, name: string }
+type BriefSet = { id: string, name: string }
+type BriefCard = { id: string, localId: string, name: string }
 
-interface FullSet {
+type FullSet = {
   id: string
   name: string
   logo?: string
@@ -28,7 +28,7 @@ interface FullSet {
   cards: BriefCard[]
 }
 
-interface CmPricing {
+type CmPricing = {
   idProduct?: number
   low?: number | null
   avg?: number | null
@@ -38,7 +38,7 @@ interface CmPricing {
   'trend-holo'?: number | null
 }
 
-interface TcgCard {
+type TcgCard = {
   id: string
   localId: string
   name: string

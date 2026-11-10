@@ -7,6 +7,9 @@ Internes Werkzeug für das CardTreasure-Team. Nur für Admins, nicht öffentlich
 - **Blog:** Beiträge auf Deutsch und Englisch mit Kartenverweisen (`:card{ref="mtg/lightning-bolt-4457ed35"}`)
 - **Skripte:** Katalog-Import, Marktplatz-Simulation, Admin-Verwaltung
 
+API-Doku (Shop und CMS in einer Datei): [docs/api.md im Shop-Repo](https://github.com/AdrianSailerArt/cardTreasure/blob/main/docs/api.md),
+erzeugt im Shop mit `bun run docs:api`. Jede Route hier braucht dafür einen Kommentar über `export default`.
+
 ## Architektur
 
 ```

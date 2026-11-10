@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 
-/*
+/**
  * Plattform-Finanzen aus dem Buchungsjournal (ledger_entries) und den Sendungen:
  *   Guthaben       Summe aller Kontostände (Verbindlichkeit gegenüber Nutzern)
  *   Treuhand       bezahlte, noch nicht abgeschlossene Sendungen (Geld liegt bei uns, gehört noch niemandem)
