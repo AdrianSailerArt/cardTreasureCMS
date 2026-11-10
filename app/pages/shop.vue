@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { CardHit } from '@cardtreasure/core/nuxt/components/listing/CardPicker.vue'
+import type { CreatorCard, CreatorInput } from '@cardtreasure/core/nuxt/components/listing/Creator.vue'
+import type { Game } from '@cardtreasure/core/catalog'
 import type { PlatformListing, PlatformSale } from '~/types/admin'
 
 /** Eigener Shop: Artikel, die CardTreasure selbst verkauft (nur an Privatkunden), und deren Verkäufe zum Packen und Versenden. */
@@ -11,6 +14,10 @@ const visible = computed(() => {
   const q = filter.value.trim().toLowerCase()
   return q ? listings.value.filter(l => l.name.toLowerCase().includes(q) || l.storageLocation?.toLowerCase().includes(q)) : listings.value
 })
+// Anlegen mit demselben Ablauf wie Kunden im Shop (ListingCreator aus dem Core-Paket), gespeichert als Angebot von CardTreasure
+const search = (q: string, game?: Game) => $fetch<CardHit[]>('/api/catalog/search', { query: { q, game } })
+const loadCard = (game: Game, slug: string) => $fetch<CreatorCard>(`/api/catalog/${game}/cards/${slug}`)
+const create = (input: CreatorInput) => $fetch<{ id: string }>('/api/shop/listings', { method: 'POST', body: input })
 const open = computed(() => sales.value.filter(s => s.status === 'paid').length)
 useSeoMeta({ title: 'Eigener Shop – CardTreasure CMS' })
 </script>
@@ -23,7 +30,8 @@ useSeoMeta({ title: 'Eigener Shop – CardTreasure CMS' })
     <UiNotice v-if="error" tone="danger" class="mt-4">Shop nicht erreichbar: {{ error.statusMessage }}</UiNotice>
 
     <template v-if="tab === 'listings'">
-      <Panel class="mt-6" title="Neues Angebot"><PlatformListingCreate @created="refreshListings()" /></Panel>
+      <h2 class="mt-8 text-title">Neues Angebot</h2>
+      <ListingCreator class="mt-4" :search="search" :load-card="loadCard" :create="create" @created="refreshListings()" />
       <Panel class="mt-6" :title="`Angebote (${listings.length})`">
         <template #actions><div class="w-64"><UiInput v-model="filter" placeholder="Name oder Lagerplatz …" aria-label="Angebote filtern" /></div></template>
         <UiTable :min-width="900">

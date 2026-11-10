@@ -26,7 +26,6 @@ const put = async (body: Record<string, unknown>) => {
   }
 }
 const save = () => put({ quantity: quantity.value, priceCents: priceCents.value, storageLocation: storage.value || null })
-const condition = computed(() => CONDITIONS.find(c => c.value === props.listing.condition))
 </script>
 
 <template>
@@ -37,7 +36,7 @@ const condition = computed(() => CONDITIONS.find(c => c.value === props.listing.
     </td>
     <td>
       <span class="flex flex-wrap gap-1">
-        <Tag v-if="condition" :tone="condition.value" caps :title="condition.label">{{ condition.short }}</Tag>
+        <ConditionBadge v-if="listing.condition" :condition="listing.condition" />
         <Tag caps>{{ listing.language }}</Tag>
         <Tag v-if="listing.finish !== 'normal'" tone="foil">{{ listing.finish }}</Tag>
       </span>

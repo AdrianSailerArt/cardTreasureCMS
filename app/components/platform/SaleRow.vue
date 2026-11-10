@@ -39,7 +39,7 @@ const a = computed(() => props.sale.address)
     </div>
     <ul class="mt-3 divide-y divide-line rounded-md bg-surface-muted px-3 text-small">
       <li v-for="(i, n) in sale.items" :key="n" class="flex flex-wrap justify-between gap-2 py-2">
-        <span>{{ i.quantity }}× {{ i.name }} <span class="text-meta text-fg-subtle">{{ CONDITIONS.find(c => c.value === i.condition)?.short }} · {{ i.language.toUpperCase() }}</span></span>
+        <span>{{ i.quantity }}× {{ i.name }} <span class="text-meta text-fg-subtle">{{ i.condition ? CONDITION_SHORT[i.condition] : 'Sealed' }} · {{ i.language.toUpperCase() }}</span></span>
         <span class="text-label" :class="i.storageLocation ? 'text-fg' : 'text-fg-subtle'">{{ i.storageLocation ?? 'ohne Lagerplatz' }}</span>
       </li>
     </ul>
