@@ -97,19 +97,32 @@ export type Reconciliation = { available: false } | {
   unmatched: { id: string, type: string, amountCents: number, feeCents: number, netCents: number, createdAt: string, ref: string | null, description: string | null }[]
 }
 
+/** Prüfungen im Zahlungsverkehr (interne Shop-API, Logik in server/lib/finance-checks.ts und incidents.ts des Shops). */
+export type FinanceArea = 'payin' | 'refund' | 'payout' | 'commission'
+export type FinanceFinding = {
+  check: string, area: FinanceArea, severity: 'warning' | 'danger', message: string, amountCents: number | null
+  orderNumber: string | null, userId: string | null, customer: string | null, ref: string | null, since: string | null
+}
+export type PaymentIncident = {
+  id: string, kind: string, severity: 'warning' | 'danger', message: string, amountCents: number | null
+  orderId: string | null, orderNumber: string | null, userId: string | null, customer: string | null, providerRef: string | null
+  createdAt: string, resolvedAt: string | null, resolution: string | null
+}
+export type FinanceChecks = { checkedAt: string, checks: { check: string, area: FinanceArea }[], findings: FinanceFinding[], incidents: PaymentIncident[] }
+
 /** Eigener Shop von CardTreasure (interne Shop-API, Logik in server/lib/listings.ts und platform.ts des Shops). */
 export type PlatformListing = {
   id: string, name: string, game: string, kind: 'single' | 'sealed', setCode: string | null, setName: string | null, collectorNumber: string | null
-  condition: string | null, language: string, finish: string, isFirstEdition: boolean
+  condition: string | null, language: string, finish: string, isFirstEdition: boolean, inToploader: boolean
   quantity: number, priceCents: number, comment: string | null, storageLocation: string | null, status: string, createdAt: string, sold: number
 }
 export type PlatformPrinting = { id: string, setCode: string, setName: string, collectorNumber: string | null, finishes: string[], languages: string[], hasFirstEdition: boolean }
 export type PlatformCard = { id: string, name: string, nameDe: string | null, game: string, printings: PlatformPrinting[] | null }
 export type PlatformSale = {
   id: string, orderNumber: string, paidAt: string | null, status: string, trackingNumber: string | null
-  itemsCents: number, shippingCents: number, shippingService: string | null
+  itemsCents: number, shippingCents: number, packagingCents: number, shippingService: string | null
   address: { name: string, street: string, houseNumber: string, extra?: string | null, postalCode: string, city: string, country: string }
-  items: { name: string, quantity: number, condition: string | null, language: string, storageLocation: string | null }[]
+  items: { name: string, quantity: number, condition: string | null, language: string, storageLocation: string | null, inToploader: boolean }[]
 }
 
 /** Werbung gewerblicher Kunden (interne Shop-API, Logik in server/lib/ads.ts des Shops). */

@@ -423,6 +423,7 @@ const simulate = async () => {
         status,
         itemsCents: items,
         shippingCents: quote.priceCents,
+        packagingCents: quote.packagingCents,
         shippingService: quote.service,
         shippingFormat: quote.format,
         packageWeightG: quote.weightG,

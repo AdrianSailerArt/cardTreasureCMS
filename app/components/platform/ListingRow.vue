@@ -7,8 +7,9 @@ const emit = defineEmits<{ changed: [] }>()
 const quantity = ref(props.listing.quantity)
 const price = ref((props.listing.priceCents / 100).toLocaleString('de-DE', { minimumFractionDigits: 2 }))
 const storage = ref(props.listing.storageLocation ?? '')
+const toploader = ref(props.listing.inToploader)
 const priceCents = computed(() => Math.round(Number(price.value.replace(/\./g, '').replace(',', '.')) * 100))
-const dirty = computed(() => quantity.value !== props.listing.quantity || priceCents.value !== props.listing.priceCents || storage.value !== (props.listing.storageLocation ?? ''))
+const dirty = computed(() => quantity.value !== props.listing.quantity || priceCents.value !== props.listing.priceCents || storage.value !== (props.listing.storageLocation ?? '') || toploader.value !== props.listing.inToploader)
 const busy = ref(false)
 const error = ref<string | null>(null)
 const put = async (body: Record<string, unknown>) => {
@@ -25,7 +26,7 @@ const put = async (body: Record<string, unknown>) => {
     busy.value = false
   }
 }
-const save = () => put({ quantity: quantity.value, priceCents: priceCents.value, storageLocation: storage.value || null })
+const save = () => put({ quantity: quantity.value, priceCents: priceCents.value, storageLocation: storage.value || null, ...(props.listing.kind === 'sealed' ? {} : { inToploader: toploader.value }) })
 </script>
 
 <template>
@@ -41,6 +42,9 @@ const save = () => put({ quantity: quantity.value, priceCents: priceCents.value,
         <Tag caps>{{ listing.language }}</Tag>
         <Tag v-if="listing.finish !== 'normal'" tone="foil">{{ listing.finish }}</Tag>
       </span>
+      <label v-if="listing.kind !== 'sealed'" class="mt-1 flex min-h-6 items-center gap-1.5 text-meta text-fg-muted">
+        <input v-model="toploader" type="checkbox" class="size-4 accent-accent"> Versand im Toploader
+      </label>
     </td>
     <td><input v-model.number="quantity" type="number" min="1" max="999" :aria-label="`Menge ${listing.name}`" class="min-h-8 w-16 rounded-md border border-line-strong bg-bg px-2 text-right text-small tabular-nums focus:border-accent"></td>
     <td><UiInput v-model="price" class="!w-24 text-right" :aria-label="`Preis ${listing.name}`" /></td>

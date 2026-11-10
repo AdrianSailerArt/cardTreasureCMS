@@ -30,7 +30,7 @@ const a = computed(() => props.sale.address)
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div class="min-w-0">
         <p class="flex flex-wrap items-center gap-2"><span class="font-mono text-small">{{ sale.orderNumber }}</span><StatusTag :status="sale.status" /></p>
-        <p class="mt-1 text-meta text-fg-subtle">{{ dateTime(sale.paidAt) }} · {{ euro(sale.itemsCents + sale.shippingCents) }} · {{ sale.shippingService ?? 'Versand' }}</p>
+        <p class="mt-1 text-meta text-fg-subtle">{{ dateTime(sale.paidAt) }} · {{ euro(sale.itemsCents + sale.shippingCents) }} · {{ sale.shippingService ?? 'Versand' }}<template v-if="sale.packagingCents"> (inkl. {{ euro(sale.packagingCents) }} Verpackung)</template></p>
       </div>
       <address class="text-small not-italic leading-snug">
         {{ a.name }}<br>{{ a.street }} {{ a.houseNumber }}<template v-if="a.extra"><br>{{ a.extra }}</template><br>
@@ -39,7 +39,7 @@ const a = computed(() => props.sale.address)
     </div>
     <ul class="mt-3 divide-y divide-line rounded-md bg-surface-muted px-3 text-small">
       <li v-for="(i, n) in sale.items" :key="n" class="flex flex-wrap justify-between gap-2 py-2">
-        <span>{{ i.quantity }}× {{ i.name }} <span class="text-meta text-fg-subtle">{{ i.condition ? CONDITION_SHORT[i.condition] : 'Sealed' }} · {{ i.language.toUpperCase() }}</span></span>
+        <span>{{ i.quantity }}× {{ i.name }} <span class="text-meta text-fg-subtle">{{ i.condition ? CONDITION_SHORT[i.condition] : 'Sealed' }} · {{ i.language.toUpperCase() }}</span> <Tag v-if="i.inToploader" tone="info">Toploader</Tag></span>
         <span class="text-label" :class="i.storageLocation ? 'text-fg' : 'text-fg-subtle'">{{ i.storageLocation ?? 'ohne Lagerplatz' }}</span>
       </li>
     </ul>

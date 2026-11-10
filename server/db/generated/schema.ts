@@ -1,4 +1,4 @@
-import { pgTable, index, text, timestamp, uniqueIndex, foreignKey, unique, uuid, jsonb, integer, char, boolean, serial, check, date, smallint, primaryKey, pgSequence, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, index, foreignKey, check, uuid, text, boolean, integer, timestamp, uniqueIndex, unique, jsonb, char, serial, date, smallint, primaryKey, pgSequence, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const cardCondition = pgEnum("card_condition", ['mint', 'near_mint', 'excellent', 'good', 'light_played', 'played', 'poor'])
@@ -7,7 +7,7 @@ export const cardLanguage = pgEnum("card_language", ['en', 'de', 'fr', 'it', 'es
 export const deckBoard = pgEnum("deck_board", ['main', 'side', 'extra', 'commander', 'maybe'])
 export const gameCode = pgEnum("game_code", ['mtg', 'pokemon', 'yugioh'])
 export const importStatus = pgEnum("import_status", ['running', 'succeeded', 'failed'])
-export const ledgerKind = pgEnum("ledger_kind", ['sale', 'commission', 'purchase', 'payout', 'refund', 'adjustment'])
+export const ledgerKind = pgEnum("ledger_kind", ['sale', 'commission', 'purchase', 'payout', 'refund', 'adjustment', 'fee', 'advertising'])
 export const listingStatus = pgEnum("listing_status", ['active', 'paused', 'sold_out', 'removed'])
 export const orderStatus = pgEnum("order_status", ['pending_payment', 'paid', 'cancelled'])
 export const paymentStatus = pgEnum("payment_status", ['pending', 'succeeded', 'failed', 'refunded'])
@@ -24,6 +24,45 @@ export const siteLocale = pgEnum("site_locale", ['de', 'en'])
 export const userRole = pgEnum("user_role", ['user', 'admin'])
 
 export const orderNumberSeq = pgSequence("order_number_seq", {  startWith: "100000", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
+
+export const listings = pgTable("listings", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	sellerId: text("seller_id").notNull(),
+	productId: uuid("product_id").notNull(),
+	condition: cardCondition(),
+	language: cardLanguage().notNull(),
+	finish: cardFinish().default('normal').notNull(),
+	isFirstEdition: boolean("is_first_edition").default(false).notNull(),
+	isSigned: boolean("is_signed").default(false).notNull(),
+	isAltered: boolean("is_altered").default(false).notNull(),
+	comment: text(),
+	imagePaths: text("image_paths").array().default(sql`'{}'`).notNull(),
+	quantity: integer().notNull(),
+	priceCents: integer("price_cents").notNull(),
+	status: listingStatus().default('active').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	storageLocation: text("storage_location"),
+	adRateBps: integer("ad_rate_bps"),
+	adStartedAt: timestamp("ad_started_at", { withTimezone: true, mode: 'string' }),
+	inToploader: boolean("in_toploader").default(false).notNull(),
+}, (table) => [
+	index("listings_active_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")).where(sql`((status = 'active'::listing_status) AND (quantity > 0))`),
+	index("listings_product_price_idx").using("btree", table.productId.asc().nullsLast().op("enum_ops"), table.status.asc().nullsLast().op("uuid_ops"), table.priceCents.asc().nullsLast().op("enum_ops")),
+	index("listings_seller_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.status.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.sellerId],
+			foreignColumns: [sellerProfiles.userId],
+			name: "listings_seller_id_seller_profiles_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.productId],
+			foreignColumns: [products.id],
+			name: "listings_product_id_products_id_fk"
+		}),
+	check("listings_min_price_chk", sql`price_cents >= 10`),
+	check("listings_quantity_chk", sql`quantity >= 0`),
+]);
 
 export const verification = pgTable("verification", {
 	id: text().primaryKey().notNull(),
@@ -59,6 +98,7 @@ export const orders = pgTable("orders", {
 			name: "orders_buyer_id_user_id_fk"
 		}),
 	unique("orders_number_unique").on(table.number),
+	check("orders_amounts_chk", sql`(items_cents >= 0) AND (shipping_cents >= 0) AND (total_cents = (items_cents + shipping_cents))`),
 ]);
 
 export const shipments = pgTable("shipments", {
@@ -81,6 +121,8 @@ export const shipments = pgTable("shipments", {
 	shippingFormat: shippingFormat("shipping_format"),
 	packageWeightG: integer("package_weight_g"),
 	cancelledBy: text("cancelled_by"),
+	commissionRateBps: integer("commission_rate_bps"),
+	packagingCents: integer("packaging_cents").default(0).notNull(),
 }, (table) => [
 	index("shipments_order_idx").using("btree", table.orderId.asc().nullsLast().op("uuid_ops")),
 	index("shipments_seller_status_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.status.asc().nullsLast().op("text_ops")),
@@ -94,26 +136,8 @@ export const shipments = pgTable("shipments", {
 			foreignColumns: [sellerProfiles.userId],
 			name: "shipments_seller_id_seller_profiles_user_id_fk"
 		}),
-]);
-
-export const user = pgTable("user", {
-	id: text().primaryKey().notNull(),
-	name: text().notNull(),
-	email: text().notNull(),
-	emailVerified: boolean("email_verified").default(false).notNull(),
-	image: text(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	username: text(),
-	role: userRole().default('user').notNull(),
-	locale: siteLocale().default('de').notNull(),
-	bannedAt: timestamp("banned_at", { withTimezone: true, mode: 'string' }),
-	isDemo: boolean("is_demo").default(false).notNull(),
-	blockedAt: timestamp("blocked_at", { withTimezone: true, mode: 'string' }),
-	blockedReason: text("blocked_reason"),
-}, (table) => [
-	unique("user_email_unique").on(table.email),
-	unique("user_username_unique").on(table.username),
+	check("shipments_amounts_chk", sql`(items_cents >= 0) AND (shipping_cents >= 0) AND (packaging_cents >= 0) AND (packaging_cents <= shipping_cents)`),
+	check("shipments_commission_chk", sql`(commission_cents >= 0) AND (commission_cents <= items_cents)`),
 ]);
 
 export const account = pgTable("account", {
@@ -187,41 +211,6 @@ export const games = pgTable("games", {
 	unique("games_code_unique").on(table.code),
 ]);
 
-export const listings = pgTable("listings", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	sellerId: text("seller_id").notNull(),
-	productId: uuid("product_id").notNull(),
-	condition: cardCondition(),
-	language: cardLanguage().notNull(),
-	finish: cardFinish().default('normal').notNull(),
-	isFirstEdition: boolean("is_first_edition").default(false).notNull(),
-	isSigned: boolean("is_signed").default(false).notNull(),
-	isAltered: boolean("is_altered").default(false).notNull(),
-	comment: text(),
-	imagePaths: text("image_paths").array().default(sql`'{}'`).notNull(),
-	quantity: integer().notNull(),
-	priceCents: integer("price_cents").notNull(),
-	status: listingStatus().default('active').notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("listings_active_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")).where(sql`((status = 'active'::listing_status) AND (quantity > 0))`),
-	index("listings_product_price_idx").using("btree", table.productId.asc().nullsLast().op("enum_ops"), table.status.asc().nullsLast().op("uuid_ops"), table.priceCents.asc().nullsLast().op("enum_ops")),
-	index("listings_seller_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.status.asc().nullsLast().op("enum_ops")),
-	foreignKey({
-			columns: [table.sellerId],
-			foreignColumns: [sellerProfiles.userId],
-			name: "listings_seller_id_seller_profiles_user_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.productId],
-			foreignColumns: [products.id],
-			name: "listings_product_id_products_id_fk"
-		}),
-	check("listings_min_price_chk", sql`price_cents >= 10`),
-	check("listings_quantity_chk", sql`quantity >= 0`),
-]);
-
 export const conversations = pgTable("conversations", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	shipmentId: uuid("shipment_id"),
@@ -259,35 +248,6 @@ export const decks = pgTable("decks", {
 			foreignColumns: [games.id],
 			name: "decks_game_id_games_id_fk"
 		}),
-]);
-
-export const sellerProfiles = pgTable("seller_profiles", {
-	userId: text("user_id").primaryKey().notNull(),
-	type: sellerType().notNull(),
-	displayName: text("display_name").notNull(),
-	country: char({ length: 2 }).notNull(),
-	shipFromAddressId: uuid("ship_from_address_id"),
-	companyName: text("company_name"),
-	vatId: text("vat_id"),
-	imprint: text(),
-	terms: text(),
-	taxId: text("tax_id"),
-	dateOfBirth: date("date_of_birth"),
-	stripeAccountId: text("stripe_account_id"),
-	payoutsEnabled: boolean("payouts_enabled").default(false).notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [user.id],
-			name: "seller_profiles_user_id_user_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.shipFromAddressId],
-			foreignColumns: [addresses.id],
-			name: "seller_profiles_ship_from_address_id_addresses_id_fk"
-		}),
-	unique("seller_profiles_stripe_account_id_unique").on(table.stripeAccountId),
 ]);
 
 export const products = pgTable("products", {
@@ -340,21 +300,56 @@ export const messages = pgTable("messages", {
 		}),
 ]);
 
-export const payments = pgTable("payments", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	orderId: uuid("order_id").notNull(),
-	provider: text().default('stripe').notNull(),
-	providerRef: text("provider_ref").notNull(),
-	amountCents: integer("amount_cents").notNull(),
-	status: paymentStatus().default('pending').notNull(),
+export const user = pgTable("user", {
+	id: text().primaryKey().notNull(),
+	name: text().notNull(),
+	email: text().notNull(),
+	emailVerified: boolean("email_verified").default(false).notNull(),
+	image: text(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	username: text(),
+	role: userRole().default('user').notNull(),
+	locale: siteLocale().default('de').notNull(),
+	bannedAt: timestamp("banned_at", { withTimezone: true, mode: 'string' }),
+	isDemo: boolean("is_demo").default(false).notNull(),
+	blockedAt: timestamp("blocked_at", { withTimezone: true, mode: 'string' }),
+	blockedReason: text("blocked_reason"),
+	blockedUntil: timestamp("blocked_until", { withTimezone: true, mode: 'string' }),
 }, (table) => [
+	unique("user_email_unique").on(table.email),
+	unique("user_username_unique").on(table.username),
+]);
+
+export const sellerProfiles = pgTable("seller_profiles", {
+	userId: text("user_id").primaryKey().notNull(),
+	type: sellerType().notNull(),
+	displayName: text("display_name").notNull(),
+	country: char({ length: 2 }).notNull(),
+	shipFromAddressId: uuid("ship_from_address_id"),
+	companyName: text("company_name"),
+	vatId: text("vat_id"),
+	imprint: text(),
+	terms: text(),
+	taxId: text("tax_id"),
+	dateOfBirth: date("date_of_birth"),
+	stripeAccountId: text("stripe_account_id"),
+	payoutsEnabled: boolean("payouts_enabled").default(false).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	isPlatform: boolean("is_platform").default(false).notNull(),
+}, (table) => [
+	uniqueIndex("seller_profiles_platform_uq").using("btree", table.isPlatform.asc().nullsLast().op("bool_ops")).where(sql`is_platform`),
 	foreignKey({
-			columns: [table.orderId],
-			foreignColumns: [orders.id],
-			name: "payments_order_id_orders_id_fk"
+			columns: [table.userId],
+			foreignColumns: [user.id],
+			name: "seller_profiles_user_id_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.shipFromAddressId],
+			foreignColumns: [addresses.id],
+			name: "seller_profiles_ship_from_address_id_addresses_id_fk"
 		}),
-	unique("payments_provider_ref_unique").on(table.providerRef),
+	unique("seller_profiles_stripe_account_id_unique").on(table.stripeAccountId),
 ]);
 
 export const posts = pgTable("posts", {
@@ -508,36 +503,6 @@ export const session = pgTable("session", {
 	unique("session_token_unique").on(table.token),
 ]);
 
-export const shipmentItems = pgTable("shipment_items", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	shipmentId: uuid("shipment_id").notNull(),
-	listingId: uuid("listing_id"),
-	productId: uuid("product_id").notNull(),
-	condition: cardCondition(),
-	language: cardLanguage().notNull(),
-	finish: cardFinish().notNull(),
-	isFirstEdition: boolean("is_first_edition").default(false).notNull(),
-	quantity: integer().notNull(),
-	unitPriceCents: integer("unit_price_cents").notNull(),
-}, (table) => [
-	index("shipment_items_product_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.shipmentId],
-			foreignColumns: [shipments.id],
-			name: "shipment_items_shipment_id_shipments_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.listingId],
-			foreignColumns: [listings.id],
-			name: "shipment_items_listing_id_listings_id_fk"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.productId],
-			foreignColumns: [products.id],
-			name: "shipment_items_product_id_products_id_fk"
-		}),
-]);
-
 export const wishlists = pgTable("wishlists", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	userId: text("user_id").notNull(),
@@ -624,6 +589,60 @@ export const reviews = pgTable("reviews", {
 	check("reviews_description_chk", sql`(rating_description IS NULL) OR ((rating_description >= 1) AND (rating_description <= 5))`),
 ]);
 
+export const payments = pgTable("payments", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	orderId: uuid("order_id").notNull(),
+	provider: text().default('stripe').notNull(),
+	providerRef: text("provider_ref").notNull(),
+	amountCents: integer("amount_cents").notNull(),
+	status: paymentStatus().default('pending').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	feeCents: integer("fee_cents"),
+}, (table) => [
+	uniqueIndex("payments_order_uq").using("btree", table.orderId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.orderId],
+			foreignColumns: [orders.id],
+			name: "payments_order_id_orders_id_fk"
+		}),
+	unique("payments_provider_ref_unique").on(table.providerRef),
+	check("payments_amounts_chk", sql`(amount_cents > 0) AND ((fee_cents IS NULL) OR (fee_cents >= 0))`),
+]);
+
+export const shipmentItems = pgTable("shipment_items", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	shipmentId: uuid("shipment_id").notNull(),
+	listingId: uuid("listing_id"),
+	productId: uuid("product_id").notNull(),
+	condition: cardCondition(),
+	language: cardLanguage().notNull(),
+	finish: cardFinish().notNull(),
+	isFirstEdition: boolean("is_first_edition").default(false).notNull(),
+	quantity: integer().notNull(),
+	unitPriceCents: integer("unit_price_cents").notNull(),
+	adRateBps: integer("ad_rate_bps"),
+	adFeeCents: integer("ad_fee_cents"),
+	inToploader: boolean("in_toploader").default(false).notNull(),
+}, (table) => [
+	index("shipment_items_product_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.shipmentId],
+			foreignColumns: [shipments.id],
+			name: "shipment_items_shipment_id_shipments_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.listingId],
+			foreignColumns: [listings.id],
+			name: "shipment_items_listing_id_listings_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.productId],
+			foreignColumns: [products.id],
+			name: "shipment_items_product_id_products_id_fk"
+		}),
+	check("shipment_items_amounts_chk", sql`(quantity > 0) AND (unit_price_cents > 0)`),
+]);
+
 export const importRuns = pgTable("import_runs", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	game: gameCode().notNull(),
@@ -636,35 +655,6 @@ export const importRuns = pgTable("import_runs", {
 	finishedAt: timestamp("finished_at", { withTimezone: true, mode: 'string' }),
 }, (table) => [
 	index("import_runs_game_started_idx").using("btree", table.game.asc().nullsLast().op("timestamptz_ops"), table.startedAt.asc().nullsLast().op("timestamptz_ops")),
-]);
-
-export const ledgerEntries = pgTable("ledger_entries", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	userId: text("user_id").notNull(),
-	kind: ledgerKind().notNull(),
-	amountCents: integer("amount_cents").notNull(),
-	orderId: uuid("order_id"),
-	shipmentId: uuid("shipment_id"),
-	note: text(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("ledger_user_created_idx").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("text_ops")),
-	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [user.id],
-			name: "ledger_entries_user_id_user_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.orderId],
-			foreignColumns: [orders.id],
-			name: "ledger_entries_order_id_orders_id_fk"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.shipmentId],
-			foreignColumns: [shipments.id],
-			name: "ledger_entries_shipment_id_shipments_id_fk"
-		}).onDelete("set null"),
-	check("ledger_amount_nonzero_chk", sql`amount_cents <> 0`),
 ]);
 
 export const notifications = pgTable("notifications", {
@@ -688,6 +678,40 @@ export const notifications = pgTable("notifications", {
 			foreignColumns: [user.id],
 			name: "notifications_user_id_user_id_fk"
 		}).onDelete("cascade"),
+]);
+
+export const ledgerEntries = pgTable("ledger_entries", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	kind: ledgerKind().notNull(),
+	amountCents: integer("amount_cents").notNull(),
+	orderId: uuid("order_id"),
+	shipmentId: uuid("shipment_id"),
+	note: text(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	externalRef: text("external_ref"),
+	idempotencyKey: text("idempotency_key"),
+}, (table) => [
+	uniqueIndex("ledger_shipment_kind_uq").using("btree", table.shipmentId.asc().nullsLast().op("uuid_ops"), table.kind.asc().nullsLast().op("uuid_ops")).where(sql`((shipment_id IS NOT NULL) AND (kind = ANY (ARRAY['sale'::ledger_kind, 'commission'::ledger_kind, 'advertising'::ledger_kind, 'refund'::ledger_kind])))`),
+	index("ledger_user_created_idx").using("btree", table.userId.asc().nullsLast().op("timestamptz_ops"), table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	uniqueIndex("ledger_user_idempotency_uq").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.idempotencyKey.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [user.id],
+			name: "ledger_entries_user_id_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.orderId],
+			foreignColumns: [orders.id],
+			name: "ledger_entries_order_id_orders_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.shipmentId],
+			foreignColumns: [shipments.id],
+			name: "ledger_entries_shipment_id_shipments_id_fk"
+		}).onDelete("set null"),
+	check("ledger_amount_nonzero_chk", sql`amount_cents <> 0`),
+	check("ledger_sign_chk", sql`((kind <> ALL (ARRAY['sale'::ledger_kind, 'refund'::ledger_kind])) OR (amount_cents > 0)) AND ((kind <> ALL (ARRAY['commission'::ledger_kind, 'purchase'::ledger_kind, 'payout'::ledger_kind, 'advertising'::ledger_kind])) OR (amount_cents < 0))`),
 ]);
 
 export const media = pgTable("media", {
@@ -748,6 +772,205 @@ export const moderationLog = pgTable("moderation_log", {
 			foreignColumns: [user.id],
 			name: "moderation_log_admin_id_user_id_fk"
 		}).onDelete("set null"),
+]);
+
+export const commissionSettings = pgTable("commission_settings", {
+	id: boolean().default(true).primaryKey().notNull(),
+	rateBps: integer("rate_bps").notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedBy: text("updated_by"),
+}, (table) => [
+	foreignKey({
+			columns: [table.updatedBy],
+			foreignColumns: [user.id],
+			name: "commission_settings_updated_by_user_id_fk"
+		}).onDelete("set null"),
+	check("commission_settings_single_chk", sql`CHECK (id)`),
+	check("commission_settings_rate_chk", sql`(rate_bps >= 0) AND (rate_bps <= 2000)`),
+]);
+
+export const commissionOverrides = pgTable("commission_overrides", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	sellerId: text("seller_id").notNull(),
+	rateBps: integer("rate_bps").notNull(),
+	reason: text().notNull(),
+	validFrom: timestamp("valid_from", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	validUntil: timestamp("valid_until", { withTimezone: true, mode: 'string' }),
+	endedAt: timestamp("ended_at", { withTimezone: true, mode: 'string' }),
+	grantedBy: text("granted_by"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("commission_overrides_seller_idx").using("btree", table.sellerId.asc().nullsLast().op("text_ops"), table.validFrom.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.sellerId],
+			foreignColumns: [user.id],
+			name: "commission_overrides_seller_id_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.grantedBy],
+			foreignColumns: [user.id],
+			name: "commission_overrides_granted_by_user_id_fk"
+		}).onDelete("set null"),
+	check("commission_overrides_rate_chk", sql`(rate_bps >= 0) AND (rate_bps <= 2000)`),
+]);
+
+export const paymentRefunds = pgTable("payment_refunds", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	paymentId: uuid("payment_id").notNull(),
+	shipmentId: uuid("shipment_id"),
+	amountCents: integer("amount_cents").notNull(),
+	status: text().default('pending').notNull(),
+	providerRef: text("provider_ref"),
+	attempts: integer().default(0).notNull(),
+	lastError: text("last_error"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	uniqueIndex("payment_refunds_shipment_uq").using("btree", table.shipmentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.paymentId],
+			foreignColumns: [payments.id],
+			name: "payment_refunds_payment_id_payments_id_fk"
+		}),
+	foreignKey({
+			columns: [table.shipmentId],
+			foreignColumns: [shipments.id],
+			name: "payment_refunds_shipment_id_shipments_id_fk"
+		}).onDelete("set null"),
+	unique("payment_refunds_provider_ref_unique").on(table.providerRef),
+	check("payment_refunds_amount_chk", sql`amount_cents > 0`),
+	check("payment_refunds_status_chk", sql`status = ANY (ARRAY['pending'::text, 'succeeded'::text, 'failed'::text])`),
+]);
+
+export const reports = pgTable("reports", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	reporterId: text("reporter_id"),
+	targetType: text("target_type").notNull(),
+	targetId: text("target_id").notNull(),
+	subjectUserId: text("subject_user_id").notNull(),
+	category: text().notNull(),
+	text: text(),
+	status: text().default('open').notNull(),
+	resolution: text(),
+	handledBy: text("handled_by"),
+	handledAt: timestamp("handled_at", { withTimezone: true, mode: 'string' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	uniqueIndex("reports_reporter_target_uq").using("btree", table.reporterId.asc().nullsLast().op("text_ops"), table.targetType.asc().nullsLast().op("text_ops"), table.targetId.asc().nullsLast().op("text_ops")),
+	index("reports_status_created_idx").using("btree", table.status.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("reports_subject_idx").using("btree", table.subjectUserId.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.handledBy],
+			foreignColumns: [user.id],
+			name: "reports_handled_by_user_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.reporterId],
+			foreignColumns: [user.id],
+			name: "reports_reporter_id_user_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.subjectUserId],
+			foreignColumns: [user.id],
+			name: "reports_subject_user_id_user_id_fk"
+		}).onDelete("cascade"),
+]);
+
+export const adClicks = pgTable("ad_clicks", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	listingId: uuid("listing_id").notNull(),
+	userId: text("user_id"),
+	visitorId: text("visitor_id"),
+	placement: text().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("ad_clicks_listing_user_idx").using("btree", table.listingId.asc().nullsLast().op("text_ops"), table.userId.asc().nullsLast().op("uuid_ops"), table.createdAt.asc().nullsLast().op("uuid_ops")),
+	index("ad_clicks_listing_visitor_idx").using("btree", table.listingId.asc().nullsLast().op("text_ops"), table.visitorId.asc().nullsLast().op("text_ops"), table.createdAt.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.listingId],
+			foreignColumns: [listings.id],
+			name: "ad_clicks_listing_id_listings_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [user.id],
+			name: "ad_clicks_user_id_user_id_fk"
+		}).onDelete("set null"),
+]);
+
+export const adSettings = pgTable("ad_settings", {
+	id: boolean().default(true).primaryKey().notNull(),
+	enabled: boolean().default(true).notNull(),
+	minRateBps: integer("min_rate_bps").default(200).notNull(),
+	maxRateBps: integer("max_rate_bps").default(1500).notNull(),
+	minFeeCents: integer("min_fee_cents").default(10).notNull(),
+	attributionDays: integer("attribution_days").default(30).notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedBy: text("updated_by"),
+}, (table) => [
+	foreignKey({
+			columns: [table.updatedBy],
+			foreignColumns: [user.id],
+			name: "ad_settings_updated_by_user_id_fk"
+		}).onDelete("set null"),
+	check("ad_settings_single_chk", sql`CHECK (id)`),
+	check("ad_settings_rates_chk", sql`(min_rate_bps >= 0) AND (max_rate_bps >= min_rate_bps) AND (max_rate_bps <= 5000)`),
+]);
+
+export const cartExpirations = pgTable("cart_expirations", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	batchId: uuid("batch_id").notNull(),
+	userId: text("user_id").notNull(),
+	listingId: uuid("listing_id"),
+	sellerId: text("seller_id"),
+	quantity: integer().notNull(),
+	priceCents: integer("price_cents").notNull(),
+	addedAt: timestamp("added_at", { withTimezone: true, mode: 'string' }).notNull(),
+	expiredAt: timestamp("expired_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("cart_expirations_expired_idx").using("btree", table.expiredAt.asc().nullsLast().op("timestamptz_ops")),
+	index("cart_expirations_user_idx").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.expiredAt.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [user.id],
+			name: "cart_expirations_user_id_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.listingId],
+			foreignColumns: [listings.id],
+			name: "cart_expirations_listing_id_listings_id_fk"
+		}).onDelete("set null"),
+]);
+
+export const paymentIncidents = pgTable("payment_incidents", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	kind: text().notNull(),
+	severity: text().default('danger').notNull(),
+	dedupeKey: text("dedupe_key").notNull(),
+	message: text().notNull(),
+	amountCents: integer("amount_cents"),
+	orderId: uuid("order_id"),
+	userId: text("user_id"),
+	providerRef: text("provider_ref"),
+	details: jsonb(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: 'string' }),
+	resolvedBy: text("resolved_by"),
+	resolution: text(),
+}, (table) => [
+	index("payment_incidents_open_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")).where(sql`(resolved_at IS NULL)`),
+	foreignKey({
+			columns: [table.orderId],
+			foreignColumns: [orders.id],
+			name: "payment_incidents_order_id_orders_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [user.id],
+			name: "payment_incidents_user_id_user_id_fk"
+		}).onDelete("set null"),
+	unique("payment_incidents_dedupe_key_unique").on(table.dedupeKey),
+	check("payment_incidents_severity_chk", sql`severity = ANY (ARRAY['warning'::text, 'danger'::text])`),
 ]);
 
 export const postCardRefs = pgTable("post_card_refs", {

@@ -42,7 +42,7 @@ useSeoMeta({ title: 'Eigener Shop – CardTreasure CMS' })
         <template #actions><div class="w-64"><UiInput v-model="filter" placeholder="Name oder Lagerplatz …" aria-label="Angebote filtern" /></div></template>
         <UiTable :min-width="900">
           <template #head><th>Artikel</th><th>Zustand</th><th>Menge</th><th>Preis €</th><th>Lagerplatz</th><th class="text-right">Verkauft</th><th>Status</th><th /></template>
-          <PlatformListingRow v-for="l in visible" :key="`${l.id}-${l.quantity}-${l.priceCents}-${l.storageLocation}-${l.status}`" :listing="l" @changed="refreshListings()" />
+          <PlatformListingRow v-for="l in visible" :key="`${l.id}-${l.quantity}-${l.priceCents}-${l.storageLocation}-${l.inToploader}-${l.status}`" :listing="l" @changed="refreshListings()" />
           <tr v-if="!visible.length"><td colspan="8" class="py-4"><EmptyState>Noch keine eigenen Angebote. Oben eine Karte suchen und anlegen.</EmptyState></td></tr>
         </UiTable>
       </Panel>
