@@ -121,3 +121,15 @@ export interface Promotion {
   clicks: number, adSales: number, adRevenueCents: number
 }
 export interface AdsOverview { settings: AdSettings, promotions: Promotion[], totals: { revenueCents: number, revenue30Cents: number, sales: number } }
+
+/** Abgelaufene Warenkörbe (interne Shop-API, Logik in server/lib/cart-expiry.ts des Shops). */
+export interface CartExpiryCustomer {
+  userId: string, name: string, email: string, country: string | null
+  expiries: number, items: number, valueCents: number, lastAt: string, expiriesTotal: number, orders: number, blocked: boolean
+}
+export interface CartExpiryReport {
+  days: number, holdHours: number, repeatThreshold: number
+  totals: { expiries: number, customers: number, items: number, valueCents: number, repeaters: number }
+  customers: CartExpiryCustomer[]
+}
+export interface CustomerCartExpiries { total: number, last30: number, lastAt: string | null, repeatThreshold: number }

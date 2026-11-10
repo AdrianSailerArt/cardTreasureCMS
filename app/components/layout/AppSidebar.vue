@@ -10,6 +10,7 @@ const nav = [
   { to: '/commission', label: 'Provision' },
   { to: '/trust', label: 'Vertrauen' },
   { to: '/reports', label: 'Meldungen' },
+  { to: '/abandoned-carts', label: 'Warenkörbe' },
   { to: '/customers', label: 'Kunden' },
   { to: '/shop', label: 'Eigener Shop' },
   { to: '/ads', label: 'Werbung' },

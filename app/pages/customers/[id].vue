@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CustomerCommission } from '~/types/admin'
+import type { CustomerCartExpiries, CustomerCommission } from '~/types/admin'
 
 /** Kunden-Detail: Art (privat/gewerblich), Konto, Kennzahlen, Sperre, Angebote (entfernen), Bewertungen (Text ausblenden), Protokoll. */
 interface UserDetail {
@@ -13,6 +13,7 @@ const shopUrl = useRuntimeConfig().public.shopUrl
 const { data, error, refresh } = await useFetch<UserDetail>(() => `/api/users/${route.params.id}`)
 if (error.value || !data.value) throw createError({ statusCode: 404, statusMessage: 'Kunde nicht gefunden', fatal: true })
 const u = computed(() => data.value!.user)
+const { data: carts } = await useFetch<CustomerCartExpiries>(() => `/api/cart-expirations/${route.params.id}`)
 const { data: commission, refresh: refreshCommission } = await useFetch<CustomerCommission>(() => `/api/commission/customer/${route.params.id}`, { immediate: true })
 const ACTION_LABEL: Record<string, string> = { resolve_report: 'Meldung bearbeitet', dismiss_report: 'Meldung verworfen', grant_commission: 'Provision freigegeben', end_commission: 'Provision beendet', block_user: 'gesperrt', unblock_user: 'entsperrt', remove_listing: 'Angebot entfernt', hide_review: 'Bewertungstext ausgeblendet', show_review: 'Bewertungstext wieder gezeigt' }
 const LISTING_TONE: Record<string, 'success' | 'warning' | 'neutral'> = { active: 'success', paused: 'warning', sold_out: 'neutral' }
@@ -52,6 +53,14 @@ useSeoMeta({ title: () => `${u.value.name} – Kunden – CardTreasure CMS` })
           <p class="mt-2 text-small text-fg-muted">Sperren beendet alle Sitzungen und pausiert alle Angebote. Offene Sendungen laufen weiter.</p>
           <div v-if="u.role !== 'admin'" class="mt-4"><ModerationActionButton label="Sperren" action="block" :payload="{ userId: u.id }" @done="refresh" /></div>
         </template>
+        <div v-if="carts?.total" class="mt-4 border-t border-line pt-4">
+          <p class="text-label text-fg-subtle">Abgelaufene Warenkörbe</p>
+          <p class="mt-2 flex flex-wrap items-center gap-2 text-small">
+            <CartsExpiryTag :count="carts.last30" :threshold="carts.repeatThreshold" />
+            <span class="text-fg-muted">in 30 Tagen · {{ carts.total }} insgesamt · zuletzt {{ dateTime(carts.lastAt) }}</span>
+          </p>
+          <NuxtLink to="/abandoned-carts" class="mt-2 inline-block text-meta text-accent hover:underline">Zur Auswertung →</NuxtLink>
+        </div>
       </Panel>
     </div>
 
