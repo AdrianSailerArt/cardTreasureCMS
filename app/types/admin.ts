@@ -96,3 +96,18 @@ export type Reconciliation = { available: false } | {
   coverage: Ampel
   unmatched: { id: string, type: string, amountCents: number, feeCents: number, netCents: number, createdAt: string, ref: string | null, description: string | null }[]
 }
+
+/** Eigener Shop von CardTreasure (interne Shop-API, Logik in server/lib/listings.ts und platform.ts des Shops). */
+export interface PlatformListing {
+  id: string, name: string, game: string, kind: 'single' | 'sealed', setCode: string | null, setName: string | null, collectorNumber: string | null
+  condition: string | null, language: string, finish: string, isFirstEdition: boolean
+  quantity: number, priceCents: number, comment: string | null, storageLocation: string | null, status: string, createdAt: string, sold: number
+}
+export interface PlatformPrinting { id: string, setCode: string, setName: string, collectorNumber: string | null, finishes: string[], languages: string[], hasFirstEdition: boolean }
+export interface PlatformCard { id: string, name: string, nameDe: string | null, game: string, printings: PlatformPrinting[] | null }
+export interface PlatformSale {
+  id: string, orderNumber: string, paidAt: string | null, status: string, trackingNumber: string | null
+  itemsCents: number, shippingCents: number, shippingService: string | null
+  address: { name: string, street: string, houseNumber: string, extra?: string | null, postalCode: string, city: string, country: string }
+  items: { name: string, quantity: number, condition: string | null, language: string, storageLocation: string | null }[]
+}

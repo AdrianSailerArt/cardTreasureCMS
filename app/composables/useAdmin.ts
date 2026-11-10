@@ -10,6 +10,14 @@ export const useMe = () => useState<Me | null>('me', () => null)
 
 export const GAME_LABEL: Record<string, string> = { mtg: 'Magic', pokemon: 'Pokémon', yugioh: 'Yu-Gi-Oh!' }
 
+/** Kartenzustand: Kürzel und Name (im Shop über i18n), Reihenfolge von bestem zu schlechtestem; der Schlüssel ist zugleich der Tag-Ton */
+export const CONDITIONS = [
+  { value: 'mint', short: 'MT', label: 'Mint' }, { value: 'near_mint', short: 'NM', label: 'Near Mint' },
+  { value: 'excellent', short: 'EX', label: 'Excellent' }, { value: 'good', short: 'GD', label: 'Good' },
+  { value: 'light_played', short: 'LP', label: 'Light Played' }, { value: 'played', short: 'PL', label: 'Played' },
+  { value: 'poor', short: 'PO', label: 'Poor' },
+] as const
+
 /* Status (statusTone, statusLabel) und Formatierung kommen aus @cardtreasure/core, gleich wie im Shop. */
 
 /** Euro aus Cent auf Deutsch, `digits` 0 für ganze Euro in Übersichten. */

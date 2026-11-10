@@ -11,6 +11,7 @@ const nav = [
   { to: '/trust', label: 'Vertrauen' },
   { to: '/reports', label: 'Meldungen' },
   { to: '/customers', label: 'Kunden' },
+  { to: '/shop', label: 'Eigener Shop' },
   { to: '/imports', label: 'Imports' },
   { to: '/blog', label: 'Blog' },
   { to: '/sealed', label: 'Sealed' },
