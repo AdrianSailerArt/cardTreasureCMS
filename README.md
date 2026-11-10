@@ -39,8 +39,8 @@ bun run dev                   # http://localhost:3100 (gegen Staging: bun run de
 
 ### Test-Zugänge
 
-Feste Testkonten aus `@cardtreasure/core/test-accounts`, Passwort für alle `test1234`, Übersicht im Shop-README.
-Im CMS: `admin@test.cardtreasure.test`.
+Feste Testkonten aus `@cardtreasure/core/test-accounts`, Passwort für alle `test1234`. Im CMS: `admin@test.cardtreasure.test`
+(Login-Seite → „Mit Passwort anmelden“). Alle Zugänge und Stripe-Testkarten: `docs/zugaenge.md` im Shop-Repo.
 
 ```bash
 bun run testdata --reset            # lokal: Marktplatzdaten löschen (Katalog bleibt), Testkonten neu

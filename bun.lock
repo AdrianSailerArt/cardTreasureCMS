@@ -11,7 +11,7 @@
         "drizzle-orm": "^0.45.4",
         "echarts": "^6.1.0",
         "flag-icons": "^7.6.0",
-        "@cardtreasure/core": "git+ssh://git@github.com/AdrianSailerArt/cardTreasureCore.git#v0.8.0",
+        "@cardtreasure/core": "git+ssh://git@github.com/AdrianSailerArt/cardTreasureCore.git#v0.8.1",
         "marked": "^18.1.3",
         "nodemailer": "^10.4.0",
         "nuxt": "^4.6.4",
@@ -103,7 +103,7 @@
 
     "@better-fetch/fetch": ["@better-fetch/fetch@1.3.3", "", {}, "sha512-U6SlDt/GUWtK2JAxS/NhdoYTEim+EL1G5byz2TUj83KjLZBUpYzb5SmX0aXaCnbGkAjFKnV/o/0+cyXMbEcqqg=="],
 
-    "@cardtreasure/core": ["@cardtreasure/core@git+ssh://git@github.com/AdrianSailerArt/cardTreasureCore.git#f53303002516fb84c5082d217384b7be6271f775", { "peerDependencies": { "aws4fetch": ">=1.0", "drizzle-orm": ">=0.45", "echarts": "*", "nodemailer": "*", "nuxt": ">=4", "sharp": ">=0.34", "vue": ">=3.5", "vue-echarts": "*" }, "optionalPeers": ["nuxt", "vue"] }, "f53303002516fb84c5082d217384b7be6271f775"],
+    "@cardtreasure/core": ["@cardtreasure/core@git+ssh://git@github.com/AdrianSailerArt/cardTreasureCore.git#a93f229312ffae26929975c1a43aa90525be97a1", { "peerDependencies": { "aws4fetch": ">=1.0", "drizzle-orm": ">=0.45", "echarts": "*", "nodemailer": "*", "nuxt": ">=4", "sharp": ">=0.34", "vue": ">=3.5", "vue-echarts": "*" }, "optionalPeers": ["nuxt", "vue"] }, "a93f229312ffae26929975c1a43aa90525be97a1"],
 
     "@clack/core": ["@clack/core@1.5.1", "", { "dependencies": { "fast-wrap-ansi": "^0.2.0", "sisteransi": "^1.0.5" } }, "sha512-iHTrHA8MtVuLl2TfZySmcKv1qO2PoyC9Z7pfSDozEuV5vtY3/wcOPKJXlqJ5Oq2Cx5DDGQGAMVx6HZfRRoVEbQ=="],
 
