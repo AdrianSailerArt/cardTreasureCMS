@@ -32,11 +32,12 @@ const save = () => put({ quantity: quantity.value, priceCents: priceCents.value,
   <tr :class="{ 'opacity-60': listing.status !== 'active' }">
     <td>
       <span class="block">{{ listing.name }}</span>
-      <span class="text-meta text-fg-subtle">{{ GAME_LABEL[listing.game] }} · {{ listing.setCode?.toUpperCase() }} #{{ listing.collectorNumber }}</span>
+      <span class="text-meta text-fg-subtle">{{ GAME_LABEL[listing.game] }} · <template v-if="listing.kind === 'sealed'">Sealed</template><template v-else>{{ listing.setCode?.toUpperCase() }} #{{ listing.collectorNumber }}</template></span>
     </td>
     <td>
       <span class="flex flex-wrap gap-1">
         <ConditionBadge v-if="listing.condition" :condition="listing.condition" />
+        <Tag v-else tone="info">Sealed</Tag>
         <Tag caps>{{ listing.language }}</Tag>
         <Tag v-if="listing.finish !== 'normal'" tone="foil">{{ listing.finish }}</Tag>
       </span>

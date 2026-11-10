@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CardHit } from '@cardtreasure/core/nuxt/components/listing/CardPicker.vue'
-import type { CreatorCard, CreatorInput } from '@cardtreasure/core/nuxt/components/listing/Creator.vue'
+import type { CreatorCard, CreatorInput, CreatorSealedInput } from '@cardtreasure/core/nuxt/components/listing/Creator.vue'
+import type { SealedHit } from '@cardtreasure/core/nuxt/components/listing/SealedPicker.vue'
 import type { Game } from '@cardtreasure/core/catalog'
 import type { PlatformListing, PlatformSale } from '~/types/admin'
 
@@ -17,7 +18,12 @@ const visible = computed(() => {
 // Anlegen mit demselben Ablauf wie Kunden im Shop (ListingCreator aus dem Core-Paket), gespeichert als Angebot von CardTreasure
 const search = (q: string, game?: Game) => $fetch<CardHit[]>('/api/catalog/search', { query: { q, game } })
 const loadCard = (game: Game, slug: string) => $fetch<CreatorCard>(`/api/catalog/${game}/cards/${slug}`)
-const create = (input: CreatorInput) => $fetch<{ id: string }>('/api/shop/listings', { method: 'POST', body: input })
+/** Sealed-Suche über alle Spiele oder eines (die Sealed-Liste des Shops gibt es je Spiel) */
+const searchSealed = async (q: string, game?: Game): Promise<SealedHit[]> => {
+  const lists = await Promise.all((game ? [game] : GAMES).map(g => $fetch<(Omit<SealedHit, 'productId'> & { id: string })[]>(`/api/catalog/sealed/${g}`, { query: { q } })))
+  return lists.flat().slice(0, 40).map(i => ({ ...i, productId: i.id }))
+}
+const create = (input: CreatorInput | CreatorSealedInput) => $fetch<{ id: string }>('/api/shop/listings', { method: 'POST', body: input })
 const open = computed(() => sales.value.filter(s => s.status === 'paid').length)
 useSeoMeta({ title: 'Eigener Shop – CardTreasure CMS' })
 </script>
@@ -31,7 +37,7 @@ useSeoMeta({ title: 'Eigener Shop – CardTreasure CMS' })
 
     <template v-if="tab === 'listings'">
       <h2 class="mt-8 text-title">Neues Angebot</h2>
-      <ListingCreator class="mt-4" :search="search" :load-card="loadCard" :create="create" @created="refreshListings()" />
+      <ListingCreator class="mt-4" :search="search" :load-card="loadCard" :create="create" :search-sealed="searchSealed" @created="refreshListings()" />
       <Panel class="mt-6" :title="`Angebote (${listings.length})`">
         <template #actions><div class="w-64"><UiInput v-model="filter" placeholder="Name oder Lagerplatz …" aria-label="Angebote filtern" /></div></template>
         <UiTable :min-width="900">
