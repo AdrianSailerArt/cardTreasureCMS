@@ -61,7 +61,8 @@ useSeoMeta({ title: () => `${isNew.value ? 'Neues Sealed-Produkt' : form.name} �
           <UiField label="Name deutsch (optional)" class="sm:col-span-2"><UiInput v-model="form.nameDe" /></UiField>
           <UiField label="Sprache des Produkts"><UiSelect v-model="form.language" :options="languageOptions" /></UiField>
           <UiField label="Erscheinungsdatum"><UiInput v-model="form.releaseDate" type="date" /></UiField>
-          <UiField label="Set (optional)" class="sm:col-span-2"><SealedSetPicker v-model="form.setId" :game="form.game" :label="form.setName" @picked="n => form.setName = n" /></UiField>
+          <!-- kein <label> um die Set-Auswahl: der Knopf „entfernen“ darin würde Klicks im Feld abfangen -->
+          <div class="sm:col-span-2"><p class="mb-1 text-label text-fg-subtle">Set (optional)</p><SealedSetPicker v-model="form.setId" :game="form.game" :label="form.setName" @picked="n => form.setName = n" /></div>
           <UiField label="EAN (optional)"><UiInput v-model="form.ean" mono /></UiField>
           <UiField label="Beschreibung (optional)" class="sm:col-span-2"><UiInput v-model="form.description" :rows="4" /></UiField>
           <div class="flex items-center gap-3 sm:col-span-2">

@@ -62,13 +62,17 @@ const submit = async () => {
 
 <template>
   <form class="grid gap-4" @submit.prevent="valid && submit()">
-    <UiField label="Karte">
-      <div v-if="card" class="flex flex-wrap items-center gap-2 text-small">
+    <!-- Gewählte Karte außerhalb des Labels: ein Knopf in einem <label> würde Klicks im Feld abfangen -->
+    <div v-if="card">
+      <p class="mb-1 text-label text-fg-subtle">Karte</p>
+      <div class="flex flex-wrap items-center gap-2 text-small">
         <Tag tone="info">{{ card.nameDe ?? card.name }}</Tag>
         <span class="text-fg-subtle">{{ GAME_LABEL[card.game] }}</span>
         <UiButton size="sm" variant="ghost" @click="card = null">ändern</UiButton>
       </div>
-      <UiCombobox v-else v-model:query="q" :items="items" label="Karte suchen" placeholder="Name auf Deutsch oder Englisch …" @select="i => pick(i.value)" />
+    </div>
+    <UiField v-else label="Karte">
+      <UiCombobox v-model:query="q" :items="items" label="Karte suchen" placeholder="Name auf Deutsch oder Englisch …" @select="i => pick(i.value)" />
     </UiField>
     <template v-if="card">
       <UiField label="Druck"><UiSelect v-model="printingId" :options="printingOptions" /></UiField>

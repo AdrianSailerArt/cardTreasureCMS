@@ -69,7 +69,10 @@ const ensureUser = async (tx: Tx, a: Pick<TestAccount, 'id' | 'email' | 'name' |
 const createAccount = async (tx: Tx, a: TestAccount, hash: string) => {
   const [exists] = await tx.execute(sql`select 1 from account where user_id = ${a.id} and provider_id = 'credential'`) as unknown as unknown[]
   await ensureUser(tx, a)
-  if (exists) return false
+  if (exists) {
+    await ensureProfile(tx, a)
+    return false
+  }
   await tx.execute(sql`insert into account (id, user_id, account_id, provider_id, password, created_at, updated_at)
     values (${crypto.randomUUID()}, ${a.id}, ${a.id}, 'credential', ${hash}, now(), now())`)
   const [addr] = await tx.execute(sql`
@@ -77,14 +80,23 @@ const createAccount = async (tx: Tx, a: TestAccount, hash: string) => {
     values (${a.id}, ${a.company?.name ?? a.name}, ${a.address.street}, ${a.address.houseNumber}, ${a.address.postalCode}, ${a.address.city}, ${a.country}, true)
     returning id
   `) as unknown as { id: string }[]
-  if (a.role === 'seller' || a.role === 'dealer') {
-    await tx.execute(sql`
-      insert into seller_profiles (user_id, type, display_name, country, ship_from_address_id, company_name, vat_id)
-      values (${a.id}, ${a.role === 'dealer' ? 'commercial' : 'private'}, ${a.company?.displayName ?? a.username}, ${a.country}, ${addr!.id},
-              ${a.company?.name ?? null}, ${a.company?.vatId ?? null})
-    `)
-  }
+  await ensureProfile(tx, a, addr!.id)
   return true
+}
+
+/**
+ * Profil für jedes Kundenkonto (auch reine Käufer: jeder Kunde kann kaufen und verkaufen, und ohne Profil
+ * schickt der Shop beim Anmelden zur Einrichtung). Admins brauchen keins. Vorhandene Profile bleiben.
+ */
+const ensureProfile = async (tx: Tx, a: TestAccount, addressId?: string) => {
+  if (a.role === 'admin') return
+  await tx.execute(sql`
+    insert into seller_profiles (user_id, type, display_name, country, ship_from_address_id, company_name, vat_id)
+    values (${a.id}, ${a.role === 'dealer' ? 'commercial' : 'private'}, ${a.company?.displayName ?? a.username}, ${a.country},
+            ${addressId ?? sql`(select id from addresses where user_id = ${a.id} order by is_default desc limit 1)`},
+            ${a.company?.name ?? null}, ${a.company?.vatId ?? null})
+    on conflict (user_id) do nothing
+  `)
 }
 
 /** Ein paar Angebote je Verkäufer (je Spiel drei Karten mit Richtpreis 0,50–25 €, Dollar umgerechnet), damit es etwas zu kaufen gibt. */
@@ -155,7 +167,7 @@ const summary = async () => {
     from "user" u left join seller_profiles sp on sp.user_id = u.id where u.id <> ${PLATFORM_ID} order by u.email
   `) as unknown as { email: string, role: string, seller: string | null, listings: number }[]
   console.log(`\nTestkonten (Passwort ${TEST_PASSWORD}):`)
-  for (const r of rows) console.log(`  ${r.email.padEnd(36)} ${r.role === 'admin' ? 'Admin (CMS)' : r.seller === 'commercial' ? 'gewerblich' : r.seller === 'private' ? 'privat, verkauft' : 'kauft'}${r.listings ? `, ${r.listings} Angebote` : ''}`)
+  for (const r of rows) console.log(`  ${r.email.padEnd(36)} ${r.role === 'admin' ? 'Admin (CMS)' : r.seller === 'commercial' ? 'gewerblich' : r.seller === 'private' ? 'privat' : 'ohne Profil'}${r.listings ? `, ${r.listings} Angebote` : ''}`)
 }
 
 try {

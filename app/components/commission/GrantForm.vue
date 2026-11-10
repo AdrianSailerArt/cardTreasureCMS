@@ -44,12 +44,16 @@ const submit = async () => {
 
 <template>
   <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="valid && submit()">
-    <UiField v-if="!sellerId" label="Kunde" class="sm:col-span-2">
-      <div v-if="picked" class="flex items-center gap-2 text-small">
+    <!-- Gewählter Kunde außerhalb des Labels: ein Knopf in einem <label> würde Klicks im Feld abfangen -->
+    <div v-if="!sellerId && picked" class="sm:col-span-2">
+      <p class="mb-1 text-label text-fg-subtle">Kunde</p>
+      <div class="flex items-center gap-2 text-small">
         <Tag tone="info">{{ picked.name }}</Tag>
         <UiButton size="sm" variant="ghost" @click="picked = null">ändern</UiButton>
       </div>
-      <UiCombobox v-else v-model:query="q" :items="customers" label="Kunde suchen" placeholder="Name oder E-Mail …" @select="i => { picked = { id: i.value, name: i.label }; q = '' }" />
+    </div>
+    <UiField v-else-if="!sellerId" label="Kunde" class="sm:col-span-2">
+      <UiCombobox v-model:query="q" :items="customers" label="Kunde suchen" placeholder="Name oder E-Mail …" @select="i => { picked = { id: i.value, name: i.label }; q = '' }" />
     </UiField>
     <UiField label="Satz"><CommissionRateInput v-model="rateBps" /></UiField>
     <UiField label="gültig bis (leer = unbefristet)"><UiInput v-model="until" type="date" /></UiField>
